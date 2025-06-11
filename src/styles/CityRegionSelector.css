@@ -1,0 +1,15 @@
+path {
+  fill: #f87171;
+  stroke: #ffffff;
+  stroke-width: 1;
+  cursor: pointer;
+  transition: fill 0.2s;
+}
+
+path:hover {
+  fill: #dc2626;
+}
+
+path.selected {
+  fill: #b91c1c;
+}
