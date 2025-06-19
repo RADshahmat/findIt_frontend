@@ -1,34 +1,19 @@
-import { useState } from "react"
-import {
-  Smartphone, ShoppingBag, Gem, Watch, Users, FileText, Key, Gamepad2, Laptop, Tv,Camera,Book,
-  Glasses, Shirt, Dog, Dumbbell, FolderOpen, Car, Search,
-} from "lucide-react"
+import React, { useEffect,useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCatagories } from '../../features/catagory/catagory';
+import { getLucideIcon } from '../../helpers/lucideIcons';
 import { useNavigate } from "react-router-dom"
+import { Search } from 'lucide-react';
 
-
-
-const categories = [
-  { label: "Phones & Tablets", count: 47, icon: Smartphone, color: "from-blue-500 to-cyan-400", bgColor: "bg-blue-50" },
-  { label: "Bags", count: 167, icon: ShoppingBag, color: "from-amber-500 to-orange-400", bgColor: "bg-teal-50" },
-  { label: "Jewelry", count: 15, icon: Gem, color: "from-purple-500 to-pink-400", bgColor: "bg-purple-50" },
-  { label: "Watches", count: 2, icon: Watch, color: "from-gray-600 to-gray-500", bgColor: "bg-gray-50" },
-  { label: "People", count: 246, icon: Users, color: "from-green-500 to-emerald-400", bgColor: "bg-green-50" },
-  { label: "Documents", count: 218, icon: FileText, color: "from-blue-600 to-indigo-500", bgColor: "bg-blue-50" },
-  { label: "Keys", count: 27, icon: Key, color: "from-yellow-500 to-amber-400", bgColor: "bg-green-50" },
-  { label: "Toys", count: 3, icon: Gamepad2, color: "from-pink-500 to-rose-400", bgColor: "bg-pink-50" },
-  { label: "Laptop", count: 3, icon: Laptop, color: "from-slate-600 to-slate-500", bgColor: "bg-slate-50" },
-  { label: "Fashion Accessories", count: 1, icon: Glasses, color: "from-teal-500 to-emerald-400", bgColor: "bg-teal-50" },
-  { label: "Clothes & Shoes", count: 1, icon: Shirt, color: "from-cyan-500 to-sky-400", bgColor: "bg-cyan-50" },
-  { label: "Pets", count: 345, icon: Dog, color: "from-orange-500 to-amber-400", bgColor: "bg-orange-50" },
-  { label: "Sports Equipment", count: 1, icon: Dumbbell, color: "from-red-500 to-rose-400", bgColor: "bg-red-50" },
-  { label: "Other", count: 19, icon: FolderOpen, color: "from-gray-500 to-slate-400", bgColor: "bg-gray-50" },
-  { label: "Automobile", count: 18, icon: Car, color: "from-blue-500 to-indigo-400", bgColor: "bg-blue-50" },
-  { label: "Television", count: 11, icon: Tv, color: "from-indigo-500 to-violet-400", bgColor: "bg-indigo-50" },
-  { label: "Camera", count: 7, icon: Camera, color: "from-pink-500 to-rose-400", bgColor: "bg-pink-50" },
-  { label: "Books", count: 23, icon: Book, color: "from-yellow-600 to-amber-500", bgColor: "bg-yellow-50" },
-]
 
 const CategoryGridModern = () => {
+  const dispatch = useDispatch();
+  const { catagory, status, error } = useSelector(state => state.catagory);
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchCatagories());
+    }
+  }, [status, dispatch]);
   const navigate = useNavigate()
 
 const handleCategoryClick = (label) => {
@@ -38,12 +23,12 @@ const handleCategoryClick = (label) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [showAll, setShowAll] = useState(false)
 
-  const filteredCategories = categories.filter((category) =>
-    category.label.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCategories = catagory.filter((category) =>
+    category.lable.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const visibleCategories = showAll ? filteredCategories : filteredCategories.slice(0, 15)
-
+console.log(catagory)
   return (
     <section className="p-8 bg-white rounded-2xl shadow-lg m-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
@@ -74,11 +59,11 @@ const handleCategoryClick = (label) => {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {visibleCategories.map((item, idx) => {
-          const Icon = item.icon
+          const Icon = getLucideIcon(item.icon);
           return (
             <div
               key={idx}
-                onClick={() => handleCategoryClick(item.label)}
+                onClick={() => handleCategoryClick(item.lable)}
               className={`group cursor-pointer flex flex-col items-center justify-center p-5 rounded-xl 
                         ${item.bgColor} border border-gray-100 transition-all duration-300 
                         hover:shadow-lg hover:-translate-y-1`}
@@ -97,7 +82,7 @@ const handleCategoryClick = (label) => {
               </div>
 
               <span className="font-semibold text-gray-800 text-center group-hover:text-black transition-colors duration-300">
-                {item.label}
+                {item.lable}
               </span>
 
               <div className="flex items-center justify-center mt-1 space-x-1">
