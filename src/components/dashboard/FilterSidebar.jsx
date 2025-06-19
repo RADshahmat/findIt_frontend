@@ -1,81 +1,12 @@
 "use client"
 
-import { useState } from "react"
-import {
-  Smartphone,
-  ShoppingBag,
-  Gem,
-  Watch,
-  Users,
-  FileText,
-  Key,
-  Dog,
-  ChevronDown,
-  ChevronRight,
-  MapPin,
-  Calendar,
-  Filter,
-  X,
-} from "lucide-react"
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCatagories } from '../../features/catagory/catagory';
+import { getLucideIcon } from '../../helpers/lucideIcons';
 
-const categories = [
-  {
-    label: "Phones & Tablets",
-    icon: Smartphone,
-    color: "from-blue-500 to-cyan-400",
-    bgColor: "bg-blue-50",
-    subcategories: ["iPhone", "Samsung", "iPad", "Android Tablets"],
-  },
-  {
-    label: "Bags",
-    icon: ShoppingBag,
-    color: "from-amber-500 to-orange-400",
-    bgColor: "bg-amber-50",
-    subcategories: ["Backpacks", "Handbags", "Laptop Bags", "Travel Bags"],
-  },
-  {
-    label: "Jewelry",
-    icon: Gem,
-    color: "from-purple-500 to-pink-400",
-    bgColor: "bg-purple-50",
-    subcategories: ["Rings", "Necklaces", "Earrings", "Bracelets"],
-  },
-  {
-    label: "Watches",
-    icon: Watch,
-    color: "from-gray-600 to-gray-500",
-    bgColor: "bg-gray-50",
-    subcategories: ["Smart Watches", "Analog Watches", "Digital Watches"],
-  },
-  {
-    label: "People",
-    icon: Users,
-    color: "from-green-500 to-emerald-400",
-    bgColor: "bg-green-50",
-    subcategories: ["Missing Persons", "Found Persons"],
-  },
-  {
-    label: "Documents",
-    icon: FileText,
-    color: "from-blue-600 to-indigo-500",
-    bgColor: "bg-blue-50",
-    subcategories: ["ID Cards", "Passports", "Certificates", "Licenses"],
-  },
-  {
-    label: "Keys",
-    icon: Key,
-    color: "from-yellow-500 to-amber-400",
-    bgColor: "bg-yellow-50",
-    subcategories: ["Car Keys", "House Keys", "Office Keys"],
-  },
-  {
-    label: "Pets",
-    icon: Dog,
-    color: "from-orange-500 to-amber-400",
-    bgColor: "bg-orange-50",
-    subcategories: ["Dogs", "Cats", "Birds", "Other Pets"],
-  },
-]
+
+import { Filter, X, Smartphone, MapPin, Calendar, ChevronDown, ChevronRight } from "lucide-react";
 
 const locations = ["Dhaka", "Chattogram", "Sylhet", "Khulna", "Rajshahi", "Rangpur", "Barisal", "Mymensingh"]
 
@@ -89,6 +20,13 @@ const dateRanges = [
 ]
 
 const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, currentTab }) => {
+  const dispatch = useDispatch();
+  const { catagory, status, error } = useSelector(state => state.catagory);
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchCatagories());
+    }
+  }, [status, dispatch]);
   const [expandedCategories, setExpandedCategories] = useState(new Set())
 
   const toggleCategory = (categoryLabel) => {
@@ -128,10 +66,10 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
 
     // Apply existing filters
     if (filters.category && !additionalFilter.category) {
-      if (filters.category.subcategory) {
-        filtered = filtered.filter((listing) => listing.subcategory === filters.category.subcategory)
+      if (filters.category.subcetagories) {
+        filtered = filtered.filter((listing) => listing.subcategory === filters.category.subcetegories)
       } else {
-        filtered = filtered.filter((listing) => listing.category === filters.category.category)
+        filtered = filtered.filter((listing) => listing.category === filters.category.subcategories)
       }
     }
 
@@ -192,7 +130,8 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
   }
 
   const sidebarContent = (
-    <div className="h-full flex flex-col">
+    <div className="flex-1 overflow-y-auto max-h-full">
+
       {/* Header */}
       <div className="bg-gradient-to-r from-cyan-500 to-teal-500 p-4 text-white">
         <div className="flex items-center justify-between">
@@ -225,34 +164,33 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
           </div>
 
           <div className="space-y-1">
-            {categories.map((category) => {
-              const Icon = category.icon
-              const isExpanded = expandedCategories.has(category.label)
-              const isSelected = filters.category?.category === category.label
+            {catagory.map((category) => {
+              const Icon = getLucideIcon(category.icon);
+              const isExpanded = expandedCategories.has(category.lable)
+              const isSelected = filters.category?.category === category.lable
               const categoryCount = getCategoryCount(category.label)
 
               return (
-                <div key={category.label}>
+                <div key={category.lable}>
                   <div
-                    className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${
-                      isSelected ? "bg-cyan-50 border border-cyan-200" : "hover:bg-gray-50"
-                    }`}
-                    onClick={() => handleCategoryChange(category.label)}
+                    className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${isSelected ? "bg-cyan-50 border border-cyan-200" : "hover:bg-gray-50"
+                      }`}
+                    onClick={() => handleCategoryChange(category.lable)}
                   >
                     <div className="flex items-center flex-1">
                       <div className={`w-6 h-6 rounded-full ${category.bgColor} flex items-center justify-center mr-2`}>
                         <Icon className="h-3 w-3 text-gray-600" />
                       </div>
                       <span className={`text-sm ${isSelected ? "text-cyan-700 font-medium" : "text-gray-700"}`}>
-                        {category.label}
+                        {category.lable}
                       </span>
-                      <span className="text-xs text-gray-500 ml-auto mr-2">({categoryCount})</span>
+                      <span className="text-xs text-gray-500 ml-auto mr-2">({category.count})</span>
                     </div>
                     {category.subcategories && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
-                          toggleCategory(category.label)
+                          toggleCategory(category.lable)
                         }}
                         className="p-1 hover:bg-gray-200 rounded"
                       >
@@ -274,13 +212,12 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
 
                         return (
                           <div
-                            key={subcategory}
-                            className={`flex items-center justify-between p-2 rounded cursor-pointer text-sm transition-colors ${
-                              isSubSelected ? "bg-cyan-100 text-cyan-700" : "text-gray-600 hover:bg-gray-50"
-                            }`}
-                            onClick={() => handleCategoryChange(category.label, subcategory)}
+                            key={subcategory.id}
+                            className={`flex items-center justify-between p-2 rounded cursor-pointer text-sm transition-colors ${isSubSelected ? "bg-cyan-100 text-cyan-700" : "text-gray-600 hover:bg-gray-50"
+                              }`}
+                            onClick={() => handleCategoryChange(category.label, subcategory.name)}
                           >
-                            <span>{subcategory}</span>
+                            <span>{subcategory.name}</span>
                             <span className="text-xs text-gray-500">({subCount})</span>
                           </div>
                         )
@@ -310,9 +247,8 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
               return (
                 <div
                   key={location}
-                  className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${
-                    isSelected ? "bg-green-50 border border-green-200" : "hover:bg-gray-50"
-                  }`}
+                  className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${isSelected ? "bg-green-50 border border-green-200" : "hover:bg-gray-50"
+                    }`}
                   onClick={() => handleLocationChange(location)}
                 >
                   <span className={`text-sm ${isSelected ? "text-green-700 font-medium" : "text-gray-700"}`}>
@@ -341,9 +277,8 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
               return (
                 <div
                   key={range.value}
-                  className={`p-2 rounded-lg cursor-pointer transition-all ${
-                    isSelected ? "bg-purple-50 border border-purple-200" : "hover:bg-gray-50"
-                  }`}
+                  className={`p-2 rounded-lg cursor-pointer transition-all ${isSelected ? "bg-purple-50 border border-purple-200" : "hover:bg-gray-50"
+                    }`}
                   onClick={() => handleDateChange(range.value)}
                 >
                   <span className={`text-sm ${isSelected ? "text-purple-700 font-medium" : "text-gray-700"}`}>
