@@ -64,12 +64,11 @@ const Navbar = () => {
             >
               Sign In
             </a>
-            <a
-              href="#"
+            <Link to={'/login'}
               className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-medium transition-all shadow-md hover:shadow-lg"
             >
-              Get Started
-            </a>
+              Login
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}

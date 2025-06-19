@@ -1,4 +1,3 @@
-"use client"
 
 import { useState } from "react"
 import {
@@ -365,9 +364,9 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
 
       {/* Mobile Sidebar */}
       {isOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
+        <div className="lg:hidden fixed inset-0 z-50 flex shadow-lg">
           {/* Backdrop */}
-          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
+          <div className="fixed inset-0 bg-white bg-opacity-50 shadow-lg" onClick={onClose} />
 
           {/* Sidebar */}
           <div className="relative w-80 max-w-[85vw] bg-white shadow-xl transform transition-transform duration-300 ease-in-out">

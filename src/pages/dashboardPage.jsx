@@ -100,7 +100,7 @@ const demoListings = [
   {
     id: 8,
     title: "Found MacBook Pro 16 inch",
-    category: "Phone & Tablets",
+    category: "Phones & Tablets",
     subcategory: "iPad",
     location: "Mymensingh",
     date: "2024-01-08T11:45:00Z",
@@ -109,7 +109,31 @@ const demoListings = [
     postedBy: "Alex Rodriguez",
     views: 89,
   },
-  // Add more demo data to test pagination
+    {
+    id: 9,
+    title: "Found MacBook Pro 16 inch",
+    category: "Phones & Tablets",
+    subcategory: "iPad",
+    location: "Mymensingh",
+    date: "2024-01-08T11:45:00Z",
+    status: "found",
+    image: "https://sm.pcmag.com/pcmag_au/review/a/apple-ipho/apple-iphone-16_mm22.jpg",
+    postedBy: "Alex Rodriguez",
+    views: 89,
+  },
+      {
+    id: 10,
+    title: "Found MacBook Pro 16 inch",
+    category: "Phones & Tablets",
+    subcategory: "iPad",
+    location: "Mymensingh",
+    date: "2024-01-08T11:45:00Z",
+    status: "found",
+    image: "https://sm.pcmag.com/pcmag_au/review/a/apple-ipho/apple-iphone-16_mm22.jpg",
+    postedBy: "Alex Rodriguez",
+    views: 89,
+  },
+  /* 
   ...Array.from({ length: 20 }, (_, i) => ({
     id: i + 9,
     title: `Demo Item ${i + 9}`,
@@ -123,7 +147,8 @@ const demoListings = [
     views: Math.floor(Math.random() * 100),
     reward: i % 3 === 0 ? Math.floor(Math.random() * 10000) + 1000 : null,
   })),
-]
+  */
+]  
 
 const DashboardPage = () => {
 
