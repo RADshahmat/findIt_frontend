@@ -58,7 +58,7 @@ const authSlice = createSlice({
     reducers: {
         setMode: (state, action) => {
             state.mode = action.payload
-            state.error=null
+            state.error = null
         },
         updateForm: (state, action) => {
             state.formData = { ...state.formData, ...action.payload }
@@ -70,7 +70,16 @@ const authSlice = createSlice({
             state.user = null
             state.error = null
             state.formData = { email: "", password: "" }
-        }
+        },
+        logout: (state) => {
+            state.user = null;
+            state.userAdded = false;
+            state.loading = false;
+            state.isLoading = false;
+            state.error = null;
+            state.formData = { email: "", password: "" };
+            localStorage.removeItem("lafuser_token");
+        },
     },
     extraReducers: (builder) => {
         // Signup handlers
@@ -120,5 +129,5 @@ const authSlice = createSlice({
     },
 })
 
-export const { setMode, updateForm, setLoading, resetAuth } = authSlice.actions
+export const { setMode, updateForm, setLoading, resetAuth ,logout} = authSlice.actions
 export default authSlice.reducer

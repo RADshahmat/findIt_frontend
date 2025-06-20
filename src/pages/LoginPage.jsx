@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux"
 import { setMode } from "../features/auth/authSlice"
 import SignInPage from "./SignInPage"
 import SignUpPage from "./SignUpPage"
+import Navbar from "../components/Navbar"
 
 const LoginPage = () => {
   const [mounted, setMounted] = useState(false)
@@ -24,6 +25,7 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Shared Layout / Branding */}
+      <Navbar />
       {!loaded?<p>Loading</p>:
       <div className="w-full max-w-md space-y-4">
         <div className="text-center">
