@@ -2,8 +2,11 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react"
 import { Menu, X } from "lucide-react"
+import { useSelector } from "react-redux";
+import NavProfile from "./NavProfile";
 
 const Navbar = () => {
+  const { user, loaded } = useSelector((state) => state.auth);
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
 
@@ -57,20 +60,23 @@ const Navbar = () => {
           </nav>
 
           {/* CTA Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
-            <a
-              href="#"
-              className="px-4 py-2 rounded-lg text-cyan-600 hover:text-cyan-700 transition-colors font-medium"
-            >
-              Sign In
-            </a>
-            <Link to={'/login'}
-              className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-medium transition-all shadow-md hover:shadow-lg"
-            >
-              Login
-            </Link>
-          </div>
-
+          {user && loaded ? (
+              <NavProfile />
+            ) : (
+              <div className="flex items-center justify-between px-5">
+                <a
+                  href="#"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-cyan-600 hover:bg-slate-50"
+                >
+                  Sign In
+                </a>
+                <Link to={'/login'}
+                  className="block ml-3 px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-cyan-500 to-teal-500 text-white"
+                >
+                  Login
+                </Link>
+              </div>
+            )}
           {/* Mobile Menu Button */}
           <div className="flex md:hidden">
             <button
@@ -123,20 +129,23 @@ const Navbar = () => {
             </a>
           </div>
           <div className="pt-4 pb-3 border-t border-slate-200">
-            <div className="flex items-center px-5">
-              <a
-                href="#"
-                className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-cyan-600 hover:bg-slate-50"
-              >
-                Sign In
-              </a>
-              <a
-                href="#"
-                className="block ml-3 px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-cyan-500 to-teal-500 text-white"
-              >
-                Get Started
-              </a>
-            </div>
+            {user && loaded ? (
+              <NavProfile />
+            ) : (
+              <div className="flex items-center justify-between px-5">
+                <a
+                  href="#"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-cyan-600 hover:bg-slate-50"
+                >
+                  Sign In
+                </a>
+                <Link to={'/login'}
+                  className="block ml-3 px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-cyan-500 to-teal-500 text-white"
+                >
+                  Login
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
