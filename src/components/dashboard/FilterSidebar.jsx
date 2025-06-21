@@ -20,7 +20,7 @@ const dateRanges = [
 
 const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, currentTab }) => {
   const dispatch = useDispatch();
-  const { catagory, status, error } = useSelector(state => state.catagory);
+  const { catagory, status} = useSelector(state => state.catagory);
   useEffect(() => {
     if (status === 'idle') {
       dispatch(fetchCatagories());
@@ -183,7 +183,7 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
                       <span className={`text-sm ${isSelected ? "text-cyan-700 font-medium" : "text-gray-700"}`}>
                         {category.lable}
                       </span>
-                      <span className="text-xs text-gray-500 ml-auto mr-2">({category.count})</span>
+                      <span className="text-xs text-gray-500 ml-auto mr-2">({categoryCount})</span>
                     </div>
                     {category.subcategories && (
                       <button
