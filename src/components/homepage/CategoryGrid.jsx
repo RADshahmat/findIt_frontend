@@ -28,7 +28,7 @@ const handleCategoryClick = (label) => {
   )
 
   const visibleCategories = showAll ? filteredCategories : filteredCategories.slice(0, 15)
-console.log(catagory)
+//console.log(catagory)
   return (
     <section className="p-8 bg-white rounded-2xl shadow-lg m-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">

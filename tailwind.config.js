@@ -102,6 +102,7 @@ export default {
         "bounce-slow": "bounce-slow 3s infinite",
         "fade-in": "fadeIn 0.5s ease-in-out",
         "slide-up": "slideUp 0.3s ease-out",
+        'fast-pulse': 'pulse 0.2s ease-in-out infinite',
       },
       keyframes: {
         float: {

@@ -1,11 +1,21 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
+import { useEffect } from "react"
+import { useDispatch } from "react-redux"
+import { loadUserFromToken } from "./features/auth/authSlice";
 import Homepage from "./pages/homepage";
 import DashboardPage from "./pages/dashboardPage"
 import ScrollRestoration from "./components/ScrollToTop";
+import UserPage from "./pages/userArea";
 import LoginPage from "./pages/LoginPage";
+import ProtectedRoute from "./ProtectedRoute";
 
 function App() {
+  const dispatch = useDispatch()
+  useEffect(() => {
+    console.log("App mounted, loading user from token")
+    dispatch(loadUserFromToken())
+}, [])
   return (
     <>
       <BrowserRouter>
@@ -15,6 +25,14 @@ function App() {
           <Route path="/home" element={<Homepage />} /> 
           <Route path="/dashboard" element={<DashboardPage />} /> 
           <Route path="/login" element={<LoginPage />} ></Route>
+          <Route
+          path="/user"
+          element={
+            <ProtectedRoute>
+              <UserPage />
+            </ProtectedRoute>
+          }
+        />
         </Routes>
       </BrowserRouter>
     </>
