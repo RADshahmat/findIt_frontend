@@ -8,7 +8,7 @@ import { Search } from 'lucide-react';
 
 const CategoryGridModern = () => {
   const dispatch = useDispatch();
-  const { catagory, status, error } = useSelector(state => state.catagory);
+  const { catagory, status } = useSelector(state => state.catagory);
   useEffect(() => {
     if (status === 'idle') {
       dispatch(fetchCatagories());

@@ -7,7 +7,10 @@ import { getLucideIcon } from '../../helpers/lucideIcons';
 
 import { Filter, X, Smartphone, MapPin, Calendar, ChevronDown, ChevronRight } from "lucide-react";
 
-const locations = ["Dhaka", "Chattogram", "Sylhet", "Khulna", "Rajshahi", "Rangpur", "Barisal", "Mymensingh"]
+import districtsData from '../../assets/bd-districts.json';
+
+const locations = districtsData.districts.map((d) => d.name);
+
 
 const dateRanges = [
   { label: "Last 24 hours", value: "1day" },
@@ -17,6 +20,7 @@ const dateRanges = [
   { label: "Last 6 months", value: "6months" },
   { label: "Last year", value: "1year" },
 ]
+
 
 const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, currentTab }) => {
   const dispatch = useDispatch();
@@ -55,70 +59,80 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
   }
 
   // Calculate dynamic counts based on current listings and tab
-  const getFilteredListings = (additionalFilter = {}) => {
-    let filtered = allListings
+const getFilteredListings = (additionalFilter = {}) => {
+  let filtered = [...allListings];
 
-    // Apply tab filter
-    if (currentTab !== "all") {
-      filtered = filtered.filter((listing) => listing.status === currentTab)
-    }
-
-    // Apply existing filters
-    if (filters.category && !additionalFilter.category) {
-      if (filters.category.subcetagories) {
-        filtered = filtered.filter((listing) => listing.subcategory === filters.category.subcetegories)
-      } else {
-        filtered = filtered.filter((listing) => listing.category === filters.category.subcategories)
-      }
-    }
-
-    if (filters.location && !additionalFilter.location) {
-      filtered = filtered.filter((listing) => listing.location === filters.location)
-    }
-
-    if (filters.date && !additionalFilter.date) {
-      const now = new Date()
-      const filterDate = new Date()
-
-      switch (filters.date) {
-        case "1day":
-          filterDate.setDate(now.getDate() - 1)
-          break
-        case "3days":
-          filterDate.setDate(now.getDate() - 3)
-          break
-        case "1week":
-          filterDate.setDate(now.getDate() - 7)
-          break
-        case "1month":
-          filterDate.setMonth(now.getMonth() - 1)
-          break
-        case "6months":
-          filterDate.setMonth(now.getMonth() - 6)
-          break
-        case "1year":
-          filterDate.setFullYear(now.getFullYear() - 1)
-          break
-      }
-
-      filtered = filtered.filter((listing) => new Date(listing.date) >= filterDate)
-    }
-
-    // Apply additional filter for counting
-    if (additionalFilter.category) {
-      if (additionalFilter.subcategory) {
-        filtered = filtered.filter((listing) => listing.subcategory === additionalFilter.subcategory)
-      } else {
-        filtered = filtered.filter((listing) => listing.category === additionalFilter.category)
-      }
-    }
-
-    if (additionalFilter.location) {
-      filtered = filtered.filter((listing) => listing.location === additionalFilter.location)
-    }
-
-    return filtered
+  // Apply tab filter
+  if (currentTab !== "all") {
+    filtered = filtered.filter((listing) => listing.status === currentTab);
   }
+
+  // Apply current filters except the one being overridden by additionalFilter
+  if (filters.category && !additionalFilter.category) {
+    if (filters.category.subcategory) {
+      filtered = filtered.filter(
+        (listing) => listing.subcategory === filters.category.subcategory
+      );
+    } else {
+      filtered = filtered.filter(
+        (listing) => listing.category === filters.category.category
+      );
+    }
+  }
+
+  if (filters.location && !additionalFilter.location) {
+    filtered = filtered.filter((listing) => listing.location === filters.location);
+  }
+
+  if (filters.date && !additionalFilter.date) {
+    const now = new Date();
+    const filterDate = new Date();
+    switch (filters.date) {
+      case "1day":
+        filterDate.setDate(now.getDate() - 1);
+        break;
+      case "3days":
+        filterDate.setDate(now.getDate() - 3);
+        break;
+      case "1week":
+        filterDate.setDate(now.getDate() - 7);
+        break;
+      case "1month":
+        filterDate.setMonth(now.getMonth() - 1);
+        break;
+      case "6months":
+        filterDate.setMonth(now.getMonth() - 6);
+        break;
+      case "1year":
+        filterDate.setFullYear(now.getFullYear() - 1);
+        break;
+    }
+
+    filtered = filtered.filter(
+      (listing) => new Date(listing.date) >= filterDate
+    );
+  }
+
+  // Apply the additional filter for counts
+  if (additionalFilter.category) {
+    filtered = filtered.filter(
+      (listing) => listing.category === additionalFilter.category
+    );
+  }
+
+  if (additionalFilter.subcategory) {
+    filtered = filtered.filter(
+      (listing) => listing.subcategory === additionalFilter.subcategory
+    );
+  }
+
+  if (additionalFilter.location) {
+    filtered = filtered.filter((listing) => listing.location === additionalFilter.location);
+  }
+
+  return filtered;
+};
+
 
   const getCategoryCount = (category, subcategory = null) => {
     return getFilteredListings({ category, subcategory }).length
@@ -127,12 +141,15 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
   const getLocationCount = (location) => {
     return getFilteredListings({ location }).length
   }
-
+const [showMoreCategories, setShowMoreCategories] = useState(false);
+  const [showMoreLocations, setShowMoreLocations] = useState(false);
+  const maxVisibleItems = 4;
   const sidebarContent = (
+    
     <div className="flex-1 overflow-y-auto max-h-full">
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-cyan-500 to-teal-500 p-4 text-white">
+      <div className="bg-gradient-to-r from-cyan-500 to-teal-500 p-3 text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <Filter className="h-5 w-5 mr-2" />
@@ -162,12 +179,14 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
             <h3 className="font-semibold text-gray-800">Categories</h3>
           </div>
 
-          <div className="space-y-1">
-            {catagory.map((category) => {
+          <div className="">
+            
+            {(showMoreCategories ? catagory : catagory.slice(0, maxVisibleItems)).map((category) => {
               const Icon = getLucideIcon(category.icon);
               const isExpanded = expandedCategories.has(category.lable)
               const isSelected = filters.category?.category === category.lable
-              const categoryCount = getCategoryCount(category.label)
+              const categoryCount = getCategoryCount(category.lable)
+
 
               return (
                 <div key={category.lable}>
@@ -207,7 +226,7 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
                     <div className="ml-8 mt-1 space-y-1">
                       {category.subcategories.map((subcategory) => {
                         const isSubSelected = filters.category?.subcategory === subcategory
-                        const subCount = getCategoryCount(category.label, subcategory)
+                        const subCount = getCategoryCount(category.lable, subcategory.name)
 
                         return (
                           <div
@@ -226,8 +245,19 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
                 </div>
               )
             })}
+              {catagory.length > maxVisibleItems && (
+                    <div className="mt-1 text-center">
+                      <button
+                        onClick={() => setShowMoreCategories(!showMoreCategories)}
+                        className="text-sm text-blue-600 hover:underline"
+                      >
+                        {showMoreCategories ? "View Less" : "View More"}
+                      </button>
+                    </div>
+                  )}
           </div>
         </div>
+        
 
         {/* Locations */}
         <div className="p-4 border-b border-gray-100">
@@ -238,10 +268,10 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
             <h3 className="font-semibold text-gray-800">Locations</h3>
           </div>
 
-          <div className="space-y-1">
-            {locations.map((location) => {
-              const isSelected = filters.location === location
-              const locationCount = getLocationCount(location)
+          <div className="">
+          {(showMoreLocations ? locations : locations.slice(0, maxVisibleItems)).map((location) => {
+              const isSelected = filters.location === location;
+              const locationCount = getLocationCount(location);
 
               return (
                 <div
@@ -255,8 +285,18 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
                   </span>
                   <span className="text-xs text-gray-500">({locationCount})</span>
                 </div>
-              )
+              );
             })}
+            {locations.length > maxVisibleItems && (
+              <div className="mt-1 text-center">
+                <button
+                  onClick={() => setShowMoreLocations(!showMoreLocations)}
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  {showMoreLocations ? "View Less" : "View More"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -295,7 +335,10 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden lg:block w-80 bg-white shadow-lg rounded-lg overflow-hidden h-fit">{sidebarContent}</div>
+      <div
+        className="hidden lg:block w-80 bg-white shadow-lg rounded-lg overflow-hidden sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto">
+        {sidebarContent}
+      </div>
 
       {/* Mobile Sidebar */}
       {isOpen && (

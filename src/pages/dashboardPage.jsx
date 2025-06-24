@@ -1,10 +1,4 @@
-"use client"
-import { useSearchParams } from "react-router-dom"
-import { useState, useEffect } from "react"
-import FilterSidebar from "../components/dashboard/FilterSidebar"
-import ListingsGrid from "../components/dashboard/ListingsGrid"
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+
 
 
 // Demo listings data
@@ -12,7 +6,7 @@ const demoListings = [
   {
     id: 1,
     title: "Lost iPhone 15 Pro Max",
-    category: "Phones & Tablets",
+    category: "Bicycle",
     subcategory: "iPhone",
     location: "Dhaka",
     date: "2024-01-15T10:30:00Z",
@@ -150,29 +144,53 @@ const demoListings = [
   */
 ]  
 
+import { useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import FilterSidebar from "../components/dashboard/FilterSidebar";
+import ListingsGrid from "../components/dashboard/ListingsGrid";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+
 const DashboardPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [searchParams] = useSearchParams()
-const categoryFromURL = searchParams.get("category")
-
-useEffect(() => {
-  if (categoryFromURL) {
-    setFilters((prev) => ({
-      ...prev,
-      category: { category: categoryFromURL }
-    }))
-  }
-}, [categoryFromURL])
+  const categoryFromURL = searchParams.get("category");
+  const locationFromURL = searchParams.get("location");
+  const dateFromURL = searchParams.get("date");
+  const sortByFromURL = searchParams.get("sortBy") || "newest";
+  const tabFromURL = searchParams.get("tab") || "all";
 
   const [filters, setFilters] = useState({
     category: null,
     location: null,
     date: null,
-  })
-  const [activeTab, setActiveTab] = useState("all")
-  const [filteredListings, setFilteredListings] = useState(demoListings)
-  const [sortBy, setSortBy] = useState("newest")
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
+  });
+  const [activeTab, setActiveTab] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+
+  // Load initial state from URL
+  useEffect(() => {
+    setFilters({
+      category: categoryFromURL ? { category: categoryFromURL } : null,
+      location: locationFromURL || null,
+      date: dateFromURL || null,
+    });
+    setSortBy(sortByFromURL);
+    setActiveTab(tabFromURL);
+  }, [categoryFromURL, locationFromURL, dateFromURL, sortByFromURL, tabFromURL]);
+
+  // Sync filters, sort, and tab to URL
+  useEffect(() => {
+    const newParams = {};
+
+    if (filters.category?.category) newParams.category = filters.category.category;
+    if (filters.location) newParams.location = filters.location;
+    if (filters.date) newParams.date = filters.date;
+    //if (sortBy) newParams.sortBy = sortBy;
+    //if (activeTab) newParams.tab = activeTab;
+
+    setSearchParams(newParams);
+  }, [filters, sortBy, activeTab, setSearchParams]);
 
   const handleFilterChange = (filterType, value) => {
     if (filterType === "clear") {
@@ -180,37 +198,40 @@ useEffect(() => {
         category: null,
         location: null,
         date: null,
-      })
+      });
     } else {
       setFilters((prev) => ({
         ...prev,
         [filterType]: value,
-      }))
+      }));
     }
-  }
+  };
 
   const handleFilterRemove = (filterType) => {
     setFilters((prev) => ({
       ...prev,
       [filterType]: null,
-    }))
-  }
+    }));
+  };
 
   const handleSortChange = (newSort) => {
-    setSortBy(newSort)
-  }
+    setSortBy(newSort);
+  };
 
   const handleTabChange = (tab) => {
-    setActiveTab(tab)
-  }
+    setActiveTab(tab);
+  };
 
   const toggleMobileFilter = () => {
-    setIsMobileFilterOpen(!isMobileFilterOpen)
-  }
+    setIsMobileFilterOpen(!isMobileFilterOpen);
+  };
 
   const closeMobileFilter = () => {
-    setIsMobileFilterOpen(false)
-  }
+    setIsMobileFilterOpen(false);
+  };
+
+  const [filteredListings, setFilteredListings] = useState(demoListings);
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   useEffect(() => {
     let filtered = [...demoListings]
