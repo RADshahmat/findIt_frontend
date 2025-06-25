@@ -33,7 +33,7 @@ export const loadUserFromToken = createAsyncThunk("auth/loadUserFromToken", asyn
 
         const res = await axiosInstance.get("/me")
         //console.log("loadUserFromToken response:", res.data)
-        return { user: res.data }
+        return { user: res.data.user }
     } catch (err) {
         return thunkAPI.rejectWithValue(err.response?.data || { error: "Failed to load user" })
     }
