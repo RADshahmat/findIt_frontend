@@ -30,19 +30,17 @@ const Hero = ({ onSearch }) => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              <a
-                href="#"
+              <Link to="/user/report-lost"
                 className="px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-medium transition-all shadow-md hover:shadow-lg flex items-center justify-center"
               >
                 Report Lost Item
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link to="/user/report-found"
                 className="px-6 py-3 rounded-lg border-2 border-cyan-500 text-cyan-600 hover:bg-cyan-50 font-medium transition-all flex items-center justify-center"
               >
                 Report Found Item
-              </a>
+              </Link>
             </div>
 
             <SearchBar onSearch={onSearch} className="hidden lg:flex" />
