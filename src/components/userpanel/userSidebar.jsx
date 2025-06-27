@@ -239,16 +239,16 @@ const UserSidebar = () => {
   }
 
   const DesktopSidebar = () => (
-    <div className="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col sticky top-16 h-[calc(100vh-4rem)]">
+    <div className="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col sticky top-16 h-[calc(100vh-4rem)] mt-7 mb-2">
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-3">
         {/* Main Navigation */}
         <div className="mb-6">
           {sidebarItems.main.map((item) => (
             <button
               key={item.id}
               onClick={() => handleSectionClick(item.id)}
-              className={`w-full flex items-center px-4 py-3 rounded-lg text-left transition-all mb-2 text-sm ${
+              className={`w-full flex items-center px-4 py-2 rounded-lg text-left transition-all mb-2 text-sm ${
                 isActive(item.id)
                   ? "bg-gradient-to-r from-cyan-500 to-teal-500 text-white shadow-md"
                   : item.highlight
@@ -262,26 +262,6 @@ const UserSidebar = () => {
           ))}
         </div>
 
-        {/* Quick Reports Section */}
-        <div className="mb-6">
-          <div className="px-4 py-2 text-gray-800 font-semibold text-xs uppercase tracking-wide">Quick Reports</div>
-          <div className="mt-2 space-y-1">
-            {sidebarItems.reports.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => handleSectionClick(item.id)}
-                className={`w-full flex items-center px-4 py-2.5 rounded-lg text-left transition-all text-sm ${
-                  isActive(item.id)
-                    ? "bg-cyan-50 text-cyan-700 border-l-4 border-cyan-500"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
-                }`}
-              >
-                <item.icon className="h-4 w-4 mr-3" />
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* My Listings Section */}
         <div className="mb-6">
@@ -298,7 +278,7 @@ const UserSidebar = () => {
                 <button
                   key={item.id}
                   onClick={() => handleSectionClick(item.id)}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-left transition-all text-sm ${
+                  className={`w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-all text-sm ${
                     isActive(item.id)
                       ? "bg-cyan-50 text-cyan-700 border-l-4 border-cyan-500"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
@@ -332,7 +312,7 @@ const UserSidebar = () => {
                 <button
                   key={item.id}
                   onClick={() => handleSectionClick(item.id)}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-left transition-all text-sm ${
+                  className={`w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-all text-sm ${
                     isActive(item.id)
                       ? "bg-cyan-50 text-cyan-700 border-l-4 border-cyan-500"
                       : item.danger

@@ -5,6 +5,7 @@ import { Upload, X, MapPin, DollarSign, AlertCircle, ArrowLeft } from "lucide-re
 
 const ReportLostItem = ({ onBack }) => {
   const [formData, setFormData] = useState({
+    reportType: "lost", // Add this line
     title: "",
     category: "",
     subcategory: "",
@@ -145,6 +146,7 @@ const ReportLostItem = ({ onBack }) => {
 
       // Reset form
       setFormData({
+        reportType: "lost", // Add this line
         title: "",
         category: "",
         subcategory: "",

@@ -5,6 +5,7 @@ import { Upload, X, MapPin, CheckCircle, ArrowLeft } from "lucide-react"
 
 const ReportFoundItem = ({ onBack }) => {
   const [formData, setFormData] = useState({
+    reportType: "found", // Add this line
     title: "",
     category: "",
     subcategory: "",
@@ -145,6 +146,7 @@ const ReportFoundItem = ({ onBack }) => {
 
       // Reset form
       setFormData({
+        reportType: "found", // Add this line
         title: "",
         category: "",
         subcategory: "",
