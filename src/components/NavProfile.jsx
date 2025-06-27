@@ -28,7 +28,7 @@ export default function NavProfile() {
   }, []);
 
   if (!loaded) return <div>Loading...</div>;
-  console.log("NavProfile user:", user);
+  //console.log("NavProfile user:", user);
 
   const userData = user?.user || user; // Support both nested and flat
   const userImage = userData?.user_image;

@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import { useEffect } from "react"
-import { useDispatch } from "react-redux"
+import { useDispatch,useSelector } from "react-redux"
 import { loadUserFromToken } from "./features/auth/authSlice";
 import Homepage from "./pages/homepage";
 import DashboardPage from "./pages/dashboardPage"
@@ -11,11 +11,13 @@ import LoginPage from "./pages/LoginPage";
 import ProtectedRoute from "./ProtectedRoute";
 
 function App() {
-  const dispatch = useDispatch()
-  useEffect(() => {
-    console.log("App mounted, loading user from token")
-    dispatch(loadUserFromToken())
-}, [])
+  const dispatch = useDispatch();
+  const {user,loaded} = useSelector((state) => state.auth);
+ useEffect(() => {
+  console.log("App mounted, loading user from token");
+  dispatch(loadUserFromToken());
+}, [dispatch]);
+
   return (
     <>
       <BrowserRouter>
