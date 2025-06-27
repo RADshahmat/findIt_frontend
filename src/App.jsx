@@ -1,14 +1,16 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import "./App.css";
+"use client"
+
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import "./App.css"
 import { useEffect } from "react"
 import { useDispatch,useSelector } from "react-redux"
 import { loadUserFromToken } from "./features/auth/authSlice";
 import Homepage from "./pages/homepage";
 import DashboardPage from "./pages/dashboardPage"
-import ScrollRestoration from "./components/ScrollToTop";
-import UserPage from "./pages/userArea";
-import LoginPage from "./pages/LoginPage";
-import ProtectedRoute from "./ProtectedRoute";
+import ScrollRestoration from "./components/ScrollToTop"
+import UserPage from "./pages/userAreaPage"
+import LoginPage from "./pages/LoginPage"
+import ProtectedRoute from "./ProtectedRoute"
 
 function App() {
   const dispatch = useDispatch();
@@ -23,22 +25,23 @@ function App() {
       <BrowserRouter>
         <ScrollRestoration />
         <Routes>
-          <Route path="/" element={<Homepage />} /> 
-          <Route path="/home" element={<Homepage />} /> 
-          <Route path="/dashboard" element={<DashboardPage />} /> 
-          <Route path="/login" element={<LoginPage />} ></Route>
-          <Route
-          path="/user"
-          element={
-            <ProtectedRoute>
-              <UserPage />
-            </ProtectedRoute>
-          }
-        />
+          <Route path="/" element={<Homepage />} />
+          <Route path="/home" element={<Homepage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* User area routes with nested paths */}
+          <Route path="/user/*"
+            element={
+              <ProtectedRoute>
+                <UserPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </>
-  );
+  )
 }
 
-export default App;
+export default App

@@ -116,14 +116,14 @@ const Footer = () => {
               <li className="flex items-start">
                 <MapPin className="h-5 w-5 text-cyan-400 mt-0.5 flex-shrink-0" />
                 <span className="ml-3 text-slate-400">
-                  123 Recovery Street
+                  Faculty Of CSE
                   <br />
-                  San Francisco, CA 94103
+                  Patuakhali Science and Engineering University
                 </span>
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 text-cyan-400 flex-shrink-0" />
-                <span className="ml-3 text-slate-400">(555) 123-4567</span>
+                <span className="ml-3 text-slate-400">+880 1716-040447</span>
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 text-cyan-400 flex-shrink-0" />
