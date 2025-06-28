@@ -103,7 +103,7 @@ const demoListings = [
     postedBy: "Alex Rodriguez",
     views: 89,
   },
-    {
+  {
     id: 9,
     title: "Found MacBook Pro 16 inch",
     category: "Phones & Tablets",
@@ -115,7 +115,7 @@ const demoListings = [
     postedBy: "Alex Rodriguez",
     views: 89,
   },
-      {
+  {
     id: 10,
     title: "Found MacBook Pro 16 inch",
     category: "Phones & Tablets",
@@ -142,7 +142,7 @@ const demoListings = [
     reward: i % 3 === 0 ? Math.floor(Math.random() * 10000) + 1000 : null,
   })),
   */
-]  
+]
 
 import { useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -150,6 +150,8 @@ import FilterSidebar from "../components/dashboard/FilterSidebar";
 import ListingsGrid from "../components/dashboard/ListingsGrid";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchPost } from "../features/posts/fetchPost"; // Assuming this is the correct path for your fetchPost action
 
 const DashboardPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -159,6 +161,18 @@ const DashboardPage = () => {
   const dateFromURL = searchParams.get("date");
   const sortByFromURL = searchParams.get("sortBy") || "newest";
   const tabFromURL = searchParams.get("tab") || "all";
+  const { postData = [] } = useSelector((state) => state.fetchPost);
+  const [filteredListings, setFilteredListings] = useState(postData || []);
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const dispatch = useDispatch();
+  
+  useEffect(() => {
+    if (postData == null || postData.length === 0) {
+      console.log("Fetching posts for dashboard...");
+      dispatch(fetchPost({ reqFrom: 'dashboard', limit: 200 }));
+    }
+    setFilteredListings(postData || []);
+  }, [postData, dispatch]);
 
   const [filters, setFilters] = useState({
     category: null,
@@ -230,11 +244,11 @@ const DashboardPage = () => {
     setIsMobileFilterOpen(false);
   };
 
-  const [filteredListings, setFilteredListings] = useState(demoListings);
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
 
   useEffect(() => {
-    let filtered = [...demoListings]
+    let filtered = [...(postData || [])];
+
 
     // Apply tab filter
     if (activeTab !== "all") {
@@ -301,11 +315,12 @@ const DashboardPage = () => {
     }
 
     setFilteredListings(filtered)
-  }, [filters, sortBy, activeTab])
+  }, [filters, sortBy, activeTab, dispatch, postData]);
 
   // Calculate counts for tabs
   const getCounts = () => {
-    let baseListings = [...demoListings]
+    let baseListings = [...(postData || [])];
+
 
     // Apply current filters (except tab filter) to get accurate counts
     if (filters.category) {
@@ -365,7 +380,7 @@ const DashboardPage = () => {
             onFilterChange={handleFilterChange}
             isOpen={isMobileFilterOpen}
             onClose={closeMobileFilter}
-            allListings={demoListings}
+            allListings={postData}
             currentTab={activeTab}
           />
           <ListingsGrid

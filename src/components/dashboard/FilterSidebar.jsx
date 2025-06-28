@@ -74,7 +74,7 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
 
   // Calculate dynamic counts based on current listings and tab
   const getFilteredListings = (additionalFilter = {}) => {
-    let filtered = [...allListings];
+    let filtered = [...(allListings || [])];
 
     // Apply tab filter
     if (currentTab !== "all") {
