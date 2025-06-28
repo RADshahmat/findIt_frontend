@@ -2,19 +2,19 @@ import { ArrowRight, MapPin, Clock } from "lucide-react"
 import { Link } from "react-router-dom";
 import React,{useEffect} from "react"
 import { useSelector,useDispatch } from "react-redux"
-import { fetchPost } from "../../features/posts/fetchPost";
+import { fetchPost1 } from "../../features/posts/fetchPostHome";
 import SearchBar from "./SearchBar"
 
 const Hero = ({ onSearch }) => {
-  const { postData } = useSelector((state) => state.fetchPost);
+  const { postData1 } = useSelector((state) => state.fetchPostHome);
   const dispatch = useDispatch();
   useEffect(() => {
     console.log("Fetching posts...");
-    if (postData == null || postData.length == 0) {
-      dispatch(fetchPost({reqFrom:'home',limit:3}));
+    if (postData1 == null || postData1.length == 0) {
+      dispatch(fetchPost1({reqFrom:'home',limit:3}));
     }
-  }, [postData, dispatch]);
-  console.log("Post Data:", postData);
+  }, [postData1, dispatch]);
+  console.log("Post Data:", postData1);
   return (
     <section className="bg-gradient-to-b from-[#0f172a] via-[#1e293b] to-[#0f172a] text-cyan-400 p-8  pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-17">
@@ -96,7 +96,7 @@ const Hero = ({ onSearch }) => {
 
                 {/* Item Cards */}
                 <div className="space-y-4">
-                  {postData?.map((item, index) => (
+                  {postData1?.map((item, index) => (
                     <div
                       key={index}
                       className="bg-slate-50 rounded-lg p-4 border border-slate-100 hover:shadow-md transition-shadow"

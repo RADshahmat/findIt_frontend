@@ -4,6 +4,7 @@ import authReducer from '../features/auth/authSlice.jsx';
 import postReducer from '../features/posts/post.jsx';
 import locationReducer from '../features/location/location.jsx';
 import fetchPostReducer  from '../features/posts/fetchPost.jsx';
+import fetchPostHomeReducer from '../features/posts/fetchPostHome.jsx';
 
 export const store = configureStore({
   reducer: {
@@ -12,5 +13,6 @@ export const store = configureStore({
     post: postReducer,
     location: locationReducer,
     fetchPost: fetchPostReducer,
+    fetchPostHome: fetchPostHomeReducer,
   },
 });
