@@ -13,6 +13,7 @@ const ReportFoundItem = ({ onBack }) => {
   const { loading, success, error } = useSelector((state) => state.post);
   // const { catagory } = useSelector((state) => state.catagory);
   const [formData, setFormData] = useState({
+    reportType: "found", // Add this line
     title: "",
     category: "",
     subcategory: "",

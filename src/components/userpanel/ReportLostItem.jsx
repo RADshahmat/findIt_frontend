@@ -12,6 +12,7 @@ const ReportLostItem = ({ onBack }) => {
   const dispatch = useDispatch();
   const { loading, success, error } = useSelector((state) => state.post);
   const [formData, setFormData] = useState({
+    reportType: "lost", // Add this line
     title: "",
     category: "",
     subcategory: "",
