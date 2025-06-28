@@ -1,6 +1,8 @@
 import { MapPin, Calendar, Eye, Heart, Share2 } from "lucide-react"
+import { useState } from "react"
 
 const ListingCard = ({ listing, viewMode = "grid" }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
   const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", {
@@ -27,11 +29,18 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
         <div className="flex">
           {/* Image */}
           <div className="relative w-48 h-32 flex-shrink-0">
-            <img
-              src={listing.image || "/placeholder.svg?height=128&width=192"}
-              alt={listing.title}
-              className="w-full h-full object-cover"
-            />
+            <div className="relative w-48 h-32 flex-shrink-0">
+              {!imageLoaded && (
+                <div className="w-full h-full bg-gray-200 animate-pulse rounded-sm"></div>
+              )}
+              <img
+                src={listing.image || "/placeholder.svg?height=128&width=192"}
+                alt={listing.title}
+                onLoad={() => setImageLoaded(true)}
+                className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0 absolute"
+                  }`}
+              />
+            </div>
             <div className="absolute top-2 left-2">
               <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(listing.status)}`}>
                 {listing.status.toUpperCase()}
@@ -92,11 +101,19 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group">
       {/* Image */}
       <div className="relative overflow-hidden">
-        <img
-          src={listing.image || "/placeholder.svg?height=200&width=300"}
-          alt={listing.title}
-          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-        />
+        <div className="relative overflow-hidden">
+          {!imageLoaded && (
+            <div className="w-full h-48 bg-gray-200 animate-pulse"></div>
+          )}
+          <img
+            src={listing.image || "/placeholder.svg?height=200&width=300"}
+            alt={listing.title}
+            onLoad={() => setImageLoaded(true)}
+            className={`w-full h-48 object-cover group-hover:scale-105 transform transition-all duration-500 ease-in-out ${imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-95 absolute"
+              }`}
+          />
+        </div>
+
         <div className="absolute top-3 left-3">
           <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(listing.status)}`}>
             {listing.status.toUpperCase()}
