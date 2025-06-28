@@ -1,8 +1,9 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCatagories } from '../../features/catagory/catagory';
 import { getLucideIcon } from '../../helpers/lucideIcons';
+import { fetchLocations } from "../../features/location/location";
 
 
 import { Filter, X, Smartphone, MapPin, Calendar, ChevronDown, ChevronRight } from "lucide-react";
@@ -24,12 +25,17 @@ const dateRanges = [
 
 const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, currentTab }) => {
   const dispatch = useDispatch();
-  const { catagory, status} = useSelector(state => state.catagory);
+  const { catagory, status } = useSelector(state => state.catagory);
+  const { location, status1 } = useSelector((state) => state.location);
+
   useEffect(() => {
+    if (status1 === 'idle') {
+      dispatch(fetchLocations());
+    }
     if (status === 'idle') {
       dispatch(fetchCatagories());
     }
-  }, [status, dispatch]);
+  }, [status, dispatch, status1]);
   const [expandedCategories, setExpandedCategories] = useState(new Set())
 
   const toggleCategory = (categoryLabel) => {
@@ -58,80 +64,89 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
     onFilterChange("clear", null)
   }
 
+  const locationCountMap = useMemo(() => {
+        const map = {};
+        location.forEach(loc => {
+          map[loc.location.toLowerCase()] = loc.count;
+        });
+        return map;
+      }, [location]);
+
   // Calculate dynamic counts based on current listings and tab
-const getFilteredListings = (additionalFilter = {}) => {
-  let filtered = [...allListings];
+  const getFilteredListings = (additionalFilter = {}) => {
+    let filtered = [...allListings];
 
-  // Apply tab filter
-  if (currentTab !== "all") {
-    filtered = filtered.filter((listing) => listing.status === currentTab);
-  }
-
-  // Apply current filters except the one being overridden by additionalFilter
-  if (filters.category && !additionalFilter.category) {
-    if (filters.category.subcategory) {
-      filtered = filtered.filter(
-        (listing) => listing.subcategory === filters.category.subcategory
-      );
-    } else {
-      filtered = filtered.filter(
-        (listing) => listing.category === filters.category.category
-      );
-    }
-  }
-
-  if (filters.location && !additionalFilter.location) {
-    filtered = filtered.filter((listing) => listing.location === filters.location);
-  }
-
-  if (filters.date && !additionalFilter.date) {
-    const now = new Date();
-    const filterDate = new Date();
-    switch (filters.date) {
-      case "1day":
-        filterDate.setDate(now.getDate() - 1);
-        break;
-      case "3days":
-        filterDate.setDate(now.getDate() - 3);
-        break;
-      case "1week":
-        filterDate.setDate(now.getDate() - 7);
-        break;
-      case "1month":
-        filterDate.setMonth(now.getMonth() - 1);
-        break;
-      case "6months":
-        filterDate.setMonth(now.getMonth() - 6);
-        break;
-      case "1year":
-        filterDate.setFullYear(now.getFullYear() - 1);
-        break;
+    // Apply tab filter
+    if (currentTab !== "all") {
+      filtered = filtered.filter((listing) => listing.status === currentTab);
     }
 
-    filtered = filtered.filter(
-      (listing) => new Date(listing.date) >= filterDate
-    );
-  }
+    // Apply current filters except the one being overridden by additionalFilter
+    if (filters.category && !additionalFilter.category) {
+      if (filters.category.subcategory) {
+        filtered = filtered.filter(
+          (listing) => listing.subcategory === filters.category.subcategory
+        );
+      } else {
+        filtered = filtered.filter(
+          (listing) => listing.category === filters.category.category
+        );
+      }
+    }
 
-  // Apply the additional filter for counts
-  if (additionalFilter.category) {
-    filtered = filtered.filter(
-      (listing) => listing.category === additionalFilter.category
-    );
-  }
+    if (filters.location && !additionalFilter.location) {
+      filtered = filtered.filter((listing) => listing.location === filters.location);
+    }
 
-  if (additionalFilter.subcategory) {
-    filtered = filtered.filter(
-      (listing) => listing.subcategory === additionalFilter.subcategory
-    );
-  }
+    if (filters.date && !additionalFilter.date) {
+      const now = new Date();
+      const filterDate = new Date();
+      switch (filters.date) {
+        case "1day":
+          filterDate.setDate(now.getDate() - 1);
+          break;
+        case "3days":
+          filterDate.setDate(now.getDate() - 3);
+          break;
+        case "1week":
+          filterDate.setDate(now.getDate() - 7);
+          break;
+        case "1month":
+          filterDate.setMonth(now.getMonth() - 1);
+          break;
+        case "6months":
+          filterDate.setMonth(now.getMonth() - 6);
+          break;
+        case "1year":
+          filterDate.setFullYear(now.getFullYear() - 1);
+          break;
+      }
 
-  if (additionalFilter.location) {
-    filtered = filtered.filter((listing) => listing.location === additionalFilter.location);
-  }
+      filtered = filtered.filter(
+        (listing) => new Date(listing.date) >= filterDate
+      );
+    }
 
-  return filtered;
-};
+    
+    // Apply the additional filter for counts
+    if (additionalFilter.category) {
+      filtered = filtered.filter(
+        (listing) => listing.category === additionalFilter.category
+      );
+    }
+
+    if (additionalFilter.subcategory) {
+      filtered = filtered.filter(
+        (listing) => listing.subcategory === additionalFilter.subcategory
+      );
+    }
+
+    if (additionalFilter.location) {
+      filtered = filtered.filter((listing) => listing.location === additionalFilter.location);
+    }
+
+    return filtered;
+  };
 
 
   const getCategoryCount = (category, subcategory = null) => {
@@ -141,11 +156,11 @@ const getFilteredListings = (additionalFilter = {}) => {
   const getLocationCount = (location) => {
     return getFilteredListings({ location }).length
   }
-const [showMoreCategories, setShowMoreCategories] = useState(false);
+  const [showMoreCategories, setShowMoreCategories] = useState(false);
   const [showMoreLocations, setShowMoreLocations] = useState(false);
   const maxVisibleItems = 4;
   const sidebarContent = (
-    
+
     <div className="flex-1 overflow-y-auto max-h-full">
 
       {/* Header */}
@@ -180,7 +195,7 @@ const [showMoreCategories, setShowMoreCategories] = useState(false);
           </div>
 
           <div className="">
-            
+
             {(showMoreCategories ? catagory : catagory.slice(0, maxVisibleItems)).map((category) => {
               const Icon = getLucideIcon(category.icon);
               const isExpanded = expandedCategories.has(category.lable)
@@ -202,7 +217,7 @@ const [showMoreCategories, setShowMoreCategories] = useState(false);
                       <span className={`text-sm ${isSelected ? "text-cyan-700 font-medium" : "text-gray-700"}`}>
                         {category.lable}
                       </span>
-                      <span className="text-xs text-gray-500 ml-auto mr-2">({categoryCount})</span>
+                      <span className="text-xs text-gray-500 ml-auto mr-2">({category.count})</span>
                     </div>
                     {category.subcategories && (
                       <button
@@ -236,7 +251,7 @@ const [showMoreCategories, setShowMoreCategories] = useState(false);
                             onClick={() => handleCategoryChange(category.label, subcategory.name)}
                           >
                             <span>{subcategory.name}</span>
-                            <span className="text-xs text-gray-500">({subCount})</span>
+                            <span className="text-xs text-gray-500">({subcategory.postCount})</span>
                           </div>
                         )
                       })}
@@ -245,19 +260,19 @@ const [showMoreCategories, setShowMoreCategories] = useState(false);
                 </div>
               )
             })}
-              {catagory.length > maxVisibleItems && (
-                    <div className="mt-1 text-center">
-                      <button
-                        onClick={() => setShowMoreCategories(!showMoreCategories)}
-                        className="text-sm text-blue-600 hover:underline"
-                      >
-                        {showMoreCategories ? "View Less" : "View More"}
-                      </button>
-                    </div>
-                  )}
+            {catagory.length > maxVisibleItems && (
+              <div className="mt-1 text-center">
+                <button
+                  onClick={() => setShowMoreCategories(!showMoreCategories)}
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  {showMoreCategories ? "View Less" : "View More"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
-        
+
 
         {/* Locations */}
         <div className="p-4 border-b border-gray-100">
@@ -269,9 +284,9 @@ const [showMoreCategories, setShowMoreCategories] = useState(false);
           </div>
 
           <div className="">
-          {(showMoreLocations ? locations : locations.slice(0, maxVisibleItems)).map((location) => {
+            {(showMoreLocations ? locations : locations.slice(0, maxVisibleItems)).map((location) => {
               const isSelected = filters.location === location;
-              const locationCount = getLocationCount(location);
+              const locationCount = locationCountMap[location.toLowerCase()] || 0;
 
               return (
                 <div

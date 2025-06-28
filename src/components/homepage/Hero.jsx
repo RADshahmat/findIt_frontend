@@ -1,8 +1,20 @@
 import { ArrowRight, MapPin, Clock } from "lucide-react"
 import { Link } from "react-router-dom";
+import React,{useEffect} from "react"
+import { useSelector,useDispatch } from "react-redux"
+import { fetchPost } from "../../features/posts/fetchPost";
 import SearchBar from "./SearchBar"
 
 const Hero = ({ onSearch }) => {
+  const { postData } = useSelector((state) => state.fetchPost);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    console.log("Fetching posts...");
+    if (postData == null || postData.length == 0) {
+      dispatch(fetchPost({reqFrom:'home',limit:3}));
+    }
+  }, [postData, dispatch]);
+  console.log("Post Data:", postData);
   return (
     <section className="bg-gradient-to-b from-[#0f172a] via-[#1e293b] to-[#0f172a] text-cyan-400 p-8  pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-17">
@@ -84,28 +96,7 @@ const Hero = ({ onSearch }) => {
 
                 {/* Item Cards */}
                 <div className="space-y-4">
-                  {[
-                    {
-                      type: "lost",
-                      item: "Blue Backpack",
-                      location: "Central Park",
-                      date: "2 hours ago",
-                      reward: "$50",
-                    },
-                    {
-                      type: "found",
-                      item: "iPhone 15 Pro",
-                      location: "Downtown Coffee Shop",
-                      date: "5 hours ago",
-                    },
-                    {
-                      type: "lost",
-                      item: "Car Keys with Red Keychain",
-                      location: "Shopping Mall",
-                      date: "1 day ago",
-                      reward: "$30",
-                    },
-                  ].map((item, index) => (
+                  {postData?.map((item, index) => (
                     <div
                       key={index}
                       className="bg-slate-50 rounded-lg p-4 border border-slate-100 hover:shadow-md transition-shadow"
@@ -115,15 +106,15 @@ const Hero = ({ onSearch }) => {
                           <div className="flex items-center">
                             <span
                               className={`text-xs font-medium px-2 py-1 rounded-full ${
-                                item.type === "lost"
+                                item.status === "lost"
                                   ? "bg-orange-100 text-orange-700"
                                   : "bg-green-100 text-green-700"
                               }`}
                             >
-                              {item.type === "lost" ? "LOST" : "FOUND"}
+                              {item.status === "lost" ? "LOST" : "FOUND"}
                             </span>
                             <span className="ml-2 font-medium text-slate-800">
-                              {item.item}
+                              {item.title}
                             </span>
                           </div>
                           <div className="mt-2 flex items-center text-sm text-slate-500">

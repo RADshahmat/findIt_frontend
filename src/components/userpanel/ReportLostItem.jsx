@@ -1,9 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { use, useState, useEffect, useRef } from "react"
 import { Upload, X, MapPin, DollarSign, AlertCircle, ArrowLeft } from "lucide-react"
+import { fetchCatagories } from "../../features/catagory/catagory"
+import { useDispatch, useSelector } from "react-redux";
+import { createPost, resetPostState } from "../../features/posts/post";
+import districtsData from "../../assets/bd-districts.json";
+import { ChevronDown } from "lucide-react";
 
 const ReportLostItem = ({ onBack }) => {
+  const dispatch = useDispatch();
+  const { loading, success, error } = useSelector((state) => state.post);
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -19,37 +26,45 @@ const ReportLostItem = ({ onBack }) => {
     contactEmail: "",
     additionalDetails: "",
     urgency: "medium",
+    status: "lost",
   })
-
   const [images, setImages] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState({})
+  const [locationQuery, setLocationQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef();
 
-  const categories = {
-    "Phones & Tablets": ["iPhone", "Samsung", "iPad", "Android Tablets", "Other Phones"],
-    Bags: ["Backpacks", "Handbags", "Laptop Bags", "Travel Bags", "Wallets"],
-    Jewelry: ["Rings", "Necklaces", "Earrings", "Bracelets", "Watches"],
-    Documents: ["ID Cards", "Passports", "Certificates", "Licenses", "Credit Cards"],
-    Keys: ["Car Keys", "House Keys", "Office Keys", "Key Chains"],
-    Electronics: ["Laptops", "Cameras", "Headphones", "Chargers", "Gaming Devices"],
-    Clothing: ["Jackets", "Shoes", "Accessories", "Sportswear"],
-    Pets: ["Dogs", "Cats", "Birds", "Other Pets"],
-    Vehicles: ["Cars", "Motorcycles", "Bicycles", "Scooters"],
-    Other: ["Books", "Toys", "Sports Equipment", "Musical Instruments", "Miscellaneous"],
-  }
+  const { catagory, status } = useSelector(state => state.catagory);
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchCatagories());
+    }
+    if (success) {
+      console.log("Post created successfully, resetting form state");
+      setFormData({
+        title: "",
+        category: "",
+        subcategory: "",
+        description: "",
+        location: "",
+        specificLocation: "",
+        date: "",
+        time: "",
+        reward: "",
+        contactName: "",
+        contactPhone: "",
+        contactEmail: "",
+        additionalDetails: "",
+        urgency: "medium",
+        status: "lost",
+      });
+      setImages([]);
+    }
+  }, [status, dispatch, success]);
 
-  const locations = [
-    "Dhaka",
-    "Chattogram",
-    "Sylhet",
-    "Khulna",
-    "Rajshahi",
-    "Rangpur",
-    "Barisal",
-    "Mymensingh",
-    "Cumilla",
-    "Gazipur",
-  ]
+  const locations = districtsData.districts.map(d => d.name);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -65,6 +80,22 @@ const ReportLostItem = ({ onBack }) => {
       setErrors((prev) => ({ ...prev, [name]: "" }))
     }
   }
+
+  const filteredLocations = locations.filter((loc) =>
+    loc.toLowerCase().includes(locationQuery.toLowerCase())
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files)
@@ -128,47 +159,23 @@ const ReportLostItem = ({ onBack }) => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
+    //console.log("Form data before validation:", formData);
+    const isValid = validateForm();
+    if (!isValid) return;
+    const data = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      data.append(key, value);
+    });
+    images.forEach((img) => {
+      data.append("post_images", img.file);
+    });
+    dispatch(createPost(data));
+    setIsSubmitting(true);
+  };
 
-    if (!validateForm()) {
-      return
-    }
 
-    setIsSubmitting(true)
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      console.log("Lost item report submitted:", { formData, images })
-      alert("Lost item report submitted successfully!")
-
-      // Reset form
-      setFormData({
-        title: "",
-        category: "",
-        subcategory: "",
-        description: "",
-        location: "",
-        specificLocation: "",
-        date: "",
-        time: "",
-        reward: "",
-        contactName: "",
-        contactPhone: "",
-        contactEmail: "",
-        additionalDetails: "",
-        urgency: "medium",
-      })
-      setImages([])
-    } catch (error) {
-      console.error("Error submitting report:", error)
-      alert("Error submitting report. Please try again.")
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
+  //console.log("ReportLostItem component rendered with categories:", catagory);
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-lg shadow-sm border border-gray-100">
@@ -199,9 +206,8 @@ const ReportLostItem = ({ onBack }) => {
                   value={formData.title}
                   onChange={handleInputChange}
                   placeholder="e.g., iPhone 15 Pro Max"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${
-                    errors.title ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${errors.title ? "border-red-500" : "border-gray-300"
+                    }`}
                 />
                 {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
               </div>
@@ -212,14 +218,13 @@ const ReportLostItem = ({ onBack }) => {
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${
-                    errors.category ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${errors.category ? "border-red-500" : "border-gray-300"
+                    }`}
                 >
                   <option value="">Select Category</option>
-                  {Object.keys(categories).map((category) => (
-                    <option key={category} value={category}>
-                      {category}
+                  {catagory.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.lable}
                     </option>
                   ))}
                 </select>
@@ -236,11 +241,15 @@ const ReportLostItem = ({ onBack }) => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                   >
                     <option value="">Select Subcategory</option>
-                    {categories[formData.category]?.map((sub) => (
-                      <option key={sub} value={sub}>
-                        {sub}
-                      </option>
-                    ))}
+                    {catagory
+                      .find((c) => c.id === formData.category)
+                      ?.subcategories
+                      ?.map((sub) => (
+                        <option key={sub.id} value={sub.id}>
+                          {sub.name}
+                        </option>
+                      ))}
+
                   </select>
                 </div>
               )}
@@ -269,9 +278,8 @@ const ReportLostItem = ({ onBack }) => {
                 onChange={handleInputChange}
                 rows={4}
                 placeholder="Provide detailed description including color, size, brand, distinctive features, etc."
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${
-                  errors.description ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${errors.description ? "border-red-500" : "border-gray-300"
+                  }`}
               />
               {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
             </div>
@@ -285,25 +293,54 @@ const ReportLostItem = ({ onBack }) => {
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div ref={dropdownRef} className="relative w-full">
                 <label className="block text-sm font-medium text-gray-700 mb-2">City/Area *</label>
-                <select
-                  name="location"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${
-                    errors.location ? "border-red-500" : "border-gray-300"
-                  }`}
-                >
-                  <option value="">Select Location</option>
-                  {locations.map((location) => (
-                    <option key={location} value={location}>
-                      {location}
-                    </option>
-                  ))}
-                </select>
-                {errors.location && <p className="text-red-500 text-xs mt-1">{errors.location}</p>}
+
+                <div className="relative">
+                  <input
+                    type="text"
+                    readOnly={!showDropdown}
+                    placeholder="Select City"
+                    value={locationQuery}
+                    onChange={(e) => setLocationQuery(e.target.value)}
+                    onClick={() => {
+                      setShowDropdown(true);
+                    }}
+                    onFocus={() => setShowDropdown(true)}
+                    className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${errors.location ? "border-red-500" : "border-gray-300"
+                      }`}
+                  />
+                  <ChevronDown
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+                    onClick={() => setShowDropdown((prev) => !prev)}
+                  />
+                </div>
+
+                {showDropdown && filteredLocations.length > 0 && (
+                  <ul className="absolute z-10 bg-white border border-gray-300 w-full mt-1 rounded-lg max-h-60 overflow-y-auto shadow-md">
+                    {filteredLocations.map((loc, index) => (
+                      <li
+                        key={index}
+                        onClick={() => {
+                          setFormData((prev) => ({ ...prev, location: loc }));
+                          setLocationQuery(loc);
+                          setShowDropdown(false);
+                          setErrors((prev) => ({ ...prev, location: "" }));
+                        }}
+                        className="px-4 py-2 cursor-pointer hover:bg-red-100"
+                      >
+                        {loc}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {errors.location && (
+                  <p className="text-red-500 text-xs mt-1">{errors.location}</p>
+                )}
               </div>
+
+
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Specific Location</label>
@@ -325,9 +362,8 @@ const ReportLostItem = ({ onBack }) => {
                   value={formData.date}
                   onChange={handleInputChange}
                   max={new Date().toISOString().split("T")[0]}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${
-                    errors.date ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${errors.date ? "border-red-500" : "border-gray-300"
+                    }`}
                 />
                 {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date}</p>}
               </div>
@@ -423,9 +459,8 @@ const ReportLostItem = ({ onBack }) => {
                   value={formData.contactName}
                   onChange={handleInputChange}
                   placeholder="Full Name"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${
-                    errors.contactName ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${errors.contactName ? "border-red-500" : "border-gray-300"
+                    }`}
                 />
                 {errors.contactName && <p className="text-red-500 text-xs mt-1">{errors.contactName}</p>}
               </div>
@@ -438,9 +473,8 @@ const ReportLostItem = ({ onBack }) => {
                   value={formData.contactPhone}
                   onChange={handleInputChange}
                   placeholder="+880 1234 567890"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${
-                    errors.contactPhone ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${errors.contactPhone ? "border-red-500" : "border-gray-300"
+                    }`}
                 />
                 {errors.contactPhone && <p className="text-red-500 text-xs mt-1">{errors.contactPhone}</p>}
               </div>
@@ -453,9 +487,8 @@ const ReportLostItem = ({ onBack }) => {
                   value={formData.contactEmail}
                   onChange={handleInputChange}
                   placeholder="your.email@example.com"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${
-                    errors.contactEmail ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${errors.contactEmail ? "border-red-500" : "border-gray-300"
+                    }`}
                 />
                 {errors.contactEmail && <p className="text-red-500 text-xs mt-1">{errors.contactEmail}</p>}
               </div>
@@ -474,7 +507,12 @@ const ReportLostItem = ({ onBack }) => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
-
+          {success && isSubmitting && (
+            <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-lg">
+              <div className="flex items-center">Post Created Successfully. </div> </div>)}
+          {error && isSubmitting && (
+            <div className="bg-green-50 border border-red-200 text-red-700 p-4 rounded-lg">
+              <div className="flex items-center">{error.message} </div> </div>)}
           {/* Submit Button */}
           <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
             <button
@@ -486,10 +524,10 @@ const ReportLostItem = ({ onBack }) => {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={loading}
               className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
-              {isSubmitting ? (
+              {loading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
                   Submitting...
