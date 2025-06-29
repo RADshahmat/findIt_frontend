@@ -16,7 +16,7 @@ function App() {
   const dispatch = useDispatch();
   const {user,loaded} = useSelector((state) => state.auth);
  useEffect(() => {
-  console.log("App mounted, loading user from token");
+  //console.log("App mounted, loading user from token");
   dispatch(loadUserFromToken());
 }, [dispatch]);
 

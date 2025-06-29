@@ -99,7 +99,7 @@ const UserSidebar = () => {
       // Handle account closure logic
       if (window.confirm("Are you sure you want to close your account? This action cannot be undone.")) {
         // Add your account closure logic here
-        console.log("Account closure requested")
+        //console.log("Account closure requested")
       }
       return
     }
