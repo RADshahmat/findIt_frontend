@@ -2,30 +2,37 @@
 export default {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}", "*.{js,ts,jsx,tsx,mdx}"],
-  safelist: [
-    // From and To gradients (limited to typical shades)
-    ...[
-      "blue", "cyan", "sky", "indigo", "purple", "pink", "rose", "red",
-      "orange", "amber", "yellow", "lime", "green", "emerald", "teal",
-      "gray", "slate", "zinc", "neutral", "stone"
-    ].flatMap(color =>
-      [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950].flatMap(shade => [
-        `from-${color}-${shade}`,
-        `to-${color}-${shade}`
-      ])
-    ),
+safelist: [
+  // Gradient utility classes
+  "from-blue-500", "to-cyan-400",
+  "from-amber-500", "to-orange-400",
+  "from-purple-500", "to-pink-400",
+  "from-gray-600", "to-gray-500",
+  "from-green-500", "to-emerald-400",
+  "from-blue-600", "to-indigo-500",
+  "from-yellow-500", "to-amber-400",
+  "from-pink-500", "to-rose-400",
+  "from-slate-600", "to-slate-500",
+  "from-teal-500", "to-emerald-400",
+  "from-cyan-500", "to-sky-400",
+  "from-orange-500", "to-amber-400",
+  "from-red-500", "to-rose-400",
+  "from-gray-500", "to-slate-400",
+  "from-blue-500", "to-indigo-400",
 
-    // Background shades (for soft card/category backgrounds)
-  ...[
-    "blue", "cyan", "sky", "indigo", "purple", "pink", "rose", "red",
-    "orange", "amber", "yellow", "lime", "green", "emerald", "teal",
-    "gray", "slate", "zinc", "neutral", "stone"
-  ].flatMap(color =>
-    [50, 100, 200, 300, 400, 500, 600, 700, 800, 900,950].map(shade =>
-      `bg-${color}-${shade}`
-    )
-  )
-  ],
+  // Background color classes
+  "bg-blue-50",
+  "bg-teal-50",
+  "bg-purple-50",
+  "bg-gray-50",
+  "bg-green-50",
+  "bg-pink-50",
+  "bg-slate-50",
+  "bg-cyan-50",
+  "bg-orange-50",
+  "bg-red-50",
+  "bg-amber-50"
+],
   theme: {
     extend: {
       colors: {
