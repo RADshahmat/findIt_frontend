@@ -6,16 +6,16 @@ export const createPost = createAsyncThunk(
     "post/createPost",
     async (formData, thunkAPI) => {
         try {
-            console.log("Creating post with data:");
+            //console.log("Creating post with data:");
             for (let pair of formData.entries()) {
-                console.log(pair[0], pair[1]);
+                //console.log(pair[0], pair[1]);
             }
             const res = await axiosInstance.post("post", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            console.log("Post created successfully:", res.data);
+            //console.log("Post created successfully:", res.data);
             return res.data;
         } catch (err) {
             return thunkAPI.rejectWithValue(err.response?.data || "Failed to post");

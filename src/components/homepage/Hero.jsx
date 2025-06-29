@@ -9,12 +9,12 @@ const Hero = ({ onSearch }) => {
   const { postData1 } = useSelector((state) => state.fetchPostHome);
   const dispatch = useDispatch();
   useEffect(() => {
-    console.log("Fetching posts...");
+    //console.log("Fetching posts...");
     if (postData1 == null || postData1.length == 0) {
       dispatch(fetchPost1({reqFrom:'home',limit:3}));
     }
   }, [postData1, dispatch]);
-  console.log("Post Data:", postData1);
+  //console.log("Post Data:", postData1);
   return (
     <section className="bg-gradient-to-b from-[#0f172a] via-[#1e293b] to-[#0f172a] text-cyan-400 p-8  pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-17">

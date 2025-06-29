@@ -42,7 +42,7 @@ const ReportLostItem = ({ onBack }) => {
       dispatch(fetchCatagories());
     }
     if (success) {
-      console.log("Post created successfully, resetting form state");
+      //console.log("Post created successfully, resetting form state");
       setFormData({
         title: "",
         category: "",
@@ -161,7 +161,7 @@ const ReportLostItem = ({ onBack }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    //console.log("Form data before validation:", formData);
+    ////console.log("Form data before validation:", formData);
     const isValid = validateForm();
     if (!isValid) return;
     const data = new FormData();
@@ -176,7 +176,7 @@ const ReportLostItem = ({ onBack }) => {
   };
 
 
-  //console.log("ReportLostItem component rendered with categories:", catagory);
+  ////console.log("ReportLostItem component rendered with categories:", catagory);
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-lg shadow-sm border border-gray-100">

@@ -31,7 +31,7 @@ const CityRegionSelector = () => {
     return map;
   }, [location]);
 
-console.log("Location Count Map:", locationCountMap);
+//console.log("Location Count Map:", locationCountMap);
   return (
     <section className="p-6 mx-7  bg-white rounded-2xl shadow-lg mt-6">
       <h2 className="text-3xl font-bold mb-4 flex items-center gap-2  text-slate-800">

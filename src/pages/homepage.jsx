@@ -22,7 +22,7 @@ function HomePage() {
   
   const handleSearch = (query) => {
     setSearchQuery(query)
-    console.log("Searching for:", query)
+    //console.log("Searching for:", query)
     // In a real app, you would connect this to your backend
   } 
     
