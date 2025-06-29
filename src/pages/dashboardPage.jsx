@@ -1,210 +1,73 @@
+"use client"
 
-
-
-// Demo listings data
-const demoListings = [
-  {
-    id: 1,
-    title: "Lost iPhone 15 Pro Max",
-    category: "Bicycle",
-    subcategory: "iPhone",
-    location: "Dhaka",
-    date: "2024-01-15T10:30:00Z",
-    status: "lost",
-    image: "https://sm.pcmag.com/pcmag_au/review/a/apple-ipho/apple-iphone-16_mm22.jpg",
-    postedBy: "John Doe",
-    views: 45,
-    reward: 5000,
-  },
-  {
-    id: 2,
-    title: "Found Black Leather Wallet",
-    category: "Documents",
-    subcategory: "Wallets",
-    location: "Chattogram",
-    date: "2024-01-14T15:20:00Z",
-    status: "found",
-    image: "https://sm.pcmag.com/pcmag_au/review/a/apple-ipho/apple-iphone-16_mm22.jpg",
-    postedBy: "Jane Smith",
-    views: 32,
-  },
-  {
-    id: 3,
-    title: "Missing Golden Retriever Dog",
-    category: "Pets",
-    subcategory: "Dogs",
-    location: "Sylhet",
-    date: "2024-01-13T08:45:00Z",
-    status: "lost",
-    image: "https://sm.pcmag.com/pcmag_au/review/a/apple-ipho/apple-iphone-16_mm22.jpg",
-    postedBy: "Mike Johnson",
-    views: 78,
-    reward: 10000,
-  },
-  {
-    id: 4,
-    title: "Found Samsung Galaxy Watch",
-    category: "Watches",
-    subcategory: "Smart Watches",
-    location: "Khulna",
-    date: "2024-01-12T12:15:00Z",
-    status: "found",
-    image: "https://sm.pcmag.com/pcmag_au/review/a/apple-ipho/apple-iphone-16_mm22.jpg",
-    postedBy: "Sarah Wilson",
-    views: 23,
-  },
-  {
-    id: 5,
-    title: "Lost Blue Backpack with Laptop",
-    category: "Bags",
-    subcategory: "Backpacks",
-    location: "Rajshahi",
-    date: "2024-01-11T16:30:00Z",
-    status: "lost",
-    image: "https://sm.pcmag.com/pcmag_au/review/a/apple-ipho/apple-iphone-16_mm22.jpg",
-    postedBy: "David Brown",
-    views: 56,
-    reward: 3000,
-  },
-  {
-    id: 6,
-    title: "Found Car Keys with BMW Keychain",
-    category: "Keys",
-    subcategory: "Car Keys",
-    location: "Rangpur",
-    date: "2024-01-10T09:20:00Z",
-    status: "found",
-    image: "https://sm.pcmag.com/pcmag_au/review/a/apple-ipho/apple-iphone-16_mm22.jpg",
-    postedBy: "Lisa Davis",
-    views: 19,
-  },
-  {
-    id: 7,
-    title: "Lost Diamond Ring",
-    category: "Jewelry",
-    subcategory: "Rings",
-    location: "Barisal",
-    date: "2024-01-09T14:10:00Z",
-    status: "lost",
-    image: "https://sm.pcmag.com/pcmag_au/review/a/apple-ipho/apple-iphone-16_mm22.jpg",
-    postedBy: "Emily Chen",
-    views: 67,
-    reward: 15000,
-  },
-  {
-    id: 8,
-    title: "Found MacBook Pro 16 inch",
-    category: "Phones & Tablets",
-    subcategory: "iPad",
-    location: "Mymensingh",
-    date: "2024-01-08T11:45:00Z",
-    status: "found",
-    image: "https://sm.pcmag.com/pcmag_au/review/a/apple-ipho/apple-iphone-16_mm22.jpg",
-    postedBy: "Alex Rodriguez",
-    views: 89,
-  },
-  {
-    id: 9,
-    title: "Found MacBook Pro 16 inch",
-    category: "Phones & Tablets",
-    subcategory: "iPad",
-    location: "Mymensingh",
-    date: "2024-01-08T11:45:00Z",
-    status: "found",
-    image: "https://sm.pcmag.com/pcmag_au/review/a/apple-ipho/apple-iphone-16_mm22.jpg",
-    postedBy: "Alex Rodriguez",
-    views: 89,
-  },
-  {
-    id: 10,
-    title: "Found MacBook Pro 16 inch",
-    category: "Phones & Tablets",
-    subcategory: "iPad",
-    location: "Mymensingh",
-    date: "2024-01-08T11:45:00Z",
-    status: "found",
-    image: "https://sm.pcmag.com/pcmag_au/review/a/apple-ipho/apple-iphone-16_mm22.jpg",
-    postedBy: "Alex Rodriguez",
-    views: 89,
-  },
-  /* 
-  ...Array.from({ length: 20 }, (_, i) => ({
-    id: i + 9,
-    title: `Demo Item ${i + 9}`,
-    category: "Other",
-    subcategory: "Miscellaneous",
-    location: "Dhaka",
-    date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString(),
-    status: i % 2 === 0 ? "lost" : "found",
-    image: "/placeholder.svg?height=200&width=300",
-    postedBy: `User ${i + 9}`,
-    views: Math.floor(Math.random() * 100),
-    reward: i % 3 === 0 ? Math.floor(Math.random() * 10000) + 1000 : null,
-  })),
-  */
-]
-
-import { useSearchParams } from "react-router-dom";
-import { useState, useEffect } from "react";
-import FilterSidebar from "../components/dashboard/FilterSidebar";
-import ListingsGrid from "../components/dashboard/ListingsGrid";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import { useSelector, useDispatch } from "react-redux";
-import { fetchPost } from "../features/posts/fetchPost"; // Assuming this is the correct path for your fetchPost action
+import { useSearchParams } from "react-router-dom"
+import { useState, useEffect } from "react"
+import FilterSidebar from "../components/dashboard/FilterSidebar"
+import ListingsGrid from "../components/dashboard/ListingsGrid"
+import Navbar from "../components/Navbar"
+import Footer from "../components/Footer"
+import { useSelector, useDispatch } from "react-redux"
+import { fetchPost } from "../features/posts/fetchPost"
 
 const DashboardPage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams()
 
-  const categoryFromURL = searchParams.get("category");
-  const locationFromURL = searchParams.get("location");
-  const dateFromURL = searchParams.get("date");
-  const sortByFromURL = searchParams.get("sortBy") || "newest";
-  const tabFromURL = searchParams.get("tab") || "all";
-  const { postData = [] } = useSelector((state) => state.fetchPost);
-  const [filteredListings, setFilteredListings] = useState(postData || []);
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
-  const dispatch = useDispatch();
-  
+  const categoryFromURL = searchParams.get("category")
+  const subcategoryFromURL = searchParams.get("subcategory")
+  const locationFromURL = searchParams.get("location")
+  const dateFromURL = searchParams.get("date")
+  const sortByFromURL = searchParams.get("sortBy") || "newest"
+  const tabFromURL = searchParams.get("tab") || "all"
+
+  const { postData = [] } = useSelector((state) => state.fetchPost)
+  const [filteredListings, setFilteredListings] = useState(postData || [])
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
+  const dispatch = useDispatch()
+
   useEffect(() => {
     if (postData == null || postData.length === 0) {
-      console.log("Fetching posts for dashboard...");
-      dispatch(fetchPost({ reqFrom: 'dashboard', limit: 200 }));
+      console.log("Fetching posts for dashboard...")
+      dispatch(fetchPost({ reqFrom: "dashboard", limit: 200 }))
     }
-    setFilteredListings(postData || []);
-  }, [postData, dispatch]);
+    setFilteredListings(postData || [])
+  }, [postData, dispatch])
 
   const [filters, setFilters] = useState({
     category: null,
     location: null,
     date: null,
-  });
-  const [activeTab, setActiveTab] = useState("all");
-  const [sortBy, setSortBy] = useState("newest");
+  })
+  const [activeTab, setActiveTab] = useState("all")
+  const [sortBy, setSortBy] = useState("newest")
 
   // Load initial state from URL
   useEffect(() => {
     setFilters({
-      category: categoryFromURL ? { category: categoryFromURL } : null,
+      category:
+        categoryFromURL || subcategoryFromURL
+          ? {
+              category: categoryFromURL,
+              subcategory: subcategoryFromURL,
+            }
+          : null,
       location: locationFromURL || null,
       date: dateFromURL || null,
-    });
-    setSortBy(sortByFromURL);
-    setActiveTab(tabFromURL);
-  }, [categoryFromURL, locationFromURL, dateFromURL, sortByFromURL, tabFromURL]);
+    })
+    setSortBy(sortByFromURL)
+    setActiveTab(tabFromURL)
+  }, [categoryFromURL, subcategoryFromURL, locationFromURL, dateFromURL, sortByFromURL, tabFromURL])
 
   // Sync filters, sort, and tab to URL
   useEffect(() => {
-    const newParams = {};
+    const newParams = {}
 
-    if (filters.category?.category) newParams.category = filters.category.category;
-    if (filters.location) newParams.location = filters.location;
-    if (filters.date) newParams.date = filters.date;
-    //if (sortBy) newParams.sortBy = sortBy;
-    //if (activeTab) newParams.tab = activeTab;
+    if (filters.category?.category) newParams.category = filters.category.category
+    if (filters.category?.subcategory) newParams.subcategory = filters.category.subcategory
+    if (filters.location) newParams.location = filters.location
+    if (filters.date) newParams.date = filters.date
 
-    setSearchParams(newParams);
-  }, [filters, sortBy, activeTab, setSearchParams]);
+    setSearchParams(newParams)
+  }, [filters, sortBy, activeTab, setSearchParams])
 
   const handleFilterChange = (filterType, value) => {
     if (filterType === "clear") {
@@ -212,43 +75,40 @@ const DashboardPage = () => {
         category: null,
         location: null,
         date: null,
-      });
+      })
     } else {
       setFilters((prev) => ({
         ...prev,
         [filterType]: value,
-      }));
+      }))
     }
-  };
+  }
 
   const handleFilterRemove = (filterType) => {
     setFilters((prev) => ({
       ...prev,
       [filterType]: null,
-    }));
-  };
+    }))
+  }
 
   const handleSortChange = (newSort) => {
-    setSortBy(newSort);
-  };
+    setSortBy(newSort)
+  }
 
   const handleTabChange = (tab) => {
-    setActiveTab(tab);
-  };
+    setActiveTab(tab)
+  }
 
   const toggleMobileFilter = () => {
-    setIsMobileFilterOpen(!isMobileFilterOpen);
-  };
+    setIsMobileFilterOpen(!isMobileFilterOpen)
+  }
 
   const closeMobileFilter = () => {
-    setIsMobileFilterOpen(false);
-  };
-
-
+    setIsMobileFilterOpen(false)
+  }
 
   useEffect(() => {
-    let filtered = [...(postData || [])];
-
+    let filtered = [...(postData || [])]
 
     // Apply tab filter
     if (activeTab !== "all") {
@@ -258,8 +118,10 @@ const DashboardPage = () => {
     // Apply category filter
     if (filters.category) {
       if (filters.category.subcategory) {
+        // Filter by subcategory (which implicitly includes the category)
         filtered = filtered.filter((listing) => listing.subcategory === filters.category.subcategory)
-      } else {
+      } else if (filters.category.category) {
+        // Filter by category only
         filtered = filtered.filter((listing) => listing.category === filters.category.category)
       }
     }
@@ -315,18 +177,17 @@ const DashboardPage = () => {
     }
 
     setFilteredListings(filtered)
-  }, [filters, sortBy, activeTab, dispatch, postData]);
+  }, [filters, sortBy, activeTab, dispatch, postData])
 
   // Calculate counts for tabs
   const getCounts = () => {
-    let baseListings = [...(postData || [])];
-
+    let baseListings = [...(postData || [])]
 
     // Apply current filters (except tab filter) to get accurate counts
     if (filters.category) {
       if (filters.category.subcategory) {
         baseListings = baseListings.filter((listing) => listing.subcategory === filters.category.subcategory)
-      } else {
+      } else if (filters.category.category) {
         baseListings = baseListings.filter((listing) => listing.category === filters.category.category)
       }
     }
@@ -400,4 +261,4 @@ const DashboardPage = () => {
   )
 }
 
-export default DashboardPage;
+export default DashboardPage

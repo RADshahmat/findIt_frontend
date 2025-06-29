@@ -1,17 +1,16 @@
+"use client"
 
-import React, { useEffect, useState, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchCatagories } from '../../features/catagory/catagory';
-import { getLucideIcon } from '../../helpers/lucideIcons';
-import { fetchLocations } from "../../features/location/location";
+import { useEffect, useState, useMemo } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { fetchCatagories } from "../../features/catagory/catagory"
+import { getLucideIcon } from "../../helpers/lucideIcons"
+import { fetchLocations } from "../../features/location/location"
 
+import { Filter, X, Smartphone, MapPin, Calendar, ChevronDown, ChevronRight } from "lucide-react"
 
-import { Filter, X, Smartphone, MapPin, Calendar, ChevronDown, ChevronRight } from "lucide-react";
+import districtsData from "../../assets/bd-districts.json"
 
-import districtsData from '../../assets/bd-districts.json';
-
-const locations = districtsData.districts.map((d) => d.name);
-
+const locations = districtsData.districts.map((d) => d.name)
 
 const dateRanges = [
   { label: "Last 24 hours", value: "1day" },
@@ -22,21 +21,28 @@ const dateRanges = [
   { label: "Last year", value: "1year" },
 ]
 
-
-const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, currentTab }) => {
-  const dispatch = useDispatch();
-  const { catagory, status } = useSelector(state => state.catagory);
-  const { location, status1 } = useSelector((state) => state.location);
+const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose }) => {
+  const dispatch = useDispatch()
+  const { catagory, status } = useSelector((state) => state.catagory)
+  const { location, status1 } = useSelector((state) => state.location)
 
   useEffect(() => {
-    if (status1 === 'idle') {
-      dispatch(fetchLocations());
+    if (status1 === "idle") {
+      dispatch(fetchLocations())
     }
-    if (status === 'idle') {
-      dispatch(fetchCatagories());
+    if (status === "idle") {
+      dispatch(fetchCatagories())
     }
-  }, [status, dispatch, status1]);
+  }, [status, dispatch, status1])
+
   const [expandedCategories, setExpandedCategories] = useState(new Set())
+
+  // Auto-expand category if subcategory is selected
+  useEffect(() => {
+    if (filters.category?.subcategory && filters.category?.category) {
+      setExpandedCategories((prev) => new Set([...prev, filters.category.category]))
+    }
+  }, [filters.category])
 
   const toggleCategory = (categoryLabel) => {
     const newExpanded = new Set(expandedCategories)
@@ -49,7 +55,13 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
   }
 
   const handleCategoryChange = (category, subcategory = null) => {
-    onFilterChange("category", { category, subcategory })
+    if (subcategory) {
+      // When selecting a subcategory, keep both category and subcategory
+      onFilterChange("category", { category, subcategory })
+    } else {
+      // When selecting only a category, clear subcategory
+      onFilterChange("category", { category, subcategory: null })
+    }
   }
 
   const handleLocationChange = (location) => {
@@ -65,104 +77,19 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
   }
 
   const locationCountMap = useMemo(() => {
-        const map = {};
-        location.forEach(loc => {
-          map[loc.location.toLowerCase()] = loc.count;
-        });
-        return map;
-      }, [location]);
+    const map = {}
+    location.forEach((loc) => {
+      map[loc.location.toLowerCase()] = loc.count
+    })
+    return map
+  }, [location])
 
-  // Calculate dynamic counts based on current listings and tab
-  const getFilteredListings = (additionalFilter = {}) => {
-    let filtered = [...(allListings || [])];
+  const [showMoreCategories, setShowMoreCategories] = useState(false)
+  const [showMoreLocations, setShowMoreLocations] = useState(false)
+  const maxVisibleItems = 4
 
-    // Apply tab filter
-    if (currentTab !== "all") {
-      filtered = filtered.filter((listing) => listing.status === currentTab);
-    }
-
-    // Apply current filters except the one being overridden by additionalFilter
-    if (filters.category && !additionalFilter.category) {
-      if (filters.category.subcategory) {
-        filtered = filtered.filter(
-          (listing) => listing.subcategory === filters.category.subcategory
-        );
-      } else {
-        filtered = filtered.filter(
-          (listing) => listing.category === filters.category.category
-        );
-      }
-    }
-
-    if (filters.location && !additionalFilter.location) {
-      filtered = filtered.filter((listing) => listing.location === filters.location);
-    }
-
-    if (filters.date && !additionalFilter.date) {
-      const now = new Date();
-      const filterDate = new Date();
-      switch (filters.date) {
-        case "1day":
-          filterDate.setDate(now.getDate() - 1);
-          break;
-        case "3days":
-          filterDate.setDate(now.getDate() - 3);
-          break;
-        case "1week":
-          filterDate.setDate(now.getDate() - 7);
-          break;
-        case "1month":
-          filterDate.setMonth(now.getMonth() - 1);
-          break;
-        case "6months":
-          filterDate.setMonth(now.getMonth() - 6);
-          break;
-        case "1year":
-          filterDate.setFullYear(now.getFullYear() - 1);
-          break;
-      }
-
-      filtered = filtered.filter(
-        (listing) => new Date(listing.date) >= filterDate
-      );
-    }
-
-    
-    // Apply the additional filter for counts
-    if (additionalFilter.category) {
-      filtered = filtered.filter(
-        (listing) => listing.category === additionalFilter.category
-      );
-    }
-
-    if (additionalFilter.subcategory) {
-      filtered = filtered.filter(
-        (listing) => listing.subcategory === additionalFilter.subcategory
-      );
-    }
-
-    if (additionalFilter.location) {
-      filtered = filtered.filter((listing) => listing.location === additionalFilter.location);
-    }
-
-    return filtered;
-  };
-
-
-  const getCategoryCount = (category, subcategory = null) => {
-    return getFilteredListings({ category, subcategory }).length
-  }
-
-  const getLocationCount = (location) => {
-    return getFilteredListings({ location }).length
-  }
-  const [showMoreCategories, setShowMoreCategories] = useState(false);
-  const [showMoreLocations, setShowMoreLocations] = useState(false);
-  const maxVisibleItems = 4;
   const sidebarContent = (
-
     <div className="flex-1 overflow-y-auto max-h-full">
-
       {/* Header */}
       <div className="bg-gradient-to-r from-cyan-500 to-teal-500 p-3 text-white">
         <div className="flex items-center justify-between">
@@ -195,19 +122,17 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
           </div>
 
           <div className="">
-
             {(showMoreCategories ? catagory : catagory.slice(0, maxVisibleItems)).map((category) => {
-              const Icon = getLucideIcon(category.icon);
+              const Icon = getLucideIcon(category.icon)
               const isExpanded = expandedCategories.has(category.lable)
-              const isSelected = filters.category?.category === category.lable
-              const categoryCount = getCategoryCount(category.lable)
-
+              const isSelected = filters.category?.category === category.lable && !filters.category?.subcategory
 
               return (
                 <div key={category.lable}>
                   <div
-                    className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${isSelected ? "bg-cyan-50 border border-cyan-200" : "hover:bg-gray-50"
-                      }`}
+                    className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${
+                      isSelected ? "bg-cyan-50 border border-cyan-200" : "hover:bg-gray-50"
+                    }`}
                     onClick={() => handleCategoryChange(category.lable)}
                   >
                     <div className="flex items-center flex-1">
@@ -240,15 +165,15 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
                   {isExpanded && category.subcategories && (
                     <div className="ml-8 mt-1 space-y-1">
                       {category.subcategories.map((subcategory) => {
-                        const isSubSelected = filters.category?.subcategory === subcategory
-                        const subCount = getCategoryCount(category.lable, subcategory.name)
+                        const isSubSelected = filters.category?.subcategory === subcategory.name
 
                         return (
                           <div
                             key={subcategory.id}
-                            className={`flex items-center justify-between p-2 rounded cursor-pointer text-sm transition-colors ${isSubSelected ? "bg-cyan-100 text-cyan-700" : "text-gray-600 hover:bg-gray-50"
-                              }`}
-                            onClick={() => handleCategoryChange(category.label, subcategory.name)}
+                            className={`flex items-center justify-between p-2 rounded cursor-pointer text-sm transition-colors ${
+                              isSubSelected ? "bg-cyan-100 text-cyan-700" : "text-gray-600 hover:bg-gray-50"
+                            }`}
+                            onClick={() => handleCategoryChange(category.lable, subcategory.name)}
                           >
                             <span>{subcategory.name}</span>
                             <span className="text-xs text-gray-500">({subcategory.postCount})</span>
@@ -273,7 +198,6 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
           </div>
         </div>
 
-
         {/* Locations */}
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center mb-3">
@@ -285,14 +209,15 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
 
           <div className="">
             {(showMoreLocations ? locations : locations.slice(0, maxVisibleItems)).map((location) => {
-              const isSelected = filters.location === location;
-              const locationCount = locationCountMap[location.toLowerCase()] || 0;
+              const isSelected = filters.location === location
+              const locationCount = locationCountMap[location.toLowerCase()] || 0
 
               return (
                 <div
                   key={location}
-                  className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${isSelected ? "bg-green-50 border border-green-200" : "hover:bg-gray-50"
-                    }`}
+                  className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${
+                    isSelected ? "bg-green-50 border border-green-200" : "hover:bg-gray-50"
+                  }`}
                   onClick={() => handleLocationChange(location)}
                 >
                   <span className={`text-sm ${isSelected ? "text-green-700 font-medium" : "text-gray-700"}`}>
@@ -300,7 +225,7 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
                   </span>
                   <span className="text-xs text-gray-500">({locationCount})</span>
                 </div>
-              );
+              )
             })}
             {locations.length > maxVisibleItems && (
               <div className="mt-1 text-center">
@@ -331,8 +256,9 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
               return (
                 <div
                   key={range.value}
-                  className={`p-2 rounded-lg cursor-pointer transition-all ${isSelected ? "bg-purple-50 border border-purple-200" : "hover:bg-gray-50"
-                    }`}
+                  className={`p-2 rounded-lg cursor-pointer transition-all ${
+                    isSelected ? "bg-purple-50 border border-purple-200" : "hover:bg-gray-50"
+                  }`}
                   onClick={() => handleDateChange(range.value)}
                 >
                   <span className={`text-sm ${isSelected ? "text-purple-700 font-medium" : "text-gray-700"}`}>
@@ -350,8 +276,7 @@ const FilterSidebar = ({ filters, onFilterChange, isOpen, onClose, allListings, 
   return (
     <>
       {/* Desktop Sidebar */}
-      <div
-        className="hidden lg:block w-80 bg-white shadow-lg rounded-lg overflow-hidden sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto">
+      <div className="hidden lg:block w-80 bg-white shadow-lg rounded-lg overflow-hidden sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto">
         {sidebarContent}
       </div>
 

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { Upload, X, MapPin, CheckCircle, ArrowLeft } from "lucide-react"
 import { fetchCatagories } from "../../features/catagory/catagory"
 import { useDispatch, useSelector } from "react-redux";
-import { createPost, resetPostState } from "../../features/posts/post";
+import { createPost } from "../../features/posts/post";
 import districtsData from "../../assets/bd-districts.json";
 import { ChevronDown } from "lucide-react";
 

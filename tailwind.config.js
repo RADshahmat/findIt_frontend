@@ -2,6 +2,30 @@
 export default {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}", "*.{js,ts,jsx,tsx,mdx}"],
+  safelist: [
+    // From and To gradients (limited to typical shades)
+    ...[
+      "blue", "cyan", "sky", "indigo", "purple", "pink", "rose", "red",
+      "orange", "amber", "yellow", "lime", "green", "emerald", "teal",
+      "gray", "slate", "zinc", "neutral", "stone"
+    ].flatMap(color =>
+      [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950].flatMap(shade => [
+        `from-${color}-${shade}`,
+        `to-${color}-${shade}`
+      ])
+    ),
+
+    // Background shades (for soft card/category backgrounds)
+  ...[
+    "blue", "cyan", "sky", "indigo", "purple", "pink", "rose", "red",
+    "orange", "amber", "yellow", "lime", "green", "emerald", "teal",
+    "gray", "slate", "zinc", "neutral", "stone"
+  ].flatMap(color =>
+    [50, 100, 200, 300, 400, 500, 600, 700, 800, 900,950].map(shade =>
+      `bg-${color}-${shade}`
+    )
+  )
+  ],
   theme: {
     extend: {
       colors: {

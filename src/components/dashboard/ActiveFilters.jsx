@@ -7,11 +7,21 @@ const ActiveFilters = ({ filters, onFilterRemove }) => {
     const items = []
 
     if (filters.category) {
-      items.push({
-        type: "category",
-        label: filters.category.subcategory || filters.category.category,
-        value: filters.category,
-      })
+      if (filters.category.subcategory) {
+        // Show both category and subcategory when subcategory is selected
+        items.push({
+          type: "category",
+          label: `${filters.category.category} > ${filters.category.subcategory}`,
+          value: filters.category,
+        })
+      } else if (filters.category.category) {
+        // Show only category when no subcategory is selected
+        items.push({
+          type: "category",
+          label: filters.category.category,
+          value: filters.category,
+        })
+      }
     }
 
     if (filters.location) {
