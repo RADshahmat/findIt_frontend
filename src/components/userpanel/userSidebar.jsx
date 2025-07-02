@@ -245,7 +245,7 @@ const UserSidebar = () => {
         {/* Main Navigation */}
         <div className="mb-6">
           {sidebarItems.main.map((item) => (
-            <button
+            <div
               key={item.id}
               onClick={() => handleSectionClick(item.id)}
               className={`w-full flex items-center px-4 py-2 rounded-lg text-left transition-all mb-2 text-sm ${
@@ -258,24 +258,24 @@ const UserSidebar = () => {
             >
               <item.icon className="h-4 w-4 mr-3" />
               <span className="font-medium">{item.label}</span>
-            </button>
+            </div>
           ))}
         </div>
 
 
         {/* My Listings Section */}
         <div className="mb-6">
-          <button
+          <div
             onClick={() => toggleSection("listings")}
             className="w-full flex items-center justify-between px-4 py-2 text-gray-800 font-semibold text-xs uppercase tracking-wide hover:bg-gray-50 rounded-lg transition-colors"
           >
             <span>My Listings</span>
             {expandedSections.listings ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          </button>
+          </div>
           {expandedSections.listings && (
             <div className="mt-2 space-y-1">
               {sidebarItems.listings.map((item) => (
-                <button
+                <div
                   key={item.id}
                   onClick={() => handleSectionClick(item.id)}
                   className={`w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-all text-sm ${
@@ -291,7 +291,7 @@ const UserSidebar = () => {
                   {item.count && (
                     <span className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full">{item.count}</span>
                   )}
-                </button>
+                </div>
               ))}
             </div>
           )}
@@ -299,17 +299,17 @@ const UserSidebar = () => {
 
         {/* My Account Section */}
         <div>
-          <button
+          <div
             onClick={() => toggleSection("account")}
             className="w-full flex items-center justify-between px-4 py-2 text-gray-800 font-semibold text-xs uppercase tracking-wide hover:bg-gray-50 rounded-lg transition-colors"
           >
             <span>My Account</span>
             {expandedSections.account ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          </button>
+          </div>
           {expandedSections.account && (
             <div className="mt-2 space-y-1">
               {sidebarItems.account.map((item) => (
-                <button
+                <div
                   key={item.id}
                   onClick={() => handleSectionClick(item.id)}
                   className={`w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-all text-sm ${
@@ -333,7 +333,7 @@ const UserSidebar = () => {
                       {item.count}
                     </span>
                   )}
-                </button>
+                </div>
               ))}
             </div>
           )}
@@ -348,7 +348,7 @@ const UserSidebar = () => {
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-gray-900 border-t border-gray-700 md:hidden">
         <div className="flex items-center justify-around py-2">
           {bottomNavItems.map((item) => (
-            <button
+            <div
               key={item.id}
               onClick={() => handleBottomTabClick(item.id)}
               className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
@@ -368,7 +368,7 @@ const UserSidebar = () => {
                 )}
               </div>
               <span className="text-xs mt-1 font-medium">{item.label}</span>
-            </button>
+            </div>
           ))}
         </div>
       </div>
@@ -382,13 +382,13 @@ const UserSidebar = () => {
               <h3 className="text-lg font-semibold text-gray-300">
                 {activeBottomTab === "listings" ? "My Listings" : "My Account"}
               </h3>
-              <button onClick={closeSubMenu} className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
+              <div onClick={closeSubMenu} className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
                 <X className="h-5 w-5 text-gray-400" />
-              </button>
+              </div>
             </div>
             <div className="p-2">
               {(activeBottomTab === "listings" ? sidebarItems.listings : sidebarItems.account).map((item) => (
-                <button
+                <div
                   key={item.id}
                   onClick={() => handleSectionClick(item.id)}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-left transition-all text-sm mb-1 ${
@@ -412,7 +412,7 @@ const UserSidebar = () => {
                       {item.count}
                     </span>
                   )}
-                </button>
+                </div>
               ))}
             </div>
           </div>

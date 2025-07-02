@@ -31,7 +31,8 @@ safelist: [
   "bg-cyan-50",
   "bg-orange-50",
   "bg-red-50",
-  "bg-amber-50"
+  "bg-amber-50",
+  'bg-cyan-500',
 ],
   theme: {
     extend: {

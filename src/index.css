@@ -38,6 +38,10 @@ body {
   background-clip: text;
   color: transparent;
 }
+.button {
+   background-color: transparent,
+
+}
 
 @keyframes float {
   0% {
