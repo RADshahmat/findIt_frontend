@@ -245,7 +245,7 @@ const UserSidebar = () => {
         {/* Main Navigation */}
         <div className="mb-6">
           {sidebarItems.main.map((item) => (
-            <div
+            <a
               key={item.id}
               onClick={() => handleSectionClick(item.id)}
               className={`w-full flex items-center px-4 py-2 rounded-lg text-left transition-all mb-2 text-sm ${
@@ -258,24 +258,24 @@ const UserSidebar = () => {
             >
               <item.icon className="h-4 w-4 mr-3" />
               <span className="font-medium">{item.label}</span>
-            </div>
+            </a>
           ))}
         </div>
 
 
         {/* My Listings Section */}
         <div className="mb-6">
-          <div
+          <a
             onClick={() => toggleSection("listings")}
             className="w-full flex items-center justify-between px-4 py-2 text-gray-800 font-semibold text-xs uppercase tracking-wide hover:bg-gray-50 rounded-lg transition-colors"
           >
             <span>My Listings</span>
             {expandedSections.listings ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          </div>
+          </a>
           {expandedSections.listings && (
             <div className="mt-2 space-y-1">
               {sidebarItems.listings.map((item) => (
-                <div
+                <a
                   key={item.id}
                   onClick={() => handleSectionClick(item.id)}
                   className={`w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-all text-sm ${
@@ -291,7 +291,7 @@ const UserSidebar = () => {
                   {item.count && (
                     <span className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full">{item.count}</span>
                   )}
-                </div>
+                </a>
               ))}
             </div>
           )}
@@ -299,17 +299,17 @@ const UserSidebar = () => {
 
         {/* My Account Section */}
         <div>
-          <div
+          <a
             onClick={() => toggleSection("account")}
             className="w-full flex items-center justify-between px-4 py-2 text-gray-800 font-semibold text-xs uppercase tracking-wide hover:bg-gray-50 rounded-lg transition-colors"
           >
             <span>My Account</span>
             {expandedSections.account ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          </div>
+          </a>
           {expandedSections.account && (
             <div className="mt-2 space-y-1">
               {sidebarItems.account.map((item) => (
-                <div
+                <a
                   key={item.id}
                   onClick={() => handleSectionClick(item.id)}
                   className={`w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-all text-sm ${
@@ -333,7 +333,7 @@ const UserSidebar = () => {
                       {item.count}
                     </span>
                   )}
-                </div>
+                </a>
               ))}
             </div>
           )}

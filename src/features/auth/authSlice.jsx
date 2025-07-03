@@ -39,6 +39,20 @@ export const loadUserFromToken = createAsyncThunk("auth/loadUserFromToken", asyn
     }
 })
 
+// UPDATE USER THUNK
+export const updateUser = createAsyncThunk("auth/updateUser", async (formData, thunkAPI) => {
+  try {
+    const res = await axiosInstance.put("/user", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    return res.data.user
+  } catch (err) {
+    return thunkAPI.rejectWithValue(err.response?.data || { error: "Failed to update user" })
+  }
+})
+
 
 const authSlice = createSlice({
     name: "auth",
@@ -126,6 +140,20 @@ const authSlice = createSlice({
                 state.user = null
                 state.loaded = true
             })
+        builder
+            .addCase(updateUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.user = action.payload;
+            })
+            .addCase(updateUser.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            });
+
     },
 })
 

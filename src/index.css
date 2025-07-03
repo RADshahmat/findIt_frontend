@@ -38,9 +38,11 @@ body {
   background-clip: text;
   color: transparent;
 }
-.button {
-   background-color: transparent,
-
+button {
+  background-color: transparent,
+}
+a{
+  cursor: pointer;
 }
 
 @keyframes float {
