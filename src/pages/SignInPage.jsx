@@ -67,7 +67,8 @@ const SignInPage = () => {
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 inset-y-0"
+          style={{ backgroundColor: "transparent" }}
+          className="absolute right-3 inset-y-0 "
         >
           {showPassword ? (
             <EyeOff className="h-5 w-5 text-gray-400" />
@@ -81,7 +82,7 @@ const SignInPage = () => {
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full bg-cyan-500 text-white py-3 rounded-xl flex justify-center items-center gap-2"
+        className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white py-3 rounded-xl flex justify-center items-center gap-2"
       >
         {isLoading ? "Signing In..." : "Sign In"}
         <ArrowRight className="inline h-4 w-4" />

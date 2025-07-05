@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchLocations } from "../../features/location/location";
 import districtsData from "../../assets/bd-districts.json";

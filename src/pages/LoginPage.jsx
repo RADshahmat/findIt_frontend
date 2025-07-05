@@ -27,7 +27,7 @@ const LoginPage = () => {
       {/* Shared Layout / Branding */}
       <Navbar />
       {!loaded?<p>Loading</p>:
-      <div className="w-full max-w-md space-y-4">
+      <div className="w-full max-w-md space-y-4 mt-20">
         <div className="text-center">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-teal-600 bg-clip-text text-transparent">
             FindIt
@@ -41,26 +41,26 @@ const LoginPage = () => {
         {mode === "signin" ? <SignInPage /> : <SignUpPage />}
 
         {/* Toggle Prompt */}
-        <div className="text-center mt-4">
+        <div className="text-center ">
           {mode === "signin" ? (
             <p>
               Don’t have an account?{" "}
-              <button
+              <span
                 onClick={toggleMode}
                 className="text-cyan-600 hover:text-cyan-700 font-medium"
               >
                 Sign up
-              </button>
+              </span>
             </p>
           ) : (
             <p>
               Already have an account?{" "}
-              <button
+              <span
                 onClick={toggleMode}
                 className="text-cyan-600 hover:text-cyan-700 font-medium"
               >
                 Sign in
-              </button>
+              </span>
             </p>
           )}
         </div>

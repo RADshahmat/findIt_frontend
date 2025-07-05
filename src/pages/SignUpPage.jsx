@@ -100,7 +100,7 @@ const SignUpPage = () => {
 
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-100 px-4">
+        <div className=" flex items-center justify-center bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-100 px-4">
             <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md space-y-6">
                 <h2 className="text-3xl font-bold text-center text-cyan-600">Create an Account</h2>
 

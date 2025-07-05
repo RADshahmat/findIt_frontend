@@ -5,6 +5,7 @@ import postReducer from '../features/posts/post.jsx';
 import locationReducer from '../features/location/location.jsx';
 import fetchPostReducer  from '../features/posts/fetchPost.jsx';
 import fetchPostHomeReducer from '../features/posts/fetchPostHome.jsx';
+import reportsReducer from "../features/reports/reportsSlice"
 
 export const store = configureStore({
   reducer: {
@@ -14,5 +15,6 @@ export const store = configureStore({
     location: locationReducer,
     fetchPost: fetchPostReducer,
     fetchPostHome: fetchPostHomeReducer,
+    reports: reportsReducer,
   },
 });

@@ -1,26 +1,20 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import {
   Home,
   Plus,
   List,
-  Clock,
+  ClipboardList,
   Archive,
-  Heart,
   MessageCircle,
   Search,
   User,
-  Settings,
   LogOut,
   Trash2,
   Bell,
   ChevronDown,
   ChevronRight,
-  X,
-  FileText,
-  MapPin,
+  X
 } from "lucide-react"
 
 const UserSidebar = () => {
@@ -45,13 +39,11 @@ const UserSidebar = () => {
     if (path.includes("/user/report-lost")) return "report-lost"
     if (path.includes("/user/report-found")) return "report-found"
     if (path.includes("/user/my-listings")) return "my-listings"
-    if (path.includes("/user/pending-approval")) return "pending-approval"
+    if (path.includes("/user/my-reports")) return "my-reports"
     if (path.includes("/user/archived-listings")) return "archived-listings"
-    if (path.includes("/user/favorite-listings")) return "favorite-listings"
     if (path.includes("/user/messenger")) return "messenger"
     if (path.includes("/user/saved-searches")) return "saved-searches"
     if (path.includes("/user/my-account")) return "my-account"
-    if (path.includes("/user/settings")) return "settings"
     if (path.includes("/user/notifications")) return "notifications"
     return "dashboard" // default
   }
@@ -111,13 +103,11 @@ const UserSidebar = () => {
       "report-lost": "/user/report-lost",
       "report-found": "/user/report-found",
       "my-listings": "/user/my-listings",
-      "pending-approval": "/user/pending-approval",
+      "my-reports": "/user/my-reports",
       "archived-listings": "/user/archived-listings",
-      "favorite-listings": "/user/favorite-listings",
       messenger: "/user/messenger",
       "saved-searches": "/user/saved-searches",
       "my-account": "/user/my-account",
-      settings: "/user/settings",
       notifications: "/user/notifications",
     }
 
@@ -174,16 +164,12 @@ const UserSidebar = () => {
         highlight: true,
       },
     ],
-    reports: [
-      { id: "report-lost", label: "Report Lost Item", icon: FileText },
-      { id: "report-found", label: "Report Found Item", icon: MapPin },
-    ],
     listings: [
       { id: "my-listings", label: "My Listings", icon: List, count: 12 },
       {
-        id: "pending-approval",
-        label: "Pending Approval",
-        icon: Clock,
+        id: "my-reports",
+        label: "My Reports",
+        icon: ClipboardList,
         count: 3,
       },
       {
@@ -192,18 +178,12 @@ const UserSidebar = () => {
         icon: Archive,
         count: 8,
       },
-      {
-        id: "favorite-listings",
-        label: "Favorite Listings",
-        icon: Heart,
-        count: 15,
-      },
+
       { id: "messenger", label: "Messenger", icon: MessageCircle, count: 2 },
       { id: "saved-searches", label: "Saved Searches", icon: Search, count: 5 },
     ],
     account: [
       { id: "my-account", label: "My Account", icon: User },
-      { id: "settings", label: "Settings", icon: Settings },
       { id: "notifications", label: "Notifications", icon: Bell, count: 7 },
       { id: "logout", label: "Log Out", icon: LogOut },
       {
@@ -245,7 +225,7 @@ const UserSidebar = () => {
         {/* Main Navigation */}
         <div className="mb-6">
           {sidebarItems.main.map((item) => (
-            <button
+            <a
               key={item.id}
               onClick={() => handleSectionClick(item.id)}
               className={`w-full flex items-center px-4 py-2 rounded-lg text-left transition-all mb-2 text-sm ${
@@ -258,24 +238,24 @@ const UserSidebar = () => {
             >
               <item.icon className="h-4 w-4 mr-3" />
               <span className="font-medium">{item.label}</span>
-            </button>
+            </a>
           ))}
         </div>
 
 
         {/* My Listings Section */}
         <div className="mb-6">
-          <button
+          <a
             onClick={() => toggleSection("listings")}
             className="w-full flex items-center justify-between px-4 py-2 text-gray-800 font-semibold text-xs uppercase tracking-wide hover:bg-gray-50 rounded-lg transition-colors"
           >
             <span>My Listings</span>
             {expandedSections.listings ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          </button>
+          </a>
           {expandedSections.listings && (
             <div className="mt-2 space-y-1">
               {sidebarItems.listings.map((item) => (
-                <button
+                <a
                   key={item.id}
                   onClick={() => handleSectionClick(item.id)}
                   className={`w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-all text-sm ${
@@ -291,7 +271,7 @@ const UserSidebar = () => {
                   {item.count && (
                     <span className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full">{item.count}</span>
                   )}
-                </button>
+                </a>
               ))}
             </div>
           )}
@@ -299,17 +279,17 @@ const UserSidebar = () => {
 
         {/* My Account Section */}
         <div>
-          <button
+          <a
             onClick={() => toggleSection("account")}
             className="w-full flex items-center justify-between px-4 py-2 text-gray-800 font-semibold text-xs uppercase tracking-wide hover:bg-gray-50 rounded-lg transition-colors"
           >
             <span>My Account</span>
             {expandedSections.account ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          </button>
+          </a>
           {expandedSections.account && (
             <div className="mt-2 space-y-1">
               {sidebarItems.account.map((item) => (
-                <button
+                <a
                   key={item.id}
                   onClick={() => handleSectionClick(item.id)}
                   className={`w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-all text-sm ${
@@ -333,7 +313,7 @@ const UserSidebar = () => {
                       {item.count}
                     </span>
                   )}
-                </button>
+                </a>
               ))}
             </div>
           )}
@@ -348,7 +328,7 @@ const UserSidebar = () => {
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-gray-900 border-t border-gray-700 md:hidden">
         <div className="flex items-center justify-around py-2">
           {bottomNavItems.map((item) => (
-            <button
+            <div
               key={item.id}
               onClick={() => handleBottomTabClick(item.id)}
               className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
@@ -368,7 +348,7 @@ const UserSidebar = () => {
                 )}
               </div>
               <span className="text-xs mt-1 font-medium">{item.label}</span>
-            </button>
+            </div>
           ))}
         </div>
       </div>
@@ -382,13 +362,13 @@ const UserSidebar = () => {
               <h3 className="text-lg font-semibold text-gray-300">
                 {activeBottomTab === "listings" ? "My Listings" : "My Account"}
               </h3>
-              <button onClick={closeSubMenu} className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
+              <div onClick={closeSubMenu} className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
                 <X className="h-5 w-5 text-gray-400" />
-              </button>
+              </div>
             </div>
             <div className="p-2">
               {(activeBottomTab === "listings" ? sidebarItems.listings : sidebarItems.account).map((item) => (
-                <button
+                <div
                   key={item.id}
                   onClick={() => handleSectionClick(item.id)}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-left transition-all text-sm mb-1 ${
@@ -412,7 +392,7 @@ const UserSidebar = () => {
                       {item.count}
                     </span>
                   )}
-                </button>
+                </div>
               ))}
             </div>
           </div>
