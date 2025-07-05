@@ -1,26 +1,20 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import {
   Home,
   Plus,
   List,
-  Clock,
+  ClipboardList,
   Archive,
-  Heart,
   MessageCircle,
   Search,
   User,
-  Settings,
   LogOut,
   Trash2,
   Bell,
   ChevronDown,
   ChevronRight,
-  X,
-  FileText,
-  MapPin,
+  X
 } from "lucide-react"
 
 const UserSidebar = () => {
@@ -45,13 +39,11 @@ const UserSidebar = () => {
     if (path.includes("/user/report-lost")) return "report-lost"
     if (path.includes("/user/report-found")) return "report-found"
     if (path.includes("/user/my-listings")) return "my-listings"
-    if (path.includes("/user/pending-approval")) return "pending-approval"
+    if (path.includes("/user/my-reports")) return "my-reports"
     if (path.includes("/user/archived-listings")) return "archived-listings"
-    if (path.includes("/user/favorite-listings")) return "favorite-listings"
     if (path.includes("/user/messenger")) return "messenger"
     if (path.includes("/user/saved-searches")) return "saved-searches"
     if (path.includes("/user/my-account")) return "my-account"
-    if (path.includes("/user/settings")) return "settings"
     if (path.includes("/user/notifications")) return "notifications"
     return "dashboard" // default
   }
@@ -111,13 +103,11 @@ const UserSidebar = () => {
       "report-lost": "/user/report-lost",
       "report-found": "/user/report-found",
       "my-listings": "/user/my-listings",
-      "pending-approval": "/user/pending-approval",
+      "my-reports": "/user/my-reports",
       "archived-listings": "/user/archived-listings",
-      "favorite-listings": "/user/favorite-listings",
       messenger: "/user/messenger",
       "saved-searches": "/user/saved-searches",
       "my-account": "/user/my-account",
-      settings: "/user/settings",
       notifications: "/user/notifications",
     }
 
@@ -174,16 +164,12 @@ const UserSidebar = () => {
         highlight: true,
       },
     ],
-    reports: [
-      { id: "report-lost", label: "Report Lost Item", icon: FileText },
-      { id: "report-found", label: "Report Found Item", icon: MapPin },
-    ],
     listings: [
       { id: "my-listings", label: "My Listings", icon: List, count: 12 },
       {
-        id: "pending-approval",
-        label: "Pending Approval",
-        icon: Clock,
+        id: "my-reports",
+        label: "My Reports",
+        icon: ClipboardList,
         count: 3,
       },
       {
@@ -192,18 +178,12 @@ const UserSidebar = () => {
         icon: Archive,
         count: 8,
       },
-      {
-        id: "favorite-listings",
-        label: "Favorite Listings",
-        icon: Heart,
-        count: 15,
-      },
+
       { id: "messenger", label: "Messenger", icon: MessageCircle, count: 2 },
       { id: "saved-searches", label: "Saved Searches", icon: Search, count: 5 },
     ],
     account: [
       { id: "my-account", label: "My Account", icon: User },
-      { id: "settings", label: "Settings", icon: Settings },
       { id: "notifications", label: "Notifications", icon: Bell, count: 7 },
       { id: "logout", label: "Log Out", icon: LogOut },
       {

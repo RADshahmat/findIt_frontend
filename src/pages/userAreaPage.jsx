@@ -7,7 +7,7 @@ import UserSidebar from "../components/userpanel/userSidebar"
 import DashboardHome from "../components/userpanel/DashboardHome"
 import CreateReport from "../components/userpanel/CreateReport"
 import MyListings from "../components/userpanel/MyListings"
-import PendingApproval from "../components/userpanel/PendingApproval"
+import MyReports from "../components/userpanel/MyReports"
 import ArchivedListings from "../components/userpanel/ArchivedListings"
 import FavoriteListings from "../components/userpanel/FavoriteListings"
 import Messenger from "../components/userpanel/Messenger"
@@ -37,9 +37,8 @@ const UserPage = () => {
 
             {/* Listings routes */}
             <Route path="/my-listings" element={<MyListings />} />
-            <Route path="/pending-approval" element={<PendingApproval />} />
+            <Route path="/my-reports" element={<MyReports />} />
             <Route path="/archived-listings" element={<ArchivedListings />} />
-            <Route path="/favorite-listings" element={<FavoriteListings />} />
 
             {/* Communication routes */}
             <Route path="/messenger" element={<Messenger />} />
@@ -47,7 +46,6 @@ const UserPage = () => {
 
             {/* Account routes */}
             <Route path="/my-account" element={<MyAccount />} />
-            <Route path="/settings" element={<Settings />} />
             <Route path="/notifications" element={<Notifications />} />
 
             {/* Fallback route */}
