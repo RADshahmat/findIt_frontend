@@ -2,7 +2,8 @@
 export default {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}", "*.{js,ts,jsx,tsx,mdx}"],
-safelist: [
+  safelist: [
+  'dark:bg-gray-900', 'dark:text-white',
   // Gradient utility classes
   "from-blue-500", "to-cyan-400",
   "from-amber-500", "to-orange-400",
