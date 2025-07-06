@@ -33,7 +33,7 @@ const MyReports = () => {
 
   // Demo data - replace with actual Redux state when backend is ready
 
-  const {userReports = demoReports,loading} = useSelector((state) =>state.reports || { userReports: demoReports, loading: false, error: null });
+  const {userReports = userReports,loading} = useSelector((state) =>state.reports || { userReports: demoReports, loading: false, error: null });
 
   const [selectedReport, setSelectedReport] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -240,7 +240,7 @@ const MyReports = () => {
       </div>
     );
   }
-
+console.log("Rendering MyReports with userReports:", userReports);
   return (
     <div className="space-y-6">
       {/* Header Card */}
@@ -443,7 +443,7 @@ const MyReports = () => {
                               className="w-full flex items-center px-3 py-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg text-sm font-medium hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
                             >
                               <Users className="h-4 w-4 mr-2" />
-                              10 Matching Found
+                              {report.matchCount} Matching Found
                             </motion.button>
                           )}
                           {report.status === "found" && (

@@ -230,7 +230,7 @@ const DashboardPage = () => {
       found: baseListings.filter((listing) => listing.status === "found").length,
     }
   }
-
+console.log("filteredListings:", filteredListings)
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />

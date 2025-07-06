@@ -23,6 +23,8 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
     }
   }
 
+  console.log("ListingCard rendered with viewMode:", listing);
+
   if (viewMode === "list") {
     return (
       <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
@@ -34,7 +36,7 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
                 <div className="w-full h-full bg-gray-200 animate-pulse rounded-sm"></div>
               )}
               <img
-                src={listing.image || "/placeholder.svg?height=128&width=192"}
+                src={listing.image==""?"/noimg.svg?height=128&width=192": listing.image}
                 alt={listing.title}
                 onLoad={() => setImageLoaded(true)}
                 className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0 absolute"
@@ -106,7 +108,7 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
             <div className="w-full h-48 bg-gray-200 animate-pulse"></div>
           )}
           <img
-            src={listing.image || "/placeholder.svg?height=200&width=300"}
+            src={listing.image==""?"../../assets/noimg.svg?height=128&width=192": listing.image}
             alt={listing.title}
             onLoad={() => setImageLoaded(true)}
             className={`w-full h-48 object-cover group-hover:scale-105 transform transition-all duration-500 ease-in-out ${imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-95 absolute"

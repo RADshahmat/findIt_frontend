@@ -1,11 +1,25 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { ArrowLeft, MapPin, Calendar, Eye, Phone, Mail, User, MessageCircle, CheckCircle, Clock } from "lucide-react"
+import { useSelector, useDispatch } from "react-redux"
+import { fetchMatchess } from "../../../features/matching/matching"
 
 const MatchedItemsScreen = ({ report, onBack }) => {
-  // Demo matched items data
+  const dispatch = useDispatch();
+  const { matches = [], loading, error } = useSelector((state) => state.matches || { matches: [], loading: false, error: null });
+  console.log("MatchedItemsScreen rendered with matches:", matches)
+
+  useEffect(() => {
+    if (report && report.id) {
+      console.log("Fetching matches for report ID:", report.id)
+      dispatch(fetchMatchess(report.id))
+    } else {
+      console.warn("No report ID provided to fetch matches")
+    }
+  }, [dispatch,report]);
+
   const matchedItems = [
     {
       id: "match1",
@@ -110,7 +124,7 @@ const MatchedItemsScreen = ({ report, onBack }) => {
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Matching Found Items</h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Found {matchedItems.length} potential matches for "{report?.title}"
+              Found {matches.length} potential matches for "{report?.title}"
             </p>
           </div>
         </div>
@@ -148,7 +162,7 @@ const MatchedItemsScreen = ({ report, onBack }) => {
 
       {/* Matched Items */}
       <div className="space-y-4">
-        {matchedItems.map((match, index) => (
+        {matches.map((match, index) => (
           <motion.div
             key={match.id}
             variants={cardVariants}
@@ -163,7 +177,7 @@ const MatchedItemsScreen = ({ report, onBack }) => {
                 {/* Image */}
                 <div className="relative w-40 h-32 flex-shrink-0">
                   <img
-                    src={match.image || "/placeholder.svg"}
+                    src={`http://localhost:5000/image/${match.image[0]}` || "/placeholder.svg"}
                     alt={match.title}
                     className="w-full h-full object-cover rounded-lg"
                   />
@@ -264,7 +278,7 @@ const MatchedItemsScreen = ({ report, onBack }) => {
       </div>
 
       {/* No matches message */}
-      {matchedItems.length === 0 && (
+      {matches.length === 0 && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
