@@ -1,285 +1,272 @@
 "use client"
-
-import { useState } from "react"
 import { motion } from "framer-motion"
-import { ArrowLeft, MapPin, Calendar, Eye, Phone, Mail, User, MessageCircle, CheckCircle, Clock } from "lucide-react"
+import { ArrowLeft, MapPin, Calendar, Phone, Mail, CheckCircle, MessageCircle, Star } from "lucide-react"
 
-const MatchedItemsScreen = ({ report, onBack }) => {
-  // Demo matched items data
+const MatchedItemsScreen = ({ reportId, onBack }) => {
+  // Mock data for matched items
   const matchedItems = [
     {
-      id: "match1",
-      title: "Similar Person Found",
-      description: "Found a person matching the description in Patuakhali area. Wearing similar clothes.",
-      location: "Patuakhali Sadar",
-      date: "2025-07-04T00:00:00.000Z",
-      image: "/placeholder.svg?height=128&width=160",
-      finderName: "Ahmed Hassan",
-      finderPhone: "+880 1777 888999",
-      finderEmail: "ahmed@example.com",
+      id: 1,
+      title: "Black Leather Wallet",
+      description: "Found a black leather wallet with multiple cards inside",
+      image: "/placeholder.svg?height=200&width=300",
+      location: "Central Park, NYC",
+      date: "2024-01-15",
       matchPercentage: 95,
+      finder: {
+        name: "John Smith",
+        phone: "+1 (555) 123-4567",
+        email: "john.smith@email.com",
+        rating: 4.8,
+      },
       status: "pending",
-      views: 12,
+      distance: "0.2 miles away",
     },
     {
-      id: "match2",
-      title: "Person Spotted",
-      description: "Saw someone matching this description near the bus station. They seemed lost.",
-      location: "Patuakhali Bus Terminal",
-      date: "2025-07-03T00:00:00.000Z",
-      image: "/placeholder.svg?height=128&width=160",
-      finderName: "Fatima Khan",
-      finderPhone: "+880 1666 777888",
-      finderEmail: "fatima@example.com",
+      id: 2,
+      title: "Dark Brown Wallet",
+      description: "Brown leather wallet found near the subway station",
+      image: "/placeholder.svg?height=200&width=300",
+      location: "Times Square Station",
+      date: "2024-01-14",
       matchPercentage: 87,
+      finder: {
+        name: "Sarah Johnson",
+        phone: "+1 (555) 987-6543",
+        email: "sarah.j@email.com",
+        rating: 4.9,
+      },
       status: "contacted",
-      views: 8,
+      distance: "1.5 miles away",
     },
     {
-      id: "match3",
-      title: "Possible Match",
-      description: "Found someone with similar appearance. Not 100% sure but worth checking.",
-      location: "Patuakhali Hospital",
-      date: "2025-07-02T00:00:00.000Z",
-      image: "/placeholder.svg?height=128&width=160",
-      finderName: "Dr. Rahman",
-      finderPhone: "+880 1555 666777",
-      finderEmail: "rahman@example.com",
+      id: 3,
+      title: "Leather Wallet - Black",
+      description: "Small black wallet with credit cards, found in taxi",
+      image: "/placeholder.svg?height=200&width=300",
+      location: "Manhattan, NYC",
+      date: "2024-01-13",
       matchPercentage: 78,
+      finder: {
+        name: "Mike Davis",
+        phone: "+1 (555) 456-7890",
+        email: "mike.davis@email.com",
+        rating: 4.6,
+      },
       status: "verified",
-      views: 15,
+      distance: "2.1 miles away",
     },
   ]
-
-  const [selectedMatch, setSelectedMatch] = useState(null)
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })
-  }
-
-  const getMatchColor = (percentage) => {
-    if (percentage >= 90) return "text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400"
-    if (percentage >= 80) return "text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 dark:text-yellow-400"
-    return "text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400"
-  }
 
   const getStatusColor = (status) => {
     switch (status) {
       case "pending":
-        return "bg-gray-500/10 text-gray-600 border-gray-500/20 dark:bg-gray-500/20 dark:text-gray-400"
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
       case "contacted":
-        return "bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400"
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
       case "verified":
-        return "bg-green-500/10 text-green-600 border-green-500/20 dark:bg-green-500/20 dark:text-green-400"
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
       default:
-        return "bg-gray-500/10 text-gray-600 border-gray-500/20 dark:bg-gray-500/20 dark:text-gray-400"
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
     }
   }
 
-  const handleContact = (match) => {
-    setSelectedMatch(match)
-    // Here you would typically open a contact modal or initiate contact
-    console.log("Contacting:", match.finderName)
-  }
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-    hover: { y: -2, scale: 1.01 },
+  const getMatchColor = (percentage) => {
+    if (percentage >= 90) return "text-green-600 dark:text-green-400"
+    if (percentage >= 80) return "text-blue-600 dark:text-blue-400"
+    if (percentage >= 70) return "text-yellow-600 dark:text-yellow-400"
+    return "text-red-600 dark:text-red-400"
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700"
-      >
-        <div className="flex items-center gap-4">
-          <button
-            onClick={onBack}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Matching Found Items</h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Found {matchedItems.length} potential matches for "{report?.title}"
-            </p>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Original Report Summary */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/10 dark:to-pink-900/10 rounded-xl p-6 border border-red-100 dark:border-red-800"
-      >
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Your Lost Item</h3>
-        <div className="flex gap-4">
-          <img
-            src={report?.image || "/placeholder.svg?height=80&width=120"}
-            alt={report?.title}
-            className="w-20 h-16 object-cover rounded-lg"
-          />
-          <div>
-            <h4 className="font-medium text-gray-900 dark:text-white">{report?.title}</h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{report?.description}</p>
-            <div className="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
-              <span className="flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
-                {report?.location}
-              </span>
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                {formatDate(report?.date)}
-              </span>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Matched Items */}
-      <div className="space-y-4">
-        {matchedItems.map((match, index) => (
-          <motion.div
-            key={match.id}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            whileHover="hover"
-            transition={{ delay: index * 0.1 }}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden"
-          >
-            <div className="p-6">
-              <div className="flex gap-6">
-                {/* Image */}
-                <div className="relative w-40 h-32 flex-shrink-0">
-                  <img
-                    src={match.image || "/placeholder.svg"}
-                    alt={match.title}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                  <div className="absolute top-2 left-2">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(match.status)}`}
-                    >
-                      {match.status.toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="absolute top-2 right-2">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-bold ${getMatchColor(match.matchPercentage)}`}
-                    >
-                      {match.matchPercentage}%
-                    </span>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 truncate">
-                        {match.title}
-                      </h3>
-
-                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">{match.description}</p>
-
-                      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 text-sm mb-4">
-                        <div className="flex items-center text-gray-600 dark:text-gray-400">
-                          <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-                          <span className="truncate">{match.location}</span>
-                        </div>
-                        <div className="flex items-center text-gray-600 dark:text-gray-400">
-                          <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
-                          <span>{formatDate(match.date)}</span>
-                        </div>
-                        <div className="flex items-center text-gray-600 dark:text-gray-400">
-                          <Eye className="h-4 w-4 mr-2 flex-shrink-0" />
-                          <span>{match.views} views</span>
-                        </div>
-                      </div>
-
-                      {/* Finder Info */}
-                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-4">
-                        <h4 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center">
-                          <User className="h-4 w-4 mr-2" />
-                          Found by: {match.finderName}
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <div className="flex items-center">
-                            <Phone className="h-3 w-3 mr-2" />
-                            <span>{match.finderPhone}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Mail className="h-3 w-3 mr-2" />
-                            <span>{match.finderEmail}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                        <Clock className="h-3 w-3 mr-1" />
-                        <span>Reported {formatDate(match.date)}</span>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-col space-y-2 ml-4">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handleContact(match)}
-                        className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
-                      >
-                        <MessageCircle className="h-4 w-4 mr-2" />
-                        Contact
-                      </motion.button>
-
-                      {match.status === "pending" && (
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
-                        >
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Verify
-                        </motion.button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* No matches message */}
-      {matchedItems.length === 0 && (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6"
+    >
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-white dark:bg-gray-800 rounded-xl p-12 shadow-sm border border-gray-100 dark:border-gray-700 text-center"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-slate-700/20 p-6 mb-8"
         >
-          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Eye className="h-8 w-8 text-gray-400" />
+          <div className="flex items-center gap-4">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={onBack}
+              className="p-2 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-200 dark:hover:bg-blue-800 transition-all duration-200"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </motion.button>
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                Matched Items
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Found {matchedItems.length} potential matches for your lost item
+              </p>
+            </div>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Matches Found</h3>
-          <p className="text-gray-600 dark:text-gray-400">
-            We haven't found any matching items yet. We'll notify you when potential matches are reported.
-          </p>
         </motion.div>
-      )}
-    </div>
+
+        {/* Matched Items Grid */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"
+        >
+          {matchedItems.map((item, index) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              whileHover={{ y: -5, scale: 1.02 }}
+              className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-slate-700/20 overflow-hidden group hover:shadow-2xl transition-all duration-300"
+            >
+              {/* Image and Match Percentage */}
+              <div className="relative h-48 overflow-hidden">
+                <motion.img
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ duration: 0.3 }}
+                  src={item.image}
+                  alt={item.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+
+                {/* Match Percentage */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="absolute top-3 left-3"
+                >
+                  <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-full px-3 py-1">
+                    <span className={`text-sm font-bold ${getMatchColor(item.matchPercentage)}`}>
+                      {item.matchPercentage}% Match
+                    </span>
+                  </div>
+                </motion.div>
+
+                {/* Status Badge */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="absolute top-3 right-3"
+                >
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
+                    {item.status?.toUpperCase()}
+                  </span>
+                </motion.div>
+              </div>
+
+              {/* Content */}
+              <div className="p-6">
+                {/* Title and Distance */}
+                <div className="flex items-start justify-between mb-3">
+                  <motion.h3
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-xl font-bold text-gray-900 dark:text-gray-100 line-clamp-2 flex-1"
+                  >
+                    {item.title}
+                  </motion.h3>
+                </div>
+
+                {/* Description */}
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2"
+                >
+                  {item.description}
+                </motion.p>
+
+                {/* Location and Date */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="space-y-2 mb-4"
+                >
+                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                    <MapPin className="h-4 w-4 mr-2 text-blue-500 dark:text-blue-400" />
+                    <span>{item.location}</span>
+                    <span className="ml-2 text-xs text-green-600 dark:text-green-400">({item.distance})</span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                    <Calendar className="h-4 w-4 mr-2 text-green-500 dark:text-green-400" />
+                    <span>{new Date(item.date).toLocaleDateString()}</span>
+                  </div>
+                </motion.div>
+
+                {/* Finder Info */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 mb-4"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-100">Finder</h4>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{item.finder.rating}</span>
+                    </div>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300 font-medium mb-2">{item.finder.name}</p>
+                  <div className="space-y-1">
+                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <Phone className="h-3 w-3 mr-2" />
+                      <span>{item.finder.phone}</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <Mail className="h-3 w-3 mr-2" />
+                      <span>{item.finder.email}</span>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Action Buttons */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.7 }}
+                  className="flex gap-3"
+                >
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-200 text-sm font-medium"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    <span>Contact</span>
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 text-sm font-medium"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    <span>Verify</span>
+                  </motion.button>
+                </motion.div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </motion.div>
   )
 }
 

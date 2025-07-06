@@ -1,5 +1,8 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
+import { motion, AnimatePresence } from "framer-motion"
 import {
   Home,
   Plus,
@@ -13,8 +16,7 @@ import {
   Trash2,
   Bell,
   ChevronDown,
-  ChevronRight,
-  X
+  X,
 } from "lucide-react"
 
 const UserSidebar = () => {
@@ -219,13 +221,17 @@ const UserSidebar = () => {
   }
 
   const DesktopSidebar = () => (
-    <div className="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col sticky top-16 h-[calc(100vh-4rem)] mt-7 mb-2">
+    <div
+      className="w-64 bg-white dark:bg-slate-900 shadow-lg border-r border-gray-200 dark:border-slate-700 flex flex-col sticky top-16 h-[calc(100vh-4rem)] mt-7 mb-2"
+    >
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto p-3">
         {/* Main Navigation */}
-        <div className="mb-6">
+        <div
+          className="mb-6"
+        >
           {sidebarItems.main.map((item) => (
-            <a
+            <button
               key={item.id}
               onClick={() => handleSectionClick(item.id)}
               className={`w-full flex items-center px-4 py-2 rounded-lg text-left transition-all mb-2 text-sm ${
@@ -233,90 +239,110 @@ const UserSidebar = () => {
                   ? "bg-gradient-to-r from-cyan-500 to-teal-500 text-white shadow-md"
                   : item.highlight
                     ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600"
-                    : "text-gray-700 hover:bg-gray-50"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
               }`}
             >
               <item.icon className="h-4 w-4 mr-3" />
               <span className="font-medium">{item.label}</span>
-            </a>
+            </button>
           ))}
         </div>
 
-
         {/* My Listings Section */}
         <div className="mb-6">
-          <a
+          <button
             onClick={() => toggleSection("listings")}
-            className="w-full flex items-center justify-between px-4 py-2 text-gray-800 font-semibold text-xs uppercase tracking-wide hover:bg-gray-50 rounded-lg transition-colors"
+            className="w-full flex items-center justify-between px-4 py-2 text-gray-800 dark:text-gray-200 font-semibold text-xs uppercase tracking-wide hover:bg-gray-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
           >
             <span>My Listings</span>
-            {expandedSections.listings ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          </a>
-          {expandedSections.listings && (
-            <div className="mt-2 space-y-1">
-              {sidebarItems.listings.map((item) => (
-                <a
-                  key={item.id}
-                  onClick={() => handleSectionClick(item.id)}
-                  className={`w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-all text-sm ${
-                    isActive(item.id)
-                      ? "bg-cyan-50 text-cyan-700 border-l-4 border-cyan-500"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
-                  }`}
-                >
-                  <div className="flex items-center">
-                    <item.icon className="h-4 w-4 mr-3" />
-                    <span>{item.label}</span>
-                  </div>
-                  {item.count && (
-                    <span className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full">{item.count}</span>
-                  )}
-                </a>
-              ))}
-            </div>
-          )}
+            <motion.div animate={{ rotate: expandedSections.listings ? 0 : -90 }} transition={{ duration: 0.2 }}>
+              <ChevronDown className="h-4 w-4" />
+            </motion.div>
+          </button>
+          <AnimatePresence>
+            {expandedSections.listings && (
+              <div className="mt-2 space-y-1 overflow-hidden">
+                {sidebarItems.listings.map((item) => (
+                  <motion.button
+                    key={item.id}
+                    whileHover={{ scale: 1.02, x: 14 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleSectionClick(item.id)}
+                    className={`w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-all text-sm ${
+                      isActive(item.id)
+                        ? "bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-400 border-l-4 border-cyan-500"
+                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-800 dark:hover:text-gray-200"
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <item.icon className="h-4 w-4 mr-3" />
+                      <span>{item.label}</span>
+                    </div>
+                    {item.count && (
+                      <span
+                        className="bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 text-xs px-2 py-1 rounded-full"
+                      >
+                        {item.count}
+                      </span>
+                    )}
+                  </motion.button>
+                ))}
+              </div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* My Account Section */}
         <div>
-          <a
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
             onClick={() => toggleSection("account")}
-            className="w-full flex items-center justify-between px-4 py-2 text-gray-800 font-semibold text-xs uppercase tracking-wide hover:bg-gray-50 rounded-lg transition-colors"
+            className="w-full flex items-center justify-between px-4 py-2 text-gray-800 dark:text-gray-200 font-semibold text-xs uppercase tracking-wide hover:bg-gray-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
           >
             <span>My Account</span>
-            {expandedSections.account ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          </a>
-          {expandedSections.account && (
-            <div className="mt-2 space-y-1">
-              {sidebarItems.account.map((item) => (
-                <a
-                  key={item.id}
-                  onClick={() => handleSectionClick(item.id)}
-                  className={`w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-all text-sm ${
-                    isActive(item.id)
-                      ? "bg-cyan-50 text-cyan-700 border-l-4 border-cyan-500"
-                      : item.danger
-                        ? "text-red-600 hover:bg-red-50"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
-                  }`}
-                >
-                  <div className="flex items-center">
-                    <item.icon className="h-4 w-4 mr-3" />
-                    <span>{item.label}</span>
-                  </div>
-                  {item.count && (
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        item.id === "notifications" ? "bg-red-100 text-red-700" : "bg-gray-200 text-gray-700"
-                      }`}
-                    >
-                      {item.count}
-                    </span>
-                  )}
-                </a>
-              ))}
-            </div>
-          )}
+            <motion.div animate={{ rotate: expandedSections.account ? 0 : -90 }} transition={{ duration: 0.2 }}>
+              <ChevronDown className="h-4 w-4" />
+            </motion.div>
+          </motion.button>
+          <AnimatePresence>
+            {expandedSections.account && (
+              <div className="mt-2 space-y-1 overflow-hidden">
+                {sidebarItems.account.map((item) => (
+                  <motion.button
+                    key={item.id}
+                    whileHover={{ scale: 1.02, x: 14 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleSectionClick(item.id)}
+                    className={`w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-all text-sm ${
+                      isActive(item.id)
+                        ? "bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-400 border-l-4 border-cyan-500"
+                        : item.danger
+                          ? "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-800 dark:hover:text-gray-200"
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <item.icon className="h-4 w-4 mr-3" />
+                      <span>{item.label}</span>
+                    </div>
+                    {item.count && (
+                      <motion.span
+                        whileHover={{ scale: 1.1 }}
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          item.id === "notifications"
+                            ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                            : "bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300"
+                        }`}
+                      >
+                        {item.count}
+                      </motion.span>
+                    )}
+                  </motion.button>
+                ))}
+              </div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
@@ -325,13 +351,15 @@ const UserSidebar = () => {
   const MobileBottomNav = () => (
     <>
       {/* Bottom Navigation Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-gray-900 border-t border-gray-700 md:hidden">
+      <div
+        className="fixed bottom-0 left-0 right-0 z-40 bg-gray-900 dark:bg-slate-900 border-t border-gray-700 dark:border-slate-600 md:hidden"
+      >
         <div className="flex items-center justify-around py-2">
           {bottomNavItems.map((item) => (
             <div
               key={item.id}
               onClick={() => handleBottomTabClick(item.id)}
-              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
+              className={`flex flex-col items-center py-2 px-3 rounded-lg ${
                 (isActive(item.id) && (item.id === "dashboard" || item.id === "create-report")) ||
                 activeBottomTab === item.id ||
                 (getParentTab(activeSection) === item.id)
@@ -342,7 +370,8 @@ const UserSidebar = () => {
               <div className="relative">
                 <item.icon className={`h-5 w-5 ${item.highlight ? "text-green-400" : ""}`} />
                 {item.count && item.count > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
+                  >
                     {item.count > 99 ? "99+" : item.count}
                   </span>
                 )}
@@ -354,50 +383,68 @@ const UserSidebar = () => {
       </div>
 
       {/* Sub Menu Modal */}
-      {showSubMenu && (
-        <>
-          {/* Sub Menu */}
-          <div className="fixed bottom-20 left-4 right-4 z-50 bg-gray-800 rounded-xl shadow-2xl max-h-96">
-            <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-300">
-                {activeBottomTab === "listings" ? "My Listings" : "My Account"}
-              </h3>
-              <div onClick={closeSubMenu} className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
-                <X className="h-5 w-5 text-gray-400" />
-              </div>
-            </div>
-            <div className="p-2">
-              {(activeBottomTab === "listings" ? sidebarItems.listings : sidebarItems.account).map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => handleSectionClick(item.id)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-left transition-all text-sm mb-1 ${
-                    isActive(item.id)
-                      ? "bg-cyan-600 text-white"
-                      : item.danger
-                        ? "text-red-400 hover:bg-red-900/20"
-                        : "text-gray-300 hover:bg-gray-700"
-                  }`}
+      <AnimatePresence>
+        {showSubMenu && (
+          <>
+            {/* Backdrop */}
+            <div
+              onClick={closeSubMenu}
+              className="fixed inset-0 bg-black/50 z-40"
+            />
+
+            {/* Sub Menu */}
+            <motion.div
+              initial={{ opacity: 0, y: 100, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 100, scale: 0.95 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="fixed bottom-20 left-4 right-4 z-50 bg-gray-800 dark:bg-slate-800 rounded-xl shadow-2xl max-h-96 border border-gray-700 dark:border-slate-600"
+            >
+              <div className="p-4 border-b border-gray-700 dark:border-slate-600 flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-300 dark:text-gray-200">
+                  {activeBottomTab === "listings" ? "My Listings" : "My Account"}
+                </h3>
+                <button onClick={closeSubMenu}
+                  className="p-2 hover:bg-gray-700 dark:hover:bg-slate-700 rounded-lg transition-colors"
                 >
-                  <div className="flex items-center">
-                    <item.icon className="h-4 w-4 mr-3" />
-                    <span>{item.label}</span>
-                  </div>
-                  {item.count && (
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        item.id === "notifications" ? "bg-red-500 text-white" : "bg-gray-600 text-gray-300"
-                      }`}
-                    >
-                      {item.count}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
+                  <X className="h-5 w-5 text-gray-400" />
+                </button>
+              </div>
+              <div className="p-2">
+                {(activeBottomTab === "listings" ? sidebarItems.listings : sidebarItems.account).map((item, index) => (
+                  <button
+                    key={item.id}
+                    onClick={() => handleSectionClick(item.id)}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-left transition-all text-sm mb-1 ${
+                      isActive(item.id)
+                        ? "bg-cyan-600 text-white"
+                        : item.danger
+                          ? "text-red-400 hover:bg-red-900/20"
+                          : "text-gray-300 dark:text-gray-300 hover:bg-gray-700 dark:hover:bg-slate-700"
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <item.icon className="h-4 w-4 mr-3" />
+                      <span>{item.label}</span>
+                    </div>
+                    {item.count && (
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          item.id === "notifications"
+                            ? "bg-red-500 text-white"
+                            : "bg-gray-600 dark:bg-slate-600 text-gray-300"
+                        }`}
+                      >
+                        {item.count}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Bottom padding to prevent content from being hidden behind bottom nav */}
       <div className="h-20 md:hidden" />
