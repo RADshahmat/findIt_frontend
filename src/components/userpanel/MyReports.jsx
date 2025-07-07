@@ -406,7 +406,7 @@ console.log("Rendering MyReports with userReports:", userReports);
                             className="w-full flex items-center justify-center px-4 py-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg text-sm font-medium hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
                           >
                             <Users className="h-4 w-4 mr-2" />
-                            10 Matching Found
+                            {report.matchCount} Matching Found
                           </motion.button>
                         )}
                         {report.status === "found" && (
