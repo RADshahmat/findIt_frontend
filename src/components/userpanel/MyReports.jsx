@@ -56,7 +56,8 @@ const MyReports = () => {
 
   const confirmDelete = async () => {
     if (selectedReport) {
-      await dispatch(deleteReport(selectedReport.id))
+      dispatch(deleteReport(selectedReport.id))
+      //dispatch(fetchUserReports()) // Refresh reports after deletion
       setShowDeleteModal(false)
       setSelectedReport(null)
     }

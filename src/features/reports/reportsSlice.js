@@ -64,14 +64,14 @@ export const demoReports = [
 
 export const fetchUserReports = createAsyncThunk("reports/fetchUserReports", async (_, { rejectWithValue }) => {
   console.log("Fetching user reports...")
-    try {
-      const res = await axiosInstance.get("own_posts");
-      console.log("Post get successfully:", res.data);
-      return res.data;
-    } catch (error) {
+  try {
+    const res = await axiosInstance.get("own_posts");
+    console.log("Post get successfully:", res.data);
+    return res.data;
+  } catch (error) {
     return rejectWithValue(error.message)
   }
-  }
+}
 );
 // Async thunks
 export const fetchUserReports1 = createAsyncThunk("reports/fetchUserReports", async (_, { rejectWithValue }) => {
@@ -117,8 +117,12 @@ export const updateReport = createAsyncThunk(
 export const deleteReport = createAsyncThunk("reports/deleteReport", async (reportId, { rejectWithValue }) => {
   try {
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    return reportId
+    console.log("Deleting report with ID:", reportId)
+    const res = await axiosInstance.delete("post", {
+      data: { reportId }
+    });
+
+    return res.data
   } catch (error) {
     return rejectWithValue(error.message)
   }
