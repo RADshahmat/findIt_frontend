@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
-import { Upload, X, MapPin, DollarSign, ChevronDown, AlertTriangle } from "lucide-react"
+import { Upload, X, Scissors, MapPin, DollarSign, ChevronDown, AlertTriangle } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchCatagories } from "../../features/catagory/catagory"
+import SubjectSelectionModal from "./subjectSelectionModal"
 import districtsData from "../../assets/bd-districts.json"
 
 const LostItemForm = ({
@@ -47,6 +48,13 @@ const LostItemForm = ({
   const [showDropdown, setShowDropdown] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const dropdownRef = useRef()
+
+  const [isModalOpen, setModalOpen] = useState(false)
+  const [segments, setSegments] = useState([])
+  const [imagePreview, setImagePreview] = useState(null)
+  const [currentSegmentingImageId, setCurrentSegmentingImageId] = useState(null)
+  const [isSegmenting, setIsSegmenting] = useState(false)
+  const [currImgId, setCurrImgId] = useState(null);
 
   const locations = districtsData.districts.map((d) => d.name)
 
@@ -141,6 +149,86 @@ const LostItemForm = ({
     setImages((prev) => prev.filter((img) => img.id !== id))
   }
 
+  const callSegmentService = async (file) => {
+    const fd = new FormData()
+    fd.append("image", file)
+
+    const res = await fetch("http://localhost:8000/segment", {
+      method: "POST",
+      body: fd,
+    })
+    const data = await res.json();   // ✅ parse JSON
+    setCurrImgId(data.image_id)
+    //console.log("SEGMENTS:", data);
+    if (!res.ok) throw new Error("Segmentation failed")
+    return data
+  }
+
+  const handleExtractSubject = async (imageId) => {
+    const imageData = images.find((img) => img.id === imageId)
+    if (!imageData) return
+
+    setIsSegmenting(true)
+    setCurrentSegmentingImageId(imageId)
+    //console.log(imageData,imageId,"this is image data")
+    try {
+      const reader = new FileReader()
+      reader.onload = async (ev) => {
+        setImagePreview(ev.target.result)
+
+        const segData = await callSegmentService(imageData.file)
+        setSegments(segData.segments || [])
+        // setCurrentSegmentingImageId(segData.segments.image_id)
+        setModalOpen(true)
+      }
+      reader.readAsDataURL(imageData.file)
+    } catch (err) {
+      console.error(err)
+      alert("Segmentation service error: " + err.message)
+    } finally {
+      setIsSegmenting(false)
+    }
+  }
+
+  const handleSelectSegment = async (segment) => {
+    setModalOpen(false)
+    //console.log(currentSegmentingImageId.currImgId,"lets see")
+    try {
+      const imageIndex = images.findIndex(img => img.id === currentSegmentingImageId);
+      //console.log(imageIndex,"kaj kor")
+      const res = await fetch("http://localhost:8000/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mask_id: segment.id,
+          image_id: currImgId
+        }),
+      });
+
+
+      const data = await res.json()
+      //console.log(data,"extract data")
+      // Replace the original image with extracted subject
+      setImages((prev) =>
+        prev.map((img) =>
+          img.id === currentSegmentingImageId
+            ? {
+              ...img,
+              preview: `data:image/png;base64,${data.cropped_image}`,
+              extracted: true,
+              maskId: segment.id,
+            }
+            : img,
+        ),
+      )
+
+      setCurrentSegmentingImageId(null)
+    } catch (err) {
+      console.error(err)
+      alert("Extraction failed: " + err.message)
+    }
+  }
+  //console.log(isModalOpen)
   const validateForm = () => {
     const newErrors = {}
 
@@ -217,7 +305,7 @@ const LostItemForm = ({
       },
     },
   }
-
+  console.log(images, "these are images");
   return (
     <motion.form
       variants={formVariants}
@@ -226,7 +314,6 @@ const LostItemForm = ({
       onSubmit={handleSubmit}
       className="space-y-6"
     >
-
       {/* Item Information */}
       <motion.div
         variants={sectionVariants}
@@ -246,9 +333,8 @@ const LostItemForm = ({
               value={formData.title}
               onChange={handleInputChange}
               placeholder="e.g., iPhone 15 Pro Max"
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
-                errors.title ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-              }`}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${errors.title ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                }`}
             />
             {errors.title && (
               <motion.p
@@ -267,9 +353,8 @@ const LostItemForm = ({
               name="category"
               value={formData.category}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
-                errors.category ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-              }`}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${errors.category ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                }`}
             >
               <option value="">Select Category</option>
               {catagory.map((category) => (
@@ -338,9 +423,8 @@ const LostItemForm = ({
             onChange={handleInputChange}
             rows={4}
             placeholder="Provide detailed description including color, size, brand, distinctive features, etc."
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
-              errors.description ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-            }`}
+            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${errors.description ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+              }`}
           />
           {errors.description && (
             <motion.p
@@ -372,9 +456,8 @@ const LostItemForm = ({
                 onChange={(e) => setLocationQuery(e.target.value)}
                 onClick={() => setShowDropdown(true)}
                 onFocus={() => setShowDropdown(true)}
-                className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
-                  errors.location ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-                }`}
+                className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${errors.location ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                  }`}
               />
               <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer" />
             </div>
@@ -433,9 +516,8 @@ const LostItemForm = ({
               value={formData.date}
               onChange={handleInputChange}
               max={new Date().toISOString().split("T")[0]}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
-                errors.date ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-              }`}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${errors.date ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                }`}
             />
             {errors.date && (
               <motion.p
@@ -461,7 +543,7 @@ const LostItemForm = ({
         </div>
       </motion.div>
 
-      {/* Images */}
+      {/* Images with Extract Functionality */}
       <motion.div variants={sectionVariants} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
         <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Images (Optional)</h3>
 
@@ -494,11 +576,33 @@ const LostItemForm = ({
                 animate={{ opacity: 1, scale: 1 }}
                 className="relative group"
               >
-                <img
-                  src={image.preview || image.url || "/placeholder.svg"}
-                  alt={image.name}
-                  className="w-full h-24 object-cover rounded-lg"
-                />
+                {image.file && (
+                  <img
+                    src={URL.createObjectURL(image.file)}
+                    alt={image.name}
+                    className="w-full h-32 object-contain rounded-lg mb-2"
+                  />
+                )}
+
+                {/* Extracted / Preview Image */}
+                {image.preview && (
+                  <img
+                    src={image.preview}
+                    alt={image.name + "-preview"}
+                    className="w-full h-65 object-contain rounded-lg"
+                  />
+                )}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={() => handleExtractSubject(image.id)}
+                  disabled={isSegmenting && currentSegmentingImageId === image.id}
+                  className="absolute bottom-1 left-1 right-1 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white px-2 py-1 rounded text-xs font-medium flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Scissors className="h-3 w-3" />
+                  {isSegmenting && currentSegmentingImageId === image.id ? "Extracting..." : "Extract"}
+                </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -508,6 +612,11 @@ const LostItemForm = ({
                 >
                   <X className="h-3 w-3" />
                 </motion.button>
+                {image.extracted && (
+                  <div className="absolute top-1 left-1 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                    ✓
+                  </div>
+                )}
               </motion.div>
             ))}
           </motion.div>
@@ -550,9 +659,8 @@ const LostItemForm = ({
               value={formData.contactName}
               onChange={handleInputChange}
               placeholder="Full Name"
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
-                errors.contactName ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-              }`}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${errors.contactName ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                }`}
             />
             {errors.contactName && (
               <motion.p
@@ -573,9 +681,8 @@ const LostItemForm = ({
               value={formData.contactPhone}
               onChange={handleInputChange}
               placeholder="+880 1234 567890"
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
-                errors.contactPhone ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-              }`}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${errors.contactPhone ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                }`}
             />
             {errors.contactPhone && (
               <motion.p
@@ -596,9 +703,8 @@ const LostItemForm = ({
               value={formData.contactEmail}
               onChange={handleInputChange}
               placeholder="your.email@example.com"
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
-                errors.contactEmail ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-              }`}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${errors.contactEmail ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                }`}
             />
             {errors.contactEmail && (
               <motion.p
@@ -625,6 +731,7 @@ const LostItemForm = ({
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
       </motion.div>
+
       {/* Success Message */}
       {submitSuccess && (
         <motion.div
@@ -639,6 +746,7 @@ const LostItemForm = ({
           </div>
         </motion.div>
       )}
+
       {/* Submit Button */}
       <motion.div
         variants={sectionVariants}
@@ -654,6 +762,16 @@ const LostItemForm = ({
           {submitButtonText}
         </motion.button>
       </motion.div>
+
+      {isModalOpen && (
+        <SubjectSelectionModal
+          isOpen={isModalOpen}
+          imagePreview={imagePreview}
+          segments={segments}
+          onSelect={handleSelectSegment}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
     </motion.form>
   )
 }

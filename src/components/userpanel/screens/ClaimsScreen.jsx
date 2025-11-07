@@ -20,8 +20,8 @@ const ClaimsScreen = ({ reportId, onBack }) => {
     {
       id: 1,
       claimer: {
-        name: "Emily Rodriguez",
-        phone: "+1 (555) 234-5678",
+        name: "MD. Rad Shahmat",
+        phone: "+88 01716040447",
         email: "emily.rodriguez@email.com",
         rating: 4.9,
         verified: true,
@@ -42,8 +42,8 @@ const ClaimsScreen = ({ reportId, onBack }) => {
     {
       id: 2,
       claimer: {
-        name: "David Chen",
-        phone: "+1 (555) 345-6789",
+        name: "HR Khan Ratin",
+        phone: "+88 01987654321",
         email: "david.chen@email.com",
         rating: 4.7,
         verified: true,
