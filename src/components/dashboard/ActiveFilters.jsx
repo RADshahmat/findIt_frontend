@@ -63,6 +63,7 @@ const ActiveFilters = ({ filters, onFilterRemove }) => {
 
   return (
     <div className="mb-4">
+
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-gray-500 text-sm">Active filters:</span>
         {filterItems.map((item, index) => (

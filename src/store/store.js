@@ -7,6 +7,7 @@ import fetchPostReducer  from '../features/posts/fetchPost.jsx';
 import fetchPostHomeReducer from '../features/posts/fetchPostHome.jsx';
 import reportsReducer from "../features/reports/reportsSlice"
 import matchesReducer from '../features/matching/matching.jsx';
+import searchReducer from '../features/search/searchSlice.jsx';
 
 export const store = configureStore({
   reducer: {
@@ -18,5 +19,6 @@ export const store = configureStore({
     fetchPostHome: fetchPostHomeReducer,
     reports: reportsReducer,
     matches: matchesReducer,
+    search: searchReducer,
   },
 });

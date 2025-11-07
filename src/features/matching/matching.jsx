@@ -6,6 +6,7 @@ export const fetchMatchess = createAsyncThunk(
   'matches/fetchMatchess',
   async (id) => {
     const response = await axiosInstance.get(`/matching/${id}`);
+    console.log(response,"search data")
     return response.data;
   }
 );

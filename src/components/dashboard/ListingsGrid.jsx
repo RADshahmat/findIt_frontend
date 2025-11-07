@@ -51,7 +51,15 @@ const ListingsGrid = ({
   const totalPages = Math.ceil(listings.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const currentListings = listings.slice(startIndex, endIndex)
+  const sortedListings = [...listings].sort((a, b) => {
+  if (a.score !== undefined && b.score !== undefined) {
+    return b.score - a.score; // sort descending by score
+  }
+  return 0; // maintain original order if score is not present
+});
+
+const currentListings = sortedListings.slice(startIndex, endIndex);
+
 
   const getActiveFiltersCount = () => {
     let count = 0
@@ -60,7 +68,7 @@ const ListingsGrid = ({
     if (filters.date) count++
     return count
   }
-
+console.log("listings:",currentListings)
   return (
     <div className="flex-1">
       {/* Active Filters */}

@@ -176,3 +176,8 @@ a{
     transition: transform 300ms ease-in-out;
   }
 }
+
+.blur-effect {
+  filter: blur(4px);
+  transition: filter 0.7s ease-in-out;
+}

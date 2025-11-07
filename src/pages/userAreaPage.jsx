@@ -40,7 +40,7 @@ const UserPage = () => {
             <Route path="/archived-listings" element={<ArchivedListings />} />
 
             {/* Communication routes */}
-            <Route path="/messenger" element={<Messenger />} />
+            
             <Route path="/saved-searches" element={<SavedSearches />} />
 
             {/* Account routes */}
