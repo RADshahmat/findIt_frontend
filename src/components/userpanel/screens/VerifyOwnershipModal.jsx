@@ -10,18 +10,24 @@ const VerifyOwnershipModal = ({ isOpen, onClose, postId }) => {
   const { generatedQuestions, loading } = useSelector((s) => s.verification);
 
   const [answers, setAnswers] = useState([]);
+  const [apiMessage, setApiMessage] = useState("");
 
-  // Fetch questions when opened
   useEffect(() => {
     if (isOpen && postId) {
-      dispatch(generateQnA(postId));
-      console.log("Generating questions for postId:", postId);
+      dispatch(generateQnA(postId)).then((res) => {
+        const msg = res.payload?.message;
+        // Only show message if the user has already submitted
+        if (msg === "You have already submitted verification for this post.") {
+          setApiMessage(msg);
+        } else {
+          setApiMessage(""); // keep empty for all other cases
+        }
+      });
     }
   }, [isOpen, postId, dispatch]);
 
-  // Reset answer fields when questions arrive
   useEffect(() => {
-    if (generatedQuestions?.length > 0) {
+    if (Array.isArray(generatedQuestions) && generatedQuestions.length > 0) {
       setAnswers(Array(generatedQuestions.length).fill(""));
     }
   }, [generatedQuestions]);
@@ -35,7 +41,6 @@ const VerifyOwnershipModal = ({ isOpen, onClose, postId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await dispatch(verifyQnA({ postId, userAnswers: answers }));
-    alert("Verification submitted!");
     onClose();
   };
 
@@ -52,10 +57,16 @@ const VerifyOwnershipModal = ({ isOpen, onClose, postId }) => {
 
             {loading && <p className="text-center py-4">Loading Questions...</p>}
 
-            {!loading && generatedQuestions?.length > 0 && (
+            {/* Show message only if user already submitted */}
+            {!loading && apiMessage && (
+              <p className="text-center py-4 text-gray-700 dark:text-gray-300">{apiMessage}</p>
+            )}
+
+            {/* Show form only if questions exist and user hasn’t submitted */}
+            {!loading && !apiMessage && Array.isArray(generatedQuestions) && generatedQuestions.length > 0 && (
               <form onSubmit={handleSubmit} className="space-y-4 max-h-[60vh] overflow-y-auto">
                 {generatedQuestions.map((q, index) => (
-                  <div key={q._id || index}>
+                  <div key={index}>
                     <label className="block mb-1 font-medium">{q}</label>
                     <input
                       type="text"

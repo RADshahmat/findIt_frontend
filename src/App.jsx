@@ -10,6 +10,7 @@ import ScrollRestoration from "./components/ScrollToTop"
 import UserPage from "./pages/userAreaPage"
 import LoginPage from "./pages/LoginPage"
 import ProtectedRoute from "./ProtectedRoute"
+import Messenger from "./components/userpanel/Messenger"
 
 function App() {
   const dispatch = useDispatch()
@@ -38,6 +39,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="user/messenger" element={<ProtectedRoute><Messenger /></ProtectedRoute>} />
           </Routes>
         </BrowserRouter>
       </div>

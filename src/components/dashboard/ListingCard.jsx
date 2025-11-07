@@ -23,7 +23,7 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
     }
   }
 
-  console.log("ListingCard rendered with viewMode:", listing);
+  //console.log("ListingCard rendered with viewMode:", listing);
 
   if (viewMode === "list") {
     return (

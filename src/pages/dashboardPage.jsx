@@ -8,6 +8,7 @@ import Navbar from "../components/Navbar"
 import Footer from "../components/Footer"
 import { useSelector, useDispatch } from "react-redux"
 import { fetchPost } from "../features/posts/fetchPost"
+import ImageSearchBar from "../components/dashboard/SearchBar"
 
 const DashboardPage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -20,17 +21,25 @@ const DashboardPage = () => {
   const tabFromURL = searchParams.get("tab") || "all"
 
   const { postData = [] } = useSelector((state) => state.fetchPost)
-  const [filteredListings, setFilteredListings] = useState(postData || [])
+  const { results = [], loading } = useSelector((state) => state.search)
+  const sortedInitialResults = results.length > 0
+    ? [...results].sort((a, b) => b.score - a.score)
+    : postData || [];
+
+  const [filteredListings, setFilteredListings] = useState(sortedInitialResults);
+
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
   const dispatch = useDispatch()
 
   useEffect(() => {
     if (postData == null || postData.length === 0) {
-      console.log("Fetching posts for dashboard...")
+      //console.log("Fetching posts for dashboard...")
       dispatch(fetchPost({ reqFrom: "dashboard", limit: 200 }))
     }
-    setFilteredListings(postData || [])
+    setFilteredListings(results.length > 0 ? results : postData
+      || [])
   }, [postData, dispatch])
+
 
   const [filters, setFilters] = useState({
     category: null,
@@ -46,9 +55,9 @@ const DashboardPage = () => {
       category:
         categoryFromURL || subcategoryFromURL
           ? {
-              category: categoryFromURL,
-              subcategory: subcategoryFromURL,
-            }
+            category: categoryFromURL,
+            subcategory: subcategoryFromURL,
+          }
           : null,
       location: locationFromURL || null,
       date: dateFromURL || null,
@@ -108,7 +117,8 @@ const DashboardPage = () => {
   }
 
   useEffect(() => {
-    let filtered = [...(postData || [])]
+    let filtered = [...(results.length > 0 ? results : postData
+      || [])]
 
     // Apply tab filter
     if (activeTab !== "all") {
@@ -177,11 +187,13 @@ const DashboardPage = () => {
     }
 
     setFilteredListings(filtered)
-  }, [filters, sortBy, activeTab, dispatch, postData])
+  }, [filters, sortBy, activeTab, dispatch, results.length > 0 ? results : postData
+  ])
 
   // Calculate counts for tabs
   const getCounts = () => {
-    let baseListings = [...(postData || [])]
+    let baseListings = [...(results.length > 0 ? results : postData
+      || [])]
 
     // Apply current filters (except tab filter) to get accurate counts
     if (filters.category) {
@@ -230,30 +242,60 @@ const DashboardPage = () => {
       found: baseListings.filter((listing) => listing.status === "found").length,
     }
   }
-console.log("filteredListings:", filteredListings)
+
+  const [showLoader, setShowLoader] = useState(false);
+
+  useEffect(() => {
+    if (loading) {
+      setShowLoader(true);
+    } else {
+      const timeout = setTimeout(() => setShowLoader(false), 900);
+      return () => clearTimeout(timeout);
+    }
+  }, [loading]);
+  //console.log("filteredListings:", filteredListings, postData,results)
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
+
       <div className="container mt-15 px-4 py-8">
+        <ImageSearchBar />
         <div className="flex gap-6">
           <FilterSidebar
             filters={filters}
             onFilterChange={handleFilterChange}
             isOpen={isMobileFilterOpen}
             onClose={closeMobileFilter}
-            allListings={postData}
+            allListings={results.length > 0 ? results : postData
+            }
             currentTab={activeTab}
           />
-          <ListingsGrid
-            listings={filteredListings}
-            filters={filters}
-            onSortChange={handleSortChange}
-            onTabChange={handleTabChange}
-            activeTab={activeTab}
-            counts={getCounts()}
-            onFilterRemove={handleFilterRemove}
-            onFilterToggle={toggleMobileFilter}
-          />
+          <div className="relative w-full">
+            {/* Overlay Loader */}
+
+
+
+            {/* Listings Content with conditional blur */}
+            <div
+              className={`transition-[filter] duration-700 ease-in-out ${showLoader ? "blur-[6px] pointer-events-none" : "blur-none pointer-events-auto"
+                }`}
+            >
+              <ListingsGrid
+                listings={filteredListings}
+                filters={filters}
+                onSortChange={handleSortChange}
+                onTabChange={handleTabChange}
+                activeTab={activeTab}
+                counts={getCounts()}
+                onFilterRemove={handleFilterRemove}
+                onFilterToggle={toggleMobileFilter}
+              />
+            </div>
+
+
+          </div>
+
+
         </div>
       </div>
       <Footer />

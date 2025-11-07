@@ -1,6 +1,8 @@
+// features/verification/verificationSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "../../axios/axiosInstance"
+import axiosInstance from "../../axios/axiosInstance";
 
+// GET dynamic QnA from backend
 export const generateQnA = createAsyncThunk(
   "verification/generateQnA",
   async (postId, { rejectWithValue }) => {
@@ -8,7 +10,11 @@ export const generateQnA = createAsyncThunk(
       console.log("🔹 Calling generateQnA API for:", postId);
       const res = await axiosInstance.get(`/qnagenerate/${postId}`);
       console.log("✅ Response:", res.data);
-      return res.data.questions;
+      // Return both questions and message for frontend
+      return { 
+        questions: res.data.questions || [], 
+        message: res.data.message || "" 
+      };
     } catch (err) {
       console.log("❌ Error:", err);
       return rejectWithValue(err.response?.data || err.message);
@@ -16,6 +22,7 @@ export const generateQnA = createAsyncThunk(
   }
 );
 
+// POST user answers for verification
 export const verifyQnA = createAsyncThunk(
   "verification/verifyQnA",
   async ({ postId, userAnswers }, { rejectWithValue }) => {
@@ -31,41 +38,61 @@ export const verifyQnA = createAsyncThunk(
   }
 );
 
-
 const verificationSlice = createSlice({
   name: "verification",
   initialState: {
     loading: false,
     generatedQuestions: [],
+    apiMessage: "",         // message from backend
     submissionResult: null,
     error: null,
   },
   reducers: {
     clearVerificationState: (state) => {
       state.generatedQuestions = [];
+      state.apiMessage = "";
       state.submissionResult = null;
       state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(generateQnA.pending, (state) => { state.loading = true; })
-      .addCase(generateQnA.fulfilled, (state, action) => {
-        state.loading = false;
-        state.generatedQuestions = action.payload;
+      // generateQnA
+      .addCase(generateQnA.pending, (state) => {
+        state.loading = true;
+        state.generatedQuestions = [];
+        state.apiMessage = "";
+        state.error = null;
       })
+.addCase(generateQnA.fulfilled, (state, action) => {
+  state.loading = false;
+  state.generatedQuestions = action.payload.questions || [];
+
+  // Only show message if it's the "already submitted" case
+  if (action.payload.message === "You have already submitted verification for this post.") {
+    state.apiMessage = action.payload.message;
+  } else {
+    state.apiMessage = ""; // don't show message for other cases
+  }
+})
+
       .addCase(generateQnA.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || "Failed to generate QnA";
       })
-      .addCase(verifyQnA.pending, (state) => { state.loading = true; })
+      // verifyQnA
+      .addCase(verifyQnA.pending, (state) => {
+        state.loading = true;
+        state.submissionResult = null;
+        state.error = null;
+      })
       .addCase(verifyQnA.fulfilled, (state, action) => {
         state.loading = false;
         state.submissionResult = action.payload;
       })
       .addCase(verifyQnA.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || "Failed to submit answers";
       });
   },
 });
