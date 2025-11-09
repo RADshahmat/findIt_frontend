@@ -66,7 +66,7 @@ const CTA = () => {
                 </div>
 
                 {/* Floating elements */}
-                <div className="absolute -top-4 -right-4 bg-white rounded-lg shadow-lg p-2 animate-pulse">
+                {/* <div className="absolute -top-4 -right-4 bg-white rounded-lg shadow-lg p-2 animate-pulse">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path
@@ -76,7 +76,7 @@ const CTA = () => {
                       />
                     </svg>
                   </div>
-                </div>
+                </div> */}
 
                 <div className="absolute -bottom-4 -left-4 bg-white rounded-lg shadow-lg p-2">
                   <div className="text-xs font-medium text-cyan-600">94% Success</div>

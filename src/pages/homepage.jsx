@@ -64,7 +64,7 @@ function HomePage() {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <Navbar />
       <Hero onSearch={handleSearch} />
-      <SearchBar onSearch={handleSearch} className="lg:hidden mx-auto max-w-md px-4 -mt-6 mb-16" />
+
       <CityRegionSelector />
       <CategoryGrid />
       <FeaturesComponent />

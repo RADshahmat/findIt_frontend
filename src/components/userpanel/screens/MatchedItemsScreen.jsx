@@ -115,7 +115,7 @@ const MatchedItemsScreen = ({ report, onBack }) => {
                 <motion.img
                   whileHover={{ scale: 1.1 }}
                   transition={{ duration: 0.3 }}
-                  src={`http://93.127.166.229:5000/image/${item.image[0]}`}
+                  src={`https://backend.finditbd.hurairaconsultancy.com/image/${item.image[0]}`}
                   alt={item.title}
                   className="w-full h-full object-cover"
                 />

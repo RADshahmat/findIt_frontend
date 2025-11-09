@@ -17,7 +17,7 @@ const Hero = ({ onSearch }) => {
   //console.log("Post Data:", postData1);
   return (
     <section className="bg-gradient-to-b from-[#0f172a] via-[#1e293b] to-[#0f172a] text-cyan-400 p-8  pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-17">
+      <div className="container mx-auto px-0 sm:px-0 lg:px-17">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Column - Text Content */}
           <div className="max-w-xl">
@@ -55,7 +55,7 @@ const Hero = ({ onSearch }) => {
               </Link>
             </div>
 
-            <SearchBar onSearch={onSearch} className="hidden lg:flex" />
+            <SearchBar onSearch={onSearch} className="lg:flex" />
 
             <div className="flex items-center mt-8 text-slate-500 text-sm">
               <div className="flex items-center mr-6">
@@ -71,8 +71,7 @@ const Hero = ({ onSearch }) => {
 
           {/* Right Column - Image/Illustration */}
           <div className="relative">
-            <div className="absolute -top-10 -right-10 w-64 h-64 bg-cyan-100 rounded-full opacity-50 blur-3xl"></div>
-            <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-teal-100 rounded-full opacity-50 blur-3xl"></div>
+            <div className="absolute -bottom-10 -left-10  h-64 bg-teal-100 rounded-full opacity-50 blur-3xl"></div>
 
             <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
               <div className="bg-gradient-to-r from-cyan-500 to-teal-500 h-12 flex items-center px-4">
