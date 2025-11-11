@@ -1,9 +1,8 @@
 "use client"
 import { useState, useRef, useEffect } from "react"
-import { useTheme } from "../../contexts/ThemeContext"
+
 import { Send, X, Sun, Moon, Search, MoreVertical, ArrowLeft } from "lucide-react"
-import Navbar from "../navbar"
-import UserSidebar from "./userSidebar"
+
 
 const users = [
   { id: 1, name: "Alice Johnson", avatar: "🧑‍🦰", status: "online", lastSeen: "now" },
@@ -51,7 +50,7 @@ const Messenger = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const messagesContainerRef = useRef(null)
   const inputRef = useRef(null)
-  const { theme, toggleTheme } = useTheme()
+
 
   const scrollToBottom = () => {
     if (messagesContainerRef.current) {
@@ -121,12 +120,12 @@ const Messenger = () => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 overflow-hidden">
-      <Navbar />
-      <div className="flex pt-20">
-        <UserSidebar />
+    <div className="min-h-screen w-full  overflow-hidden">
+    
+      <div className="flex">
+      
         <div className="flex-1 flex justify-center items-center p-2 sm:p-4 h-[calc(100vh-80px)] pb-28 sm:pb-4" style={{width: "100%"}}>
-          <style jsx global>{`
+          <style>{`
             .custom-scrollbar::-webkit-scrollbar {
               width: 3px;
             }

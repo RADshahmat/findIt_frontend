@@ -6,10 +6,10 @@ import { loadUserFromToken, setFcmToken } from "./features/auth/authSlice";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Homepage from "./pages/homepage";
 import DashboardPage from "./pages/dashboardPage";
-import ScrollRestoration from "./components/ScrollToTop";
+import ScrollRestoration from "./helpers/scrolltotop";
 import UserPage from "./pages/userAreaPage";
 import LoginPage from "./pages/LoginPage";
-import ProtectedRoute from "./ProtectedRoute";
+import ProtectedRoute from "./helpers/ProtectedRoute";
 import Messenger from "./components/userpanel/Messenger";
 import { requestWebNotificationPermission } from "./helpers/firebaseNotification";
 import axiosInstance from "./axios/axiosInstance";
@@ -48,7 +48,7 @@ function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/user/*" element={<ProtectedRoute><UserPage /></ProtectedRoute>} />
-            <Route path="/user/messenger" element={<ProtectedRoute><Messenger /></ProtectedRoute>} />
+            
           </Routes>
         </BrowserRouter>
       </div>

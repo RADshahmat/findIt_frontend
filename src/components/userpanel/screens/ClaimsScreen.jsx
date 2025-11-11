@@ -1,5 +1,6 @@
 "use client"
 import { motion } from "framer-motion"
+import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   MapPin,
@@ -14,7 +15,9 @@ import {
   Shield,
 } from "lucide-react"
 
-const ClaimsScreen = ({ reportId, onBack }) => {
+const ClaimsScreen = () => {
+    const { reportId } = useParams(); //ei reportId use kore backend theke data fetch kora jabe
+  const navigate = useNavigate();
   // Mock data for claims
   const claims = [
     {
@@ -155,7 +158,7 @@ const ClaimsScreen = ({ reportId, onBack }) => {
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              onClick={onBack}
+              onClick={() => navigate("/user/my-reports")}
               className="p-2 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400 rounded-xl hover:bg-purple-200 dark:hover:bg-purple-800 transition-all duration-200"
             >
               <ArrowLeft className="h-5 w-5" />

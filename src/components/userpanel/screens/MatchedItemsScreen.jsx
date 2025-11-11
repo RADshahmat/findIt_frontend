@@ -1,7 +1,7 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   MapPin,
@@ -15,15 +15,15 @@ import {
 } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchMatchess } from "../../../features/matching/matching";
-import VerifyOwnershipModal from "../screens/VerifyOwnershipModal";
+import VerifyOwnershipModal from "../modals/VerifyOwnershipModal";
 
 // 🔹 Main Screen Component
-const MatchedItemsScreen = ({ report, onBack }) => {
+const MatchedItemsScreen = () => {
+  const { reportId } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
     matches = [],
-    loading,
-    error,
   } = useSelector(
     (state) => state.matches || { matches: [], loading: false, error: null }
   );
@@ -31,11 +31,11 @@ const MatchedItemsScreen = ({ report, onBack }) => {
   const [isVerifyModalOpen, setVerifyModalOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState(null);
 
-  useEffect(() => {
-    if (report && report.id) {
-      dispatch(fetchMatchess(report.id));
-    }
-  }, [dispatch, report]);
+useEffect(() => {
+  if (reportId) {
+    dispatch(fetchMatchess(reportId));
+  }
+}, [dispatch, reportId]);
 
   const getMatchColor = (percentage) => {
     if (percentage >= 90)
@@ -78,7 +78,7 @@ const MatchedItemsScreen = ({ report, onBack }) => {
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              onClick={onBack}
+              onClick={() => navigate("/user/my-reports")}
               className="p-2 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-200 dark:hover:bg-blue-800 transition-all duration-200"
             >
               <ArrowLeft className="h-5 w-5" />
