@@ -1,19 +1,7 @@
 "use client"
 import { motion } from "framer-motion"
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  ArrowLeft,
-  MapPin,
-  Calendar,
-  Phone,
-  Mail,
-  CheckCircle,
-  XCircle,
-  Clock,
-  FileText,
-  Star,
-  Shield,
-} from "lucide-react"
+import {ArrowLeft,MapPin,Calendar,Phone,Mail,CheckCircle,XCircle,Clock,FileText,Star,Shield,} from "lucide-react"
 
 const ClaimsScreen = () => {
     const { reportId } = useParams(); //ei reportId use kore backend theke data fetch kora jabe
@@ -59,45 +47,6 @@ const ClaimsScreen = () => {
       status: "under_review",
       location: "Near Central Park",
       additionalInfo: "I have bank statements showing transactions from cards that should be in the wallet.",
-    },
-    {
-      id: 3,
-      claimer: {
-        name: "Michael Thompson",
-        phone: "+1 (555) 456-7890",
-        email: "michael.t@email.com",
-        rating: 4.5,
-        verified: false,
-      },
-      claimDate: "2024-01-14",
-      description: "This looks like my wallet. I lost it last week somewhere in Manhattan.",
-      proofDocuments: [],
-      verificationScore: 45,
-      status: "rejected",
-      location: "Manhattan, NYC",
-      additionalInfo: "No additional proof provided.",
-    },
-    {
-      id: 4,
-      claimer: {
-        name: "Lisa Wang",
-        phone: "+1 (555) 567-8901",
-        email: "lisa.wang@email.com",
-        rating: 4.8,
-        verified: true,
-      },
-      claimDate: "2024-01-17",
-      description:
-        "I'm confident this is my wallet. I can describe the contents in detail and provide proof of ownership for all items inside.",
-      proofDocuments: [
-        { type: "ID", name: "Passport Copy" },
-        { type: "Card", name: "Credit Card Statement" },
-        { type: "Photo", name: "Wallet Purchase Receipt" },
-      ],
-      verificationScore: 92,
-      status: "approved",
-      location: "Central Park East",
-      additionalInfo: "I have the original purchase receipt for the wallet and can describe unique identifying marks.",
     },
   ]
 

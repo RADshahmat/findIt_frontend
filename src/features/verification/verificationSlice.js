@@ -21,22 +21,26 @@ export const generateQnA = createAsyncThunk(
     }
   }
 );
-
-// POST user answers for verification
+//submit answers and proof files to backend
 export const verifyQnA = createAsyncThunk(
   "verification/verifyQnA",
-  async ({ postId, userAnswers }, { rejectWithValue }) => {
+  async ({ postId, formData }, { rejectWithValue }) => {
     try {
-      console.log("🔹 Submitting answers for:", postId, userAnswers);
-      const res = await axiosInstance.post(`/verifyanswer/${postId}`, { userAnswers });
-      console.log("✅ Verification response:", res.data);
+      for (let pair of formData.entries()) {
+  console.log(pair[0], pair[1]);
+}
+
+      const res = await axiosInstance.post(`/verifyanswer/${postId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      
       return res.data;
     } catch (err) {
-      console.log("❌ Verification Error:", err);
       return rejectWithValue(err.response?.data || err.message);
     }
   }
 );
+
 
 const verificationSlice = createSlice({
   name: "verification",
