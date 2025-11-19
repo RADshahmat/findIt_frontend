@@ -13,6 +13,8 @@ import ProtectedRoute from "./helpers/ProtectedRoute";
 import Messenger from "./components/userpanel/Messenger";
 import { requestWebNotificationPermission } from "./helpers/firebaseNotification";
 import axiosInstance from "./axios/axiosInstance";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const dispatch = useDispatch();
@@ -39,6 +41,7 @@ function App() {
 
   return (
     <ThemeProvider>
+       <ToastContainer position="top-right" autoClose={2000} theme="dark" />
       <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
         <BrowserRouter>
           <ScrollRestoration />

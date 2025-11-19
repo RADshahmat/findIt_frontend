@@ -2,6 +2,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import MessengerModal from "../modals/chatModal";
+
 import {
   ArrowLeft,
   Phone,
@@ -17,10 +19,12 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import {
   fetchClaimsByFoundPost,
-  approveClaim,
-  rejectClaim,
+  approveClaimThunk,
+  rejectClaimThunk,
 } from "../../../features/claim/claimSlice";
+
 import VerificationResultModal from "../modals/verificationResultModal";
+import MatchedLostPostModal from "../modals/MatchedLostPostModal";
 import { useParams, useNavigate } from "react-router-dom";
 
 const getStatusColor = (status) => {
@@ -50,10 +54,14 @@ const ClaimsScreen = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { claims } = useSelector((state) => state.claims);
-const claimList = claims?.claims || [];
+const claimList = useSelector((state) => state.claims.claims) || [];
+
   const [expanded, setExpanded] = useState(null);
   const [modalClaim, setModalClaim] = useState(null);
+  const [showModal, setViewLostModal] = useState(false);
+const [chatUser, setChatUser] = useState(null);
+const [isChatOpen, setIsChatOpen] = useState(false);
+
 
   useEffect(() => {
     if (reportId) {
@@ -61,19 +69,28 @@ const claimList = claims?.claims || [];
     }
   }, [reportId, dispatch]);
 
-  const handleApprove = (claimId) => {
-    dispatch(approveClaim(claimId));
-    alert("Claim approved (demo)");
-  };
+const handleApprove = async (claimId) => {
+  try {
+    await dispatch(approveClaimThunk(claimId)).unwrap();
 
-  const handleReject = (claimId) => {
-    dispatch(rejectClaim(claimId));
-    alert("Claim rejected (demo)");
-  };
+  } catch (err) {
+    console.error(err);
+  }
+};
 
-  const openMatchedPost = (lostPostId) => {
-    navigate(`/post/${lostPostId}`);
-  };
+const handleReject = async (claimId) => {
+  try {
+    await dispatch(rejectClaimThunk(claimId)).unwrap();
+
+  } catch (err) {
+     console.error(err);
+  }
+};
+const handleOpenChat = (claimer) => {
+  setChatUser(claimer);
+  setIsChatOpen(true);
+};
+
 
   return (
     <div className="min-h-screen p-6">
@@ -203,31 +220,47 @@ const claimList = claims?.claims || [];
                               </button>
 
                               <button
-                                onClick={() => openMatchedPost(claim.matchedLostPostId)}
+                                onClick={() => setViewLostModal(claim.matchedLostPostId)}
                                 className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg text-sm border"
                               >
                                 <LinkIcon className="h-4 w-4" />
                                 View Matched Lost Post
                               </button>
+ 
+{claim.status === "pending" && (
+  <div className="flex gap-3 mt-3 justify-between">
 
-                              {claim.status === "pending" && (
-                                <>
-                                  <button
-                                    onClick={() => handleApprove(claim._id)}
-                                    className="flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg text-sm"
-                                  >
-                                    <CheckCircle className="h-4 w-4" />
-                                    Approve Claim
-                                  </button>
-                                  <button
-                                    onClick={() => handleReject(claim._id)}
-                                    className="flex items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg text-sm"
-                                  >
-                                    <XCircle className="h-4 w-4" />
-                                    Reject Claim
-                                  </button>
-                                </>
-                              )}
+    <button
+      onClick={() => handleApprove(claim._id)}
+      className="flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition"
+    >
+      <CheckCircle className="h-4 w-4" />
+      Approve
+    </button>
+
+    <button
+      onClick={() => handleReject(claim._id)}
+      className="flex items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition"
+    >
+      <XCircle className="h-4 w-4" />
+      Reject
+    </button>
+
+  </div>
+)}
+
+{claim.status === "approved" && (
+  <button
+ onClick={() => handleOpenChat(claim.claimerId)}
+    className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm"
+  >
+    <Mail className="h-4 w-4" />
+    Chat Now
+  </button>
+)}
+
+
+                              
                             </div>
                           </div>
                         </div>
@@ -247,12 +280,27 @@ const claimList = claims?.claims || [];
     <VerificationResultModal
       claim={modalClaim}
       onClose={() => setModalClaim(null)}
-      onApprove={() => { handleApprove(modalClaim._id); setModalClaim(null); }}
-      onReject={() => { handleReject(modalClaim._id); setModalClaim(null); }}
     />
-  )}
-</AnimatePresence>
+        )}
+        
+           {showModal && (
+  <MatchedLostPostModal
+    matchedPostId={showModal}
+    onClose={() => setViewLostModal(false)}
+  />
+        )}
+        
+        {isChatOpen && chatUser && (
+          
+ <MessengerModal
+  isOpen={isChatOpen}
+  onClose={() => setIsChatOpen(false)}
+  selectedUser={chatUser}
+/>
 
+  )}
+      </AnimatePresence>
+    
     </div>
   );
 };
