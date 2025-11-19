@@ -5,7 +5,7 @@ import { X, Send, Loader2, Upload } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { generateQnA, verifyQnA } from "../../../features/verification/verificationSlice";
 
-const VerifyOwnershipModal = ({ isOpen, onClose, postId }) => {
+const VerifyOwnershipModal = ({ isOpen, onClose, postId , lost_post_id}) => {
   const dispatch = useDispatch();
   const { generatedQuestions, loading } = useSelector((s) => s.verification);
 
@@ -23,8 +23,9 @@ const VerifyOwnershipModal = ({ isOpen, onClose, postId }) => {
   };
 
   useEffect(() => {
-    if (isOpen && postId) {
-      dispatch(generateQnA(postId)).then((res) => {
+    if (isOpen && postId && lost_post_id) {
+      //console.log("Generating QnA for FoundpostId:", postId, "and lost_post_id:", lost_post_id);
+      dispatch(generateQnA({ postId, lost_post_id })).then((res) => {
         const msg = res.payload?.message;
         if (msg === "You have already submitted verification for this post.") {
           setApiMessage(msg);
@@ -36,7 +37,7 @@ const VerifyOwnershipModal = ({ isOpen, onClose, postId }) => {
       // Reset form when modal closes
       resetForm();
     }
-  }, [isOpen, postId, dispatch]);
+  }, [isOpen, postId, lost_post_id, dispatch]);
 
   useEffect(() => {
     if (Array.isArray(generatedQuestions) && generatedQuestions.length > 0) {

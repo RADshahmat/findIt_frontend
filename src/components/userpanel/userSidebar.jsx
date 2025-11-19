@@ -182,7 +182,7 @@ const UserSidebar = () => {
       },
 
       { id: "messenger", label: "Messenger", icon: MessageCircle, count: 2 },
-      { id: "saved-searches", label: "Saved Searches", icon: Search, count: 5 },
+      { id: "saved-searches", label: "My Claims", icon: Search, count: 5 },
     ],
     account: [
       { id: "my-account", label: "My Account", icon: User },
@@ -411,7 +411,7 @@ const UserSidebar = () => {
                 </button>
               </div>
               <div className="p-2">
-                {(activeBottomTab === "listings" ? sidebarItems.listings : sidebarItems.account).map((item, index) => (
+                {(activeBottomTab === "listings" ? sidebarItems.listings : sidebarItems.account).map((item) => (
                   <button
                     key={item.id}
                     onClick={() => handleSectionClick(item.id)}

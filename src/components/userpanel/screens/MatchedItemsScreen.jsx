@@ -64,7 +64,7 @@ useEffect(() => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6"
+      className="min-h-screen  p-6"
     >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -226,7 +226,8 @@ useEffect(() => {
       <VerifyOwnershipModal
         isOpen={isVerifyModalOpen}
         onClose={() => setVerifyModalOpen(false)}
-       postId={selectedMatch?._id}
+        postId={selectedMatch?._id}
+        lost_post_id={reportId}
       />
     </motion.div>
   );

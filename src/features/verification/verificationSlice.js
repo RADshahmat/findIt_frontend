@@ -5,10 +5,11 @@ import axiosInstance from "../../axios/axiosInstance";
 // GET dynamic QnA from backend
 export const generateQnA = createAsyncThunk(
   "verification/generateQnA",
-  async (postId, { rejectWithValue }) => {
+async ({ postId, lost_post_id }, { rejectWithValue }) => {
+
     try {
       console.log("🔹 Calling generateQnA API for:", postId);
-      const res = await axiosInstance.get(`/qnagenerate/${postId}`);
+      const res = await axiosInstance.get( `/qnagenerate/${postId}?lost_post_id=${lost_post_id}`); 
       console.log("✅ Response:", res.data);
       // Return both questions and message for frontend
       return { 
