@@ -35,8 +35,8 @@ export default function NavProfile() {
   const username = userData?.username || "Guest";
 
   const imageUrl = userImage
-    ? `http://93.127.166.229:5000/image/${userImage}`
-    : "http://93.127.166.229:5000/image/1x_bNUPuCgVtBA5GbbMW31iWiOoQsk708";
+    ? `https://backend.finditbd.hurairaconsultancy.com/image/${userImage}`
+    : "https://backend.finditbd.hurairaconsultancy.com/image/1x_bNUPuCgVtBA5GbbMW31iWiOoQsk708";
 
   return (
     <div className="relative inline-block" ref={dropdownRef}>

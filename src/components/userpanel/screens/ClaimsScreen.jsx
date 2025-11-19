@@ -1,374 +1,265 @@
-"use client"
-import { motion } from "framer-motion"
+// ClaimsScreen.jsx
+"use client";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
-  MapPin,
-  Calendar,
   Phone,
   Mail,
   CheckCircle,
   XCircle,
-  Clock,
   FileText,
   Star,
   Shield,
-} from "lucide-react"
+  Eye,
+  Link as LinkIcon,
+} from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  fetchClaimsByFoundPost,
+  approveClaim,
+  rejectClaim,
+} from "../../../features/claim/claimSlice";
+import VerificationResultModal from "../modals/verificationResultModal";
+import { useParams, useNavigate } from "react-router-dom";
 
-const ClaimsScreen = ({ reportId, onBack }) => {
-  // Mock data for claims
-  const claims = [
-    {
-      id: 1,
-      claimer: {
-        name: "MD. Rad Shahmat",
-        phone: "+88 01716040447",
-        email: "emily.rodriguez@email.com",
-        rating: 4.9,
-        verified: true,
-      },
-      claimDate: "2024-01-16",
-      description:
-        "This is definitely my wallet! I lost it yesterday while jogging in Central Park. It has my driver's license, credit cards, and a photo of my dog inside.",
-      proofDocuments: [
-        { type: "ID", name: "Driver's License Photo" },
-        { type: "Receipt", name: "Recent Purchase Receipt" },
-      ],
-      verificationScore: 95,
-      status: "pending",
-      location: "Central Park, NYC",
-      additionalInfo:
-        "I can provide additional identification if needed. The wallet also has a small tear on the back corner.",
-    },
-    {
-      id: 2,
-      claimer: {
-        name: "HR Khan Ratin",
-        phone: "+88 01987654321",
-        email: "david.chen@email.com",
-        rating: 4.7,
-        verified: true,
-      },
-      claimDate: "2024-01-15",
-      description:
-        "I believe this might be my wallet. I lost it around the same area and time. It's black leather with multiple card slots.",
-      proofDocuments: [{ type: "Bank", name: "Bank Statement" }],
-      verificationScore: 78,
-      status: "under_review",
-      location: "Near Central Park",
-      additionalInfo: "I have bank statements showing transactions from cards that should be in the wallet.",
-    },
-    {
-      id: 3,
-      claimer: {
-        name: "Michael Thompson",
-        phone: "+1 (555) 456-7890",
-        email: "michael.t@email.com",
-        rating: 4.5,
-        verified: false,
-      },
-      claimDate: "2024-01-14",
-      description: "This looks like my wallet. I lost it last week somewhere in Manhattan.",
-      proofDocuments: [],
-      verificationScore: 45,
-      status: "rejected",
-      location: "Manhattan, NYC",
-      additionalInfo: "No additional proof provided.",
-    },
-    {
-      id: 4,
-      claimer: {
-        name: "Lisa Wang",
-        phone: "+1 (555) 567-8901",
-        email: "lisa.wang@email.com",
-        rating: 4.8,
-        verified: true,
-      },
-      claimDate: "2024-01-17",
-      description:
-        "I'm confident this is my wallet. I can describe the contents in detail and provide proof of ownership for all items inside.",
-      proofDocuments: [
-        { type: "ID", name: "Passport Copy" },
-        { type: "Card", name: "Credit Card Statement" },
-        { type: "Photo", name: "Wallet Purchase Receipt" },
-      ],
-      verificationScore: 92,
-      status: "approved",
-      location: "Central Park East",
-      additionalInfo: "I have the original purchase receipt for the wallet and can describe unique identifying marks.",
-    },
-  ]
+const getStatusColor = (status) => {
+  switch (status) {
+    case "pending":
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+    case "approved":
+      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+    case "rejected":
+      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+    case "under_review":
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+    default:
+      return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
+  }
+};
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-      case "approved":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-      case "rejected":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-      case "under_review":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+const getVerificationColor = (score) => {
+  if (score >= 90) return "text-green-600 dark:text-green-400";
+  if (score >= 70) return "text-blue-600 dark:text-blue-400";
+  if (score >= 50) return "text-yellow-600 dark:text-yellow-400";
+  return "text-red-600 dark:text-red-400";
+};
+
+const ClaimsScreen = () => {
+  const { reportId } = useParams();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { claims } = useSelector((state) => state.claims);
+const claimList = claims?.claims || [];
+  const [expanded, setExpanded] = useState(null);
+  const [modalClaim, setModalClaim] = useState(null);
+
+  useEffect(() => {
+    if (reportId) {
+      dispatch(fetchClaimsByFoundPost(reportId));
     }
-  }
+  }, [reportId, dispatch]);
 
-  const getVerificationColor = (score) => {
-    if (score >= 90) return "text-green-600 dark:text-green-400"
-    if (score >= 70) return "text-blue-600 dark:text-blue-400"
-    if (score >= 50) return "text-yellow-600 dark:text-yellow-400"
-    return "text-red-600 dark:text-red-400"
-  }
+  const handleApprove = (claimId) => {
+    dispatch(approveClaim(claimId));
+    alert("Claim approved (demo)");
+  };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "pending":
-        return <Clock className="h-4 w-4" />
-      case "approved":
-        return <CheckCircle className="h-4 w-4" />
-      case "rejected":
-        return <XCircle className="h-4 w-4" />
-      case "under_review":
-        return <FileText className="h-4 w-4" />
-      default:
-        return <Clock className="h-4 w-4" />
-    }
-  }
+  const handleReject = (claimId) => {
+    dispatch(rejectClaim(claimId));
+    alert("Claim rejected (demo)");
+  };
+
+  const openMatchedPost = (lostPostId) => {
+    navigate(`/post/${lostPostId}`);
+  };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6"
-    >
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-slate-700/20 p-6 mb-8"
-        >
-          <div className="flex items-center gap-4">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={onBack}
-              className="p-2 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400 rounded-xl hover:bg-purple-200 dark:hover:bg-purple-800 transition-all duration-200"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </motion.button>
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-                Claims
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">{claims.length} people have claimed this item</p>
-            </div>
+    <div className="min-h-screen p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* header */}
+        <div className="flex items-center gap-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-slate-700/20 p-6 mb-8">
+          <button
+            onClick={() => navigate("/user/my-reports")}
+            className="p-2 bg-white/80 dark:bg-slate-800 rounded-xl shadow-sm"
+            aria-label="Back"
+          >
+            <ArrowLeft className="h-5 w-5 text-slate-700 dark:text-slate-200" />
+          </button>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Claims</h1>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{(claimList || []).length} people have claimed this item</p>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Claims Grid */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-        >
-          {claims.map((claim, index) => (
-            <motion.div
-              key={claim.id}
-              initial={{ opacity: 0, y: 20, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              whileHover={{ y: -5, scale: 1.02 }}
-              className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-slate-700/20 overflow-hidden group hover:shadow-2xl transition-all duration-300"
-            >
-              {/* Header */}
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4">
-                <div className="flex items-center justify-between">
+        {/* accordion */}
+        <div className="space-y-4">
+          {claimList.map((claim) => {
+            const isOpen = expanded === claim._id;
+            return (
+              <div key={claim._id} className="bg-white/90 dark:bg-slate-800/80 rounded-2xl shadow-md border border-white/10 overflow-hidden">
+                {/* header */}
+                <div
+                  className="flex items-center justify-between p-4 cursor-pointer"
+                  onClick={() => setExpanded(isOpen ? null : claim._id)}
+                >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-lg">{claim.claimer.name.charAt(0)}</span>
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center text-white font-semibold">
+                      {claim.claimer.name.charAt(0)}
                     </div>
                     <div>
-                      <h3 className="text-white font-bold text-lg">{claim.claimer.name}</h3>
                       <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-3 w-3 text-yellow-300 fill-current" />
-                          <span className="text-white/80 text-sm">{claim.claimer.rating}</span>
+                        <h3 className="font-semibold text-slate-900 dark:text-slate-100">{claim.claimer.name}</h3>
+                        <div className="text-xs text-slate-500 dark:text-slate-300 flex items-center gap-1">
+                          <Star className="h-3 w-3 text-yellow-400" />
+                          {claim.claimer.rating}
+                          {claim.claimer.verified && <Shield className="h-3 w-3 text-green-400 ml-2" />}
                         </div>
-                        {claim.claimer.verified && (
-                          <div className="flex items-center gap-1">
-                            <Shield className="h-3 w-3 text-green-300" />
-                            <span className="text-white/80 text-xs">Verified</span>
-                          </div>
-                        )}
+                      </div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">{new Date(claim.createdAt).toLocaleString()}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(claim.status)}`}>
+                      {claim.status.replace("_", " ").toUpperCase()}
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-semibold">
+                        <span className={`${getVerificationColor(claim.scorePercentage)}`}>{claim.scorePercentage}%</span>
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div
-                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(claim.status)}`}
-                    >
-                      {getStatusIcon(claim.status)}
-                      <span>{claim.status.replace("_", " ").toUpperCase()}</span>
-                    </div>
-                  </div>
                 </div>
-              </div>
 
-              {/* Content */}
-              <div className="p-6">
-                {/* Verification Score */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="mb-4"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Verification Score</span>
-                    <span className={`text-lg font-bold ${getVerificationColor(claim.verificationScore)}`}>
-                      {claim.verificationScore}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                {/* expanded content */}
+                <AnimatePresence>
+                  {isOpen && (
                     <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${claim.verificationScore}%` }}
-                      transition={{ duration: 1, delay: 0.5 }}
-                      className={`h-2 rounded-full ${
-                        claim.verificationScore >= 90
-                          ? "bg-green-500"
-                          : claim.verificationScore >= 70
-                            ? "bg-blue-500"
-                            : claim.verificationScore >= 50
-                              ? "bg-yellow-500"
-                              : "bg-red-500"
-                      }`}
-                    />
-                  </div>
-                </motion.div>
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="px-4 pb-4 pt-0"
+                    >
+                      <div className="grid md:grid-cols-3 gap-4">
+                        {/* left col: evidence */}
+                        <div className="md:col-span-2 space-y-3">
+                          <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg">
+                            <h4 className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-1">Claim Description</h4>
+                            <p className="text-sm text-slate-600 dark:text-slate-300">{claim.description}</p>
+                          </div>
 
-                {/* Claim Details */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="space-y-3 mb-4"
-                >
-                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                    <Calendar className="h-4 w-4 mr-2 text-purple-500 dark:text-purple-400" />
-                    <span>Claimed on {new Date(claim.claimDate).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                    <MapPin className="h-4 w-4 mr-2 text-blue-500 dark:text-blue-400" />
-                    <span>{claim.location}</span>
-                  </div>
-                </motion.div>
+                          {/* Q&A preview (show few) */}
+         <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                            <div className="mb-2">
+                              <div className="text-xs text-green-700 dark:text-green-300 font-semibold">AI VERDICT</div>
+                              <div className="text-lg font-bold text-green-900 dark:text-green-100">{claim.verdict}</div>
+                              <div className={`text-sm mt-1 ${getVerificationColor(claim.scorePercentage)}`}>
+                                Confidence Score: {claim.scorePercentage}%
+                              </div>
+                            </div>
+                          </div>
 
-                {/* Description */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="mb-4"
-                >
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Claim Description</h4>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{claim.description}</p>
-                </motion.div>
-
-                {/* Proof Documents */}
-                {claim.proofDocuments.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                    className="mb-4"
-                  >
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Proof Documents</h4>
-                    <div className="space-y-2">
-                      {claim.proofDocuments.map((doc, docIndex) => (
-                        <div key={docIndex} className="flex items-center gap-2 text-sm">
-                          <FileText className="h-4 w-4 text-green-500 dark:text-green-400" />
-                          <span className="text-gray-600 dark:text-gray-400">{doc.name}</span>
-                          <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded text-xs">
-                            {doc.type}
-                          </span>
+                          {/* proof files preview */}
+                          <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg">
+                            <h4 className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-2">Proof Documents</h4>
+                            <div className="flex flex-wrap gap-2">
+                              {claim.proofFiles.map((f, i) => (
+                                <div key={i} className="w-24 h-24 border rounded-lg overflow-hidden relative bg-white/60">
+                                    <img src={`https://backend.finditbd.hurairaconsultancy.com${f.url}`} alt={f.name} className="w-full h-full object-cover" />
+                                  <a href={`https://backend.finditbd.hurairaconsultancy.com${f.url}`} target="_blank" rel="noreferrer" className="absolute bottom-1 right-1 bg-white/80 dark:bg-slate-800/70 rounded px-1 py-0.5 text-xs">Open</a>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
 
-                {/* Contact Info */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.7 }}
-                  className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 mb-4"
-                >
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Contact Information</h4>
-                  <div className="space-y-1">
-                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                      <Phone className="h-3 w-3 mr-2" />
-                      <span>{claim.claimer.phone}</span>
-                    </div>
-                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                      <Mail className="h-3 w-3 mr-2" />
-                      <span>{claim.claimer.email}</span>
-                    </div>
-                  </div>
-                </motion.div>
+                        {/* right col: meta & actions */}
+                        <div className="space-y-3">
+                          <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-white/10">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="text-sm font-medium text-slate-700 dark:text-slate-200">Contact</div>
+                             {/* <div className="text-xs text-slate-500 dark:text-slate-400">{claim.location}</div> */} 
+                            </div>
+                            <div className="text-sm text-slate-600 dark:text-slate-300 mb-2">
+                              <div className="flex items-center gap-2"><Phone className="h-4 w-4" />{claim.claimer.phone}</div>
+                              <div className="flex items-center gap-2 mt-1"><Mail className="h-4 w-4" />{claim.claimer.email}</div>
+                            </div>
 
-                {/* Additional Info */}
-                {claim.additionalInfo && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8 }}
-                    className="mb-4"
-                  >
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Additional Information</h4>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">{claim.additionalInfo}</p>
-                  </motion.div>
-                )}
+                          </div>
 
-                {/* Action Buttons */}
-                {claim.status === "pending" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.9 }}
-                    className="flex gap-3"
-                  >
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 text-sm font-medium"
-                    >
-                      <CheckCircle className="h-4 w-4" />
-                      <span>Approve</span>
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-lg hover:from-red-600 hover:to-rose-600 transition-all duration-200 text-sm font-medium"
-                    >
-                      <XCircle className="h-4 w-4" />
-                      <span>Reject</span>
-                    </motion.button>
-                  </motion.div>
-                )}
+                          <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-white/10">
+                  
+
+                            <div className="flex flex-col gap-2">
+                              <button
+                                onClick={() => setModalClaim(claim)}
+                                className="flex items-center justify-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm"
+                              >
+                                <Eye className="h-4 w-4" />
+                                View Verification Details
+                              </button>
+
+                              <button
+                                onClick={() => openMatchedPost(claim.matchedLostPostId)}
+                                className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg text-sm border"
+                              >
+                                <LinkIcon className="h-4 w-4" />
+                                View Matched Lost Post
+                              </button>
+
+                              {claim.status === "pending" && (
+                                <>
+                                  <button
+                                    onClick={() => handleApprove(claim._id)}
+                                    className="flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg text-sm"
+                                  >
+                                    <CheckCircle className="h-4 w-4" />
+                                    Approve Claim
+                                  </button>
+                                  <button
+                                    onClick={() => handleReject(claim._id)}
+                                    className="flex items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg text-sm"
+                                  >
+                                    <XCircle className="h-4 w-4" />
+                                    Reject Claim
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            </motion.div>
-          ))}
-        </motion.div>
+            );
+          })}
+        </div>
       </div>
-    </motion.div>
-  )
-}
 
-export default ClaimsScreen
+      {/* Verification Modal */}
+<AnimatePresence>
+  {modalClaim && (
+    <VerificationResultModal
+      claim={modalClaim}
+      onClose={() => setModalClaim(null)}
+      onApprove={() => { handleApprove(modalClaim._id); setModalClaim(null); }}
+      onReject={() => { handleReject(modalClaim._id); setModalClaim(null); }}
+    />
+  )}
+</AnimatePresence>
+
+    </div>
+  );
+};
+
+export default ClaimsScreen;
+
+
+
+// export default VerifyModal if using separate file
+//export default VerifyModal;

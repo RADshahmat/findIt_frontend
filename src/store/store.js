@@ -9,6 +9,7 @@ import reportsReducer from "../features/reports/reportsSlice"
 import matchesReducer from '../features/matching/matching.jsx';
 import searchReducer from '../features/search/searchSlice.jsx';
 import verificationReducer from "../features/verification/verificationSlice";
+import claimReducer from '../features/claim/claimSlice';
 
 export const store = configureStore({
   reducer: {
@@ -22,5 +23,6 @@ export const store = configureStore({
     matches: matchesReducer,
     search: searchReducer,
     verification: verificationReducer,
+    claims: claimReducer,
   },
 });

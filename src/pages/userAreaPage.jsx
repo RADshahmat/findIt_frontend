@@ -1,9 +1,6 @@
-"use client"
 
 import { Routes, Route, Navigate } from "react-router-dom"
-import { motion } from "framer-motion"
 import Navbar from "../components/Navbar"
-import Footer from "../components/Footer"
 import UserSidebar from "../components/userpanel/userSidebar"
 import DashboardHome from "../components/userpanel/DashboardHome"
 import CreateReport from "../components/userpanel/CreateReport"
@@ -16,6 +13,8 @@ import MyAccount from "../components/userpanel/MyAccount"
 import Notifications from "../components/userpanel/Notifications"
 import ReportLostItem from "../components/userpanel/ReportLostItem"
 import ReportFoundItem from "../components/userpanel/ReportFoundItem"
+import MatchedItemsScreen from "../components/userpanel/screens/MatchedItemsScreen"
+import ClaimsScreen from "../components/userpanel/screens/ClaimsScreen"
 
 const UserPage = () => {
   return (
@@ -37,11 +36,14 @@ const UserPage = () => {
             {/* Listings routes */}
             <Route path="/my-listings" element={<MyListings />} />
             <Route path="/my-reports" element={<MyReports />} />
+            <Route path="/my-reports/matchedscreen/:reportId" element={<MatchedItemsScreen />} />
+            <Route path="/my-reports/claimscreen/:reportId" element={<ClaimsScreen />} />
             <Route path="/archived-listings" element={<ArchivedListings />} />
 
             {/* Communication routes */}
             
             <Route path="/saved-searches" element={<SavedSearches />} />
+            <Route path="/messenger" element={<Messenger />} />
 
             {/* Account routes */}
             <Route path="/my-account" element={<MyAccount />} />
@@ -52,7 +54,6 @@ const UserPage = () => {
           </Routes>
         </div>
       </div>
-      <Footer />
     </div>
   )
 }
