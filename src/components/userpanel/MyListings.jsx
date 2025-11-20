@@ -246,7 +246,7 @@ const handleDeleteItem = () => {
                 <div className="p-5">
                   <h3 className="font-semibold text-gray-800 mb-2 line-clamp-1 text-lg">{item.title}</h3>
                   <p className="text-sm text-gray-600 mb-2 font-medium">
-                    {item.category} • {item.subcategory}
+                    {item.categoryName} • {item.subcategoryName}
                   </p>
                   <p className="text-sm text-gray-500 mb-4 line-clamp-2">{item.description}</p>
 
