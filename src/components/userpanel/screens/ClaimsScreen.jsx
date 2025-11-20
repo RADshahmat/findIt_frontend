@@ -2,6 +2,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import MessengerModal from "../modals/chatModal";
+
 import {
   ArrowLeft,
   Phone,
@@ -17,11 +19,14 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import {
   fetchClaimsByFoundPost,
-  approveClaim,
-  rejectClaim,
+  approveClaimThunk,
+  rejectClaimThunk,
 } from "../../../features/claim/claimSlice";
+
 import VerificationResultModal from "../modals/verificationResultModal";
+import MatchedLostPostModal from "../modals/MatchedLostPostModal";
 import { useParams, useNavigate } from "react-router-dom";
+import Chat from "../Messenger";
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -50,10 +55,16 @@ const ClaimsScreen = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { claims } = useSelector((state) => state.claims);
-const claimList = claims?.claims || [];
+  const claimList = useSelector((state) => state.claims.claims) || [];
+  const { user } = useSelector((state) => state.auth);
+
   const [expanded, setExpanded] = useState(null);
   const [modalClaim, setModalClaim] = useState(null);
+  const [showModal, setViewLostModal] = useState(false);
+  const [chatUser, setChatUser] = useState(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatPostId, setChatPostId] = useState(null);
+
 
   useEffect(() => {
     if (reportId) {
@@ -61,20 +72,30 @@ const claimList = claims?.claims || [];
     }
   }, [reportId, dispatch]);
 
-  const handleApprove = (claimId) => {
-    dispatch(approveClaim(claimId));
-    alert("Claim approved (demo)");
+  const handleApprove = async (claimId) => {
+    try {
+      await dispatch(approveClaimThunk(claimId)).unwrap();
+
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleReject = (claimId) => {
-    dispatch(rejectClaim(claimId));
-    alert("Claim rejected (demo)");
+  const handleReject = async (claimId) => {
+    try {
+      await dispatch(rejectClaimThunk(claimId)).unwrap();
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const handleOpenChat = (claimer,postId) => {
+    setChatUser(claimer);
+    setChatPostId(postId);
+    setIsChatOpen(true);
   };
 
-  const openMatchedPost = (lostPostId) => {
-    navigate(`/post/${lostPostId}`);
-  };
-
+  console.log("Claims List:", claimList);
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-6xl mx-auto">
@@ -152,7 +173,7 @@ const claimList = claims?.claims || [];
                           </div>
 
                           {/* Q&A preview (show few) */}
-         <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                          <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
                             <div className="mb-2">
                               <div className="text-xs text-green-700 dark:text-green-300 font-semibold">AI VERDICT</div>
                               <div className="text-lg font-bold text-green-900 dark:text-green-100">{claim.verdict}</div>
@@ -168,7 +189,7 @@ const claimList = claims?.claims || [];
                             <div className="flex flex-wrap gap-2">
                               {claim.proofFiles.map((f, i) => (
                                 <div key={i} className="w-24 h-24 border rounded-lg overflow-hidden relative bg-white/60">
-                                    <img src={`https://backend.finditbd.hurairaconsultancy.com${f.url}`} alt={f.name} className="w-full h-full object-cover" />
+                                  <img src={`https://backend.finditbd.hurairaconsultancy.com${f.url}`} alt={f.name} className="w-full h-full object-cover" />
                                   <a href={`https://backend.finditbd.hurairaconsultancy.com${f.url}`} target="_blank" rel="noreferrer" className="absolute bottom-1 right-1 bg-white/80 dark:bg-slate-800/70 rounded px-1 py-0.5 text-xs">Open</a>
                                 </div>
                               ))}
@@ -181,7 +202,7 @@ const claimList = claims?.claims || [];
                           <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-white/10">
                             <div className="flex items-center justify-between mb-2">
                               <div className="text-sm font-medium text-slate-700 dark:text-slate-200">Contact</div>
-                             {/* <div className="text-xs text-slate-500 dark:text-slate-400">{claim.location}</div> */} 
+                              {/* <div className="text-xs text-slate-500 dark:text-slate-400">{claim.location}</div> */}
                             </div>
                             <div className="text-sm text-slate-600 dark:text-slate-300 mb-2">
                               <div className="flex items-center gap-2"><Phone className="h-4 w-4" />{claim.claimer.phone}</div>
@@ -191,7 +212,7 @@ const claimList = claims?.claims || [];
                           </div>
 
                           <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-white/10">
-                  
+
 
                             <div className="flex flex-col gap-2">
                               <button
@@ -203,7 +224,7 @@ const claimList = claims?.claims || [];
                               </button>
 
                               <button
-                                onClick={() => openMatchedPost(claim.matchedLostPostId)}
+                                onClick={() => setViewLostModal(claim.matchedLostPostId)}
                                 className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg text-sm border"
                               >
                                 <LinkIcon className="h-4 w-4" />
@@ -211,23 +232,39 @@ const claimList = claims?.claims || [];
                               </button>
 
                               {claim.status === "pending" && (
-                                <>
+                                <div className="flex gap-3 mt-3 justify-between">
+
                                   <button
                                     onClick={() => handleApprove(claim._id)}
-                                    className="flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg text-sm"
+                                    className="flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition"
                                   >
                                     <CheckCircle className="h-4 w-4" />
-                                    Approve Claim
+                                    Approve
                                   </button>
+
                                   <button
                                     onClick={() => handleReject(claim._id)}
-                                    className="flex items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg text-sm"
+                                    className="flex items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition"
                                   >
                                     <XCircle className="h-4 w-4" />
-                                    Reject Claim
+                                    Reject
                                   </button>
-                                </>
+
+                                </div>
                               )}
+
+                              {claim.status === "approved" && (
+                                <button
+                                  onClick={() => handleOpenChat(claim.claimerId,claim.foundPostId)}
+                                  className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm"
+                                >
+                                  <Mail className="h-4 w-4" />
+                                  Chat Now
+                                </button>
+                              )}
+
+
+
                             </div>
                           </div>
                         </div>
@@ -242,16 +279,32 @@ const claimList = claims?.claims || [];
       </div>
 
       {/* Verification Modal */}
-<AnimatePresence>
-  {modalClaim && (
-    <VerificationResultModal
-      claim={modalClaim}
-      onClose={() => setModalClaim(null)}
-      onApprove={() => { handleApprove(modalClaim._id); setModalClaim(null); }}
-      onReject={() => { handleReject(modalClaim._id); setModalClaim(null); }}
-    />
-  )}
-</AnimatePresence>
+      <AnimatePresence>
+        {modalClaim && (
+          <VerificationResultModal
+            claim={modalClaim}
+            onClose={() => setModalClaim(null)}
+          />
+        )}
+
+        {showModal && (
+          <MatchedLostPostModal
+            matchedPostId={showModal}
+            onClose={() => setViewLostModal(false)}
+          />
+        )}
+
+        {isChatOpen && chatUser && (
+
+          <Chat
+            isOpen={isChatOpen}
+            onClose={() => setIsChatOpen(false)}
+            postId={chatPostId}
+            postOwnerId={chatUser}
+          />
+
+        )}
+      </AnimatePresence>
 
     </div>
   );

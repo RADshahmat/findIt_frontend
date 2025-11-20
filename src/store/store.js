@@ -10,7 +10,7 @@ import matchesReducer from '../features/matching/matching.jsx';
 import searchReducer from '../features/search/searchSlice.jsx';
 import verificationReducer from "../features/verification/verificationSlice";
 import claimReducer from '../features/claim/claimSlice';
-
+import matchedLostPostReducer from '../features/posts/getsinglepostSlice';
 export const store = configureStore({
   reducer: {
     catagory: catagoryReducer,
@@ -24,5 +24,6 @@ export const store = configureStore({
     search: searchReducer,
     verification: verificationReducer,
     claims: claimReducer,
+    singlepost: matchedLostPostReducer,
   },
 });
