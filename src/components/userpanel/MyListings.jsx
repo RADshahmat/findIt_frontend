@@ -8,10 +8,12 @@ import AddItemModal from "./modals/my_listings/AddItemModal"
 import EditItemModal from "./modals/my_listings/EditItemModal"
 import DeleteConfirmModal from "./modals/my_listings/DeleteConfirmModal"
 import ReportLostModal from "./modals/my_listings/ReportLostModal"
+import { fetchMyListings , createMyListing, editMyListing, deleteMyListing  } from "../../features/mylistings/myListingsSlice.js"
 
 const MyListings = () => {
   const dispatch = useDispatch()
   const { catagory, status } = useSelector((state) => state.catagory)
+  //console.log(catagory,"categories in my listings")
 
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false)
@@ -25,82 +27,43 @@ const MyListings = () => {
   const [filterStatus, setFilterStatus] = useState("all")
 
   // Mock data for user's items
-  const [myItems, setMyItems] = useState([
-    {
-      id: 1,
-      title: "iPhone 15 Pro Max",
-      category: "Electronics",
-      subcategory: "Mobile Phones",
-      description: "Space Black iPhone 15 Pro Max 256GB with clear case",
-      images: ["/placeholder.svg?height=100&width=100"],
-      status: "active",
-      dateAdded: "2024-01-15",
-      lastUpdated: "2024-01-15",
-    },
-    {
-      id: 2,
-      title: "Gold Wedding Ring",
-      category: "Jewelry",
-      subcategory: "Rings",
-      description: "18k gold wedding band with engraved initials 'M&J'",
-      images: ["/placeholder.svg?height=100&width=100"],
-      status: "lost_reported",
-      dateAdded: "2024-01-10",
-      lastUpdated: "2024-01-20",
-      reportedDate: "2024-01-20",
-    },
-    {
-      id: 3,
-      title: "Black Leather Wallet",
-      category: "Personal Items",
-      subcategory: "Wallets",
-      description: "Black leather bifold wallet with multiple card slots",
-      images: ["/placeholder.svg?height=100&width=100"],
-      status: "active",
-      dateAdded: "2024-01-05",
-      lastUpdated: "2024-01-05",
-    },
-  ])
+ const { listings: myItems, loading } = useSelector((state) => state.myListings);
 
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchCatagories())
     }
   }, [status, dispatch])
+  
+  useEffect(() => {
+    dispatch(fetchMyListings());
+  }, [dispatch]);
 
-  const handleAddItem = (newItem) => {
-    const item = {
-      id: Date.now(),
-      ...newItem,
-      status: "active",
-      dateAdded: new Date().toISOString().split("T")[0],
-      lastUpdated: new Date().toISOString().split("T")[0],
-    }
-    setMyItems((prev) => [item, ...prev])
-    setShowAddModal(false)
-  }
+const handleAddItem = (formData) => {
+  dispatch(createMyListing(formData));
+  setShowAddModal(false);
+};
 
-  const handleEditItem = (updatedItem) => {
-    setMyItems((prev) =>
-      prev.map((item) =>
-        item.id === selectedItem.id
-          ? {
-              ...item,
-              ...updatedItem,
-              lastUpdated: new Date().toISOString().split("T")[0],
-            }
-          : item,
-      ),
-    )
-    setShowEditModal(false)
-    setSelectedItem(null)
-  }
 
-  const handleDeleteItem = () => {
-    setMyItems((prev) => prev.filter((item) => item.id !== selectedItem.id))
-    setShowDeleteModal(false)
-    setSelectedItem(null)
-  }
+const handleEditItem = (updatedItem) => {
+  dispatch(editMyListing({ id: selectedItem._id, data: updatedItem }))
+    .unwrap()
+    .then(() => {
+      setShowEditModal(false);
+      setSelectedItem(null);
+    })
+    .catch((err) => console.error("Failed to edit listing:", err));
+};
+
+const handleDeleteItem = () => {
+  dispatch(deleteMyListing(selectedItem._id))
+    .unwrap()
+    .then(() => {
+      setShowDeleteModal(false);
+      setSelectedItem(null);
+    })
+    .catch((err) => console.error("Failed to delete listing:", err));
+};
 
   const handleReportLost = () => {
     setMyItems((prev) =>
@@ -162,6 +125,7 @@ const MyListings = () => {
   }
 
   const filteredItems = myItems.filter((item) => {
+    console.log(item,"item in filtering")
     const matchesSearch =
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.category.toLowerCase().includes(searchTerm.toLowerCase())
@@ -252,7 +216,7 @@ const MyListings = () => {
           >
             {filteredItems.map((item, index) => (
               <motion.div
-                key={item.id}
+                key={item._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
@@ -287,8 +251,8 @@ const MyListings = () => {
                   <p className="text-sm text-gray-500 mb-4 line-clamp-2">{item.description}</p>
 
                   <div className="flex items-center justify-between text-xs text-gray-500 mb-4 bg-gray-50 rounded-lg p-2">
-                    <span>Added: {new Date(item.dateAdded).toLocaleDateString()}</span>
-                    <span>Updated: {new Date(item.lastUpdated).toLocaleDateString()}</span>
+                    <span>Added: {new Date(item.createdAt).toLocaleDateString()}</span>
+                    <span>Updated: {new Date(item.updatedAt).toLocaleDateString()}</span>
                   </div>
 
                   <div className="flex gap-2">

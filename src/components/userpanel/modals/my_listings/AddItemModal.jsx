@@ -55,12 +55,27 @@ const AddItemModal = ({ onClose, onSubmit, categories }) => {
     setImages((prev) => prev.filter((img) => img.id !== id))
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    onSubmit({ ...formData, images: images.map((img) => img.preview) })
-    setFormData({ title: "", category: "", subcategory: "", description: "" })
-    setImages([])
-  }
+const handleSubmit = (e) => {
+  e.preventDefault();
+
+  const submitData = new FormData();
+
+  submitData.append("title", formData.title);
+  submitData.append("category", formData.category);
+  submitData.append("subcategory", formData.subcategory);
+  submitData.append("description", formData.description);
+
+  // append each uploaded file
+  images.forEach((img) => {
+    submitData.append("post_images", img.file); 
+  });
+
+  onSubmit(submitData); // send FormData instead of JSON
+
+  setFormData({ title: "", category: "", subcategory: "", description: "" });
+  setImages([]);
+};
+
 
   const modalVariants = {
     hidden: { opacity: 0, scale: 0.8, y: 50 },
@@ -161,7 +176,7 @@ const AddItemModal = ({ onClose, onSubmit, categories }) => {
                 >
                   <option value="">Select Category</option>
                   {categories.map((category) => (
-                    <option key={category.id} value={category.lable}>
+                    <option key={category.id} value={category.id}>
                       {category.lable}
                     </option>
                   ))}
@@ -183,9 +198,9 @@ const AddItemModal = ({ onClose, onSubmit, categories }) => {
                   >
                     <option value="">Select Subcategory</option>
                     {categories
-                      .find((c) => c.lable === formData.category)
+                      .find((c) => c.id === formData.category)
                       ?.subcategories?.map((sub) => (
-                        <option key={sub.id} value={sub.name}>
+                        <option key={sub.id} value={sub.id}>
                           {sub.name}
                         </option>
                       ))}
