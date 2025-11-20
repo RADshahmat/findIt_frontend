@@ -14,6 +14,7 @@ const ReportLostItem = ({ onBack }) => {
 
   const handleSubmit = async (formData) => {
     setIsSubmitting(true)
+    console.log("Submitting lost item report with data:")
     try {
       await dispatch(createPost(formData)).unwrap()
       // Reset form will be handled by the form component itself

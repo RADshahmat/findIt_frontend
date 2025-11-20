@@ -16,6 +16,7 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { fetchMatchess } from "../../../features/matching/matching";
 import VerifyOwnershipModal from "../modals/VerifyOwnershipModal";
+import Chat from "../Messenger";
 
 // 🔹 Main Screen Component
 const MatchedItemsScreen = () => {
@@ -30,12 +31,16 @@ const MatchedItemsScreen = () => {
 
   const [isVerifyModalOpen, setVerifyModalOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatPostId, setChatPostId] = useState(null);
+  const [chatPostOwnerId, setChatPostOwnerId] = useState(null);
 
-useEffect(() => {
-  if (reportId) {
-    dispatch(fetchMatchess(reportId));
-  }
-}, [dispatch, reportId]);
+
+  useEffect(() => {
+    if (reportId) {
+      dispatch(fetchMatchess(reportId));
+    }
+  }, [dispatch, reportId]);
 
   const getMatchColor = (percentage) => {
     if (percentage >= 90)
@@ -198,11 +203,17 @@ useEffect(() => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setChatPostId(item._id);
+                      setChatPostOwnerId(item.postedBy);
+                      setIsChatOpen(true);
+                    }}
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-200 text-sm font-medium"
                   >
                     <MessageCircle className="h-4 w-4" />
                     <span>Contact</span>
                   </motion.button>
+
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -216,12 +227,21 @@ useEffect(() => {
                     <span>Verify </span>
                   </motion.button>
                 </div>
+
+
               </div>
             </motion.div>
           ))}
         </motion.div>
       </div>
-
+      {isChatOpen && (
+        <Chat
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          postId={chatPostId}
+          postOwnerId={chatPostOwnerId}
+        />
+      )}
       {/* Verification Modal */}
       <VerifyOwnershipModal
         isOpen={isVerifyModalOpen}

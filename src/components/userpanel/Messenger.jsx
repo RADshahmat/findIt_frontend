@@ -1,369 +1,491 @@
-"use client"
-import { useState, useRef, useEffect } from "react"
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { FaArrowLeft } from "react-icons/fa";
+import io from "socket.io-client";
+import axiosInstance from "../../axios/axiosInstance";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useSelector } from "react-redux";
 
-import { Send, X, Sun, Moon, Search, MoreVertical, ArrowLeft } from "lucide-react"
 
+export default function ChatModal({ isOpen, onClose, postId, postOwnerId }) {
+  const { user } = useSelector((state) => state.auth);
+  const currentUserId = user?.user?.id ?? null;
 
-const users = [
-  { id: 1, name: "Alice Johnson", avatar: "🧑‍🦰", status: "online", lastSeen: "now" },
-  { id: 2, name: "Bob Smith", avatar: "👨‍🦱", status: "online", lastSeen: "2m ago" },
-  { id: 3, name: "Charlie Brown", avatar: "👨‍🦳", status: "offline", lastSeen: "1h ago" },
-  { id: 4, name: "Diana Prince", avatar: "👩‍🦱", status: "away", lastSeen: "5m ago" },
-]
+  const socketRef = useRef(null);
+  const [socket, setSocket] = useState(null);
 
-const initialMessages = {
-  1: [
-    { id: 1, sender: "Alice", text: "Hey! How are you doing?", timestamp: "10:30 AM" },
-    { id: 2, sender: "me", text: "I'm good! Just working on some projects. How about you?", timestamp: "10:32 AM" },
-    {
-      id: 3,
-      sender: "Alice",
-      text: "Same here! Working on the new design system. It's coming along nicely.",
-      timestamp: "10:35 AM",
-    },
-  ],
-  2: [
-    { id: 1, sender: "me", text: "Hey Bob! Long time no see!", timestamp: "9:15 AM" },
-    { id: 2, sender: "Bob", text: "Hey! Yeah, it's been a while. How's everything going?", timestamp: "9:20 AM" },
-  ],
-  3: [],
-  4: [{ id: 1, sender: "Diana", text: "Hi! Are we still on for the meeting tomorrow?", timestamp: "Yesterday" }],
-}
+  const [messages, setMessages] = useState([]); // message objects; each may include: _id, postId, sender_id, receiver_id, message, createdAt, read
+  const [newMessage, setNewMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false); // peer typing
+  const [activeUsers, setActiveUsers] = useState([]);
+  const [localTyping, setLocalTyping] = useState(false);
 
-const Messenger = () => {
-  const [selectedUserId, setSelectedUserId] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("messenger-selectedUserId")
-      return saved ? Number.parseInt(saved) : users[0].id
+  // pagination state
+  const LIMIT = 20;
+  const [offset, setOffset] = useState(0); // how many messages have been loaded
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // post owner info
+  const [peerInfo, setPeerInfo] = useState({ name: "User", avatar: null });
+
+  // refs
+  const containerRef = useRef(null);
+  const stopTypingDebounceRef = useRef(null);
+
+  // debounce helper
+  function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
+  // Initialize socket connection when modal opens
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const sock = io("https://backend.finditbd.hurairaconsultancy.com", {
+      withCredentials: true,
+    });
+
+    socketRef.current = sock;
+    setSocket(sock);
+
+    sock.on("registerSocket", (data) => {
+      // console.debug("registerSocket", data);
+    });
+
+    sock.on("activeUsers", (activeUserIds) => {
+      setActiveUsers(Array.isArray(activeUserIds) ? activeUserIds : []);
+    });
+
+    sock.on("newMessage", (messageData) => {
+      // only consider messages for this post
+      if (!messageData) return;
+      if (messageData.postId?.toString() === postId?.toString()) {
+        setMessages((prev) => [...prev, markReadFlag(prev, messageData)]);
+        // If the incoming message is sent to current user, send read receipt immediately
+        if (messageData.receiver_id?.toString() === currentUserId?.toString()) {
+          emitReadReceipt([messageData._id || messageData.id || null].filter(Boolean));
+        }
+        setTimeout(() => scrollToBottom(), 80);
+      }
+    });
+
+    sock.on("peerTyping", (payload) => {
+      const data = payload?.data;
+      const typingFlag = !!payload?.isTyping;
+      if (data && data.userId && data.userId === postOwnerId) {
+        setIsTyping(typingFlag);
+      }
+    });
+
+    // When someone marks messages read, update local messages (server to sender)
+    sock.on("messageRead", (payload) => {
+      const { messageIds = [], readerId } = payload || {};
+      if (!messageIds || messageIds.length === 0) return;
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (messageIds.includes(m._id || m.id)) return { ...m, read: true };
+          return m;
+        })
+      );
+    });
+
+    sock.on("connect", () => {
+      if (currentUserId) sock.emit("registerUserId", { userId: currentUserId });
+    });
+
+    return () => {
+      if (sock) sock.disconnect();
+      socketRef.current = null;
+      setSocket(null);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, currentUserId, postOwnerId, postId]);
+
+  // Fetch peer info when modal opens or postOwnerId changes
+  useEffect(() => {
+    if (!isOpen || !postOwnerId) return;
+
+    const fetchPeer = async () => {
+      try {
+        const res = await axiosInstance.get(`/user/${postOwnerId}`);
+        const info = res?.data ?? {};
+        // If your API returns nested shape, adjust accordingly.
+        console.log("Peer info fetched:", info);
+        setPeerInfo({
+          name: info.username ?? info.fullName ?? `User ${postOwnerId}`,
+          avatar: info.user_image
+            ?? info.profilePicture ?? null,
+        });
+      } catch (err) {
+        console.warn("Failed to fetch peer info", err);
+        // keep default peer info
+      }
+    };
+
+    fetchPeer();
+  }, [isOpen, postOwnerId]);
+
+  // Load initial messages (page 0)
+  useEffect(() => {
+    if (!isOpen || !postId) return;
+    resetAndLoadInitial();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, postId]);
+
+  // register userId on socket when available
+  useEffect(() => {
+    if (socket && currentUserId) socket.emit("registerUserId", { userId: currentUserId });
+  }, [socket, currentUserId]);
+
+  // helper: mark read flag for incoming message if message indicates read
+  function markReadFlag(prevMessages, incomingMessage) {
+    // preserve read if previously known
+    const newMsg = { ...incomingMessage };
+    if (incomingMessage.read === undefined) newMsg.read = incomingMessage.receiver_id?.toString() === currentUserId?.toString() ? false : incomingMessage.read ?? false;
+    return newMsg;
+  }
+
+  // reset pagination and load latest page
+  const resetAndLoadInitial = async () => {
+    setMessages([]);
+    setOffset(0);
+    setHasMore(true);
+    try {
+      const res = await axiosInstance.get(`/messages/${postId}?limit=${LIMIT}&offset=0`);
+      const data = res?.data;
+      const msgs = Array.isArray(data) ? data : data?.messages ?? data ?? [];
+      console.log("Initial messages loaded:", msgs,postId);
+      setMessages(msgs);
+      setOffset(msgs.length);
+      setHasMore(msgs.length === LIMIT);
+      // after loading, mark any unread messages for this user as read
+      markUnreadMessagesAsRead(msgs);
+      setTimeout(() => scrollToBottom(), 80);
+    } catch (err) {
+      console.error("Failed to load messages", err);
+      toast.error("Failed to load messages");
     }
-    return users[0].id
-  })
-  const [messages, setMessages] = useState(initialMessages)
-  const [newMessage, setNewMessage] = useState("")
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("messenger-sidebarOpen")
-      return saved ? JSON.parse(saved) : false
+  };
+
+  // load more (older) messages — we expect backend to support offset/limit
+  const loadMore = async () => {
+    if (!hasMore || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await axiosInstance.get(`/messages/${postId}?limit=${LIMIT}&offset=${offset}`);
+      const data = res?.data;
+      const moreMsgs = Array.isArray(data) ? data : data?.messages ?? data ?? [];
+      if (!moreMsgs || moreMsgs.length === 0) {
+        setHasMore(false);
+      } else {
+        // Prepend older messages so they appear above
+        setMessages((prev) => [...moreMsgs, ...prev]);
+        setOffset((prev) => prev + moreMsgs.length);
+        setHasMore(moreMsgs.length === LIMIT);
+      }
+    } catch (err) {
+      console.error("load more error", err);
+      toast.error("Could not load more messages");
+    } finally {
+      setLoadingMore(false);
     }
-    return false
-  })
-  const [searchQuery, setSearchQuery] = useState("")
-  const messagesContainerRef = useRef(null)
-  const inputRef = useRef(null)
+  };
 
-
+  // scroll to bottom utility
   const scrollToBottom = () => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
+    const el = containerRef.current || document.querySelector(".chat-body-tailwind");
+    if (el) {
+      el.scrollTop = el.scrollHeight;
     }
-  }
+  };
 
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages, selectedUserId])
+  // typing: emit typing and schedule stop
+  const emitStartTyping = useCallback(
+    debounce(() => {
+      if (socket && postOwnerId && currentUserId) {
+        socket.emit("typing", { peerId: postOwnerId, userId: currentUserId });
+      }
+    }, 200),
+    [socket, postOwnerId, currentUserId]
+  );
 
-  useEffect(() => {
-    localStorage.setItem("messenger-selectedUserId", selectedUserId.toString())
-  }, [selectedUserId])
+  const scheduleStopTyping = useCallback(() => {
+    if (stopTypingDebounceRef.current) clearTimeout(stopTypingDebounceRef.current);
+    stopTypingDebounceRef.current = setTimeout(() => {
+      if (socket && postOwnerId && currentUserId) {
+        socket.emit("stopTyping", { peerId: postOwnerId, userId: currentUserId });
+      }
+      setLocalTyping(false);
+    }, 800);
+  }, [socket, postOwnerId, currentUserId]);
 
-  useEffect(() => {
-    localStorage.setItem("messenger-sidebarOpen", JSON.stringify(sidebarOpen))
-  }, [sidebarOpen])
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setNewMessage(val);
 
-  const handleSend = () => {
-    if (!newMessage.trim()) return
+    if (!localTyping) {
+      setLocalTyping(true);
+      emitStartTyping();
+    } else {
+      emitStartTyping();
+    }
+    scheduleStopTyping();
+  };
 
-    const newMsg = {
-      id: Date.now(),
-      sender: "me",
-      text: newMessage.trim(),
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+  // send message
+  const handleSendMessage = async () => {
+    if (!newMessage.trim()) return;
+    if (!currentUserId) {
+      toast.error("Please login to send messages");
+      return;
     }
 
-    setMessages((prev) => ({
-      ...prev,
-      [selectedUserId]: [...(prev[selectedUserId] || []), newMsg],
-    }))
-    setNewMessage("")
-  }
+    const payload = {
+      postId,
+      sender_id: currentUserId,
+      receiver_id: postOwnerId,
+      message: newMessage.trim(),
+      meta: {},
+    };
 
-  const handleKeyPress = (e) => {
+    try {
+      const res = await axiosInstance.post("/message", payload);
+      // if backend returns created message, use it; otherwise create optimistic message
+      const created = res?.data ?? null;
+      if (created && (created._id || created.id)) {
+        setMessages((prev) => [...prev, created]);
+      } else {
+        const localMsg = {
+          _id: `local-${Date.now()}`,
+          postId,
+          sender_id: currentUserId,
+          receiver_id: postOwnerId,
+          message: newMessage.trim(),
+          createdAt: new Date().toISOString(),
+          read: false,
+        };
+        setMessages((prev) => [...prev, localMsg]);
+      }
+
+      // emit over socket
+      if (socket) {
+        const socketPayload = {
+          postId,
+          userId: currentUserId,
+          peerId: postOwnerId,
+          message: newMessage.trim(),
+          sender_id: currentUserId,
+          receiver_id: postOwnerId,
+          // optionally include message id if backend returned it
+          messageId: created?._id || created?.id || null,
+        };
+        socket.emit("newMessage", socketPayload, currentUserId);
+      }
+
+      setNewMessage("");
+      // immediate read stop typing
+      if (socket) socket.emit("stopTyping", { peerId: postOwnerId, userId: currentUserId });
+      setLocalTyping(false);
+      setTimeout(() => scrollToBottom(), 80);
+    } catch (err) {
+      console.error("send message error", err);
+      toast.error("Could not send message");
+    }
+  };
+
+  const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
+      e.preventDefault();
+      handleSendMessage();
     }
-  }
+  };
 
-  const filteredUsers = users.filter((user) => user.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  // When modal opens OR when messages change, mark unread messages as read for this user
+  const markUnreadMessagesAsRead = (msgs) => {
+    if (!Array.isArray(msgs) || !msgs.length) return;
+    // find message ids where receiver_id === currentUserId and read !== true
+    const unreadIds = msgs
+      .filter((m) => m.receiver_id?.toString() === currentUserId?.toString() && !m.read)
+      .map((m) => m._id || m.id)
+      .filter(Boolean);
 
-  const currentMessages = messages[selectedUserId] || []
-  const selectedUser = users.find((u) => u.id === selectedUserId)
+    if (unreadIds.length === 0) return;
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "online":
-        return "bg-green-500"
-      case "away":
-        return "bg-yellow-500"
-      case "offline":
-        return "bg-gray-400"
-      default:
-        return "bg-gray-400"
+    // 1) Optimistically update local messages
+    setMessages((prev) =>
+      prev.map((m) => {
+        if ((m._id || m.id) && unreadIds.includes(m._id || m.id)) return { ...m, read: true };
+        return m;
+      })
+    );
+
+    // 2) notify server via socket to inform sender
+    emitReadReceipt(unreadIds);
+
+    // 3) optionally post to server to mark as read persistently
+    // You can enable this if you add an endpoint like POST /messages/read
+    axiosInstance.post("/messages/read", { postId, readerId: currentUserId, messageIds: unreadIds }).catch(() => {
+      // ignore if server doesn't support it yet
+    });
+  };
+
+  // emit read receipt via socket
+  const emitReadReceipt = (messageIds = []) => {
+    if (!socket || !messageIds || messageIds.length === 0) return;
+    const payload = {
+      postId,
+      readerId: currentUserId,
+      messageIds,
+    };
+    socket.emit("messageRead", payload);
+  };
+
+  // On messages change, auto-mark unread messages read
+  useEffect(() => {
+    if (!isOpen || !messages || messages.length === 0) return;
+    // mark unread messages that belong to this post
+    markUnreadMessagesAsRead(messages);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, isOpen]);
+
+  // scroll/load-more: when user scrolls to top, load older messages
+  const handleScroll = (e) => {
+    const el = e.target;
+    if (!el) return;
+    if (el.scrollTop <= 10 && hasMore && !loadingMore) {
+      // load more older messages
+      loadMore();
     }
-  }
+  };
 
-  const handleTextareaChange = (e) => {
-    setNewMessage(e.target.value)
-    const textarea = e.target
-    textarea.style.height = "auto"
-    textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px"
-  }
+  // helper: close modal and cleanup
+  const handleClose = () => {
+    if (socket && postOwnerId && currentUserId) {
+      socket.emit("stopTyping", { peerId: postOwnerId, userId: currentUserId });
+    }
+    if (stopTypingDebounceRef.current) {
+      clearTimeout(stopTypingDebounceRef.current);
+      stopTypingDebounceRef.current = null;
+    }
+    setMessages([]);
+    setNewMessage("");
+    setOffset(0);
+    setHasMore(true);
+    setIsTyping(false);
+    setLocalTyping(false);
+    onClose && onClose();
+  };
+
+  const peerIsActive = postOwnerId && activeUsers.includes(postOwnerId);
+
+  if (!isOpen) return null;
 
   return (
-    <div className="min-h-screen w-full  overflow-hidden">
-    
-      <div className="flex">
-      
-        <div className="flex-1 flex justify-center items-center p-2 sm:p-4 h-[calc(100vh-80px)] pb-28 sm:pb-4" style={{width: "100%"}}>
-          <style>{`
-            .custom-scrollbar::-webkit-scrollbar {
-              width: 3px;
-            }
-            .custom-scrollbar::-webkit-scrollbar-track {
-              background: transparent;
-            }
-            .custom-scrollbar::-webkit-scrollbar-thumb {
-              background: rgba(156, 163, 175, 0.5);
-              border-radius: 10px;
-            }
-            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-              background: rgba(156, 163, 175, 0.7);
-            }
-            .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-              background: rgba(75, 85, 99, 0.5);
-            }
-            .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-              background: rgba(75, 85, 99, 0.7);
-            }
-            .word-wrap {
-              word-wrap: break-word;
-              overflow-wrap: anywhere;
-              word-break: break-word;
-              hyphens: auto;
-            }
-            .modern-textarea-scroll::-webkit-scrollbar {
-              width: 2px;
-            }
-            .modern-textarea-scroll::-webkit-scrollbar-track {
-              background: transparent;
-            }
-            .modern-textarea-scroll::-webkit-scrollbar-thumb {
-              background: rgba(156, 163, 175, 0.3);
-              border-radius: 10px;
-            }
-            .modern-textarea-scroll::-webkit-scrollbar-thumb:hover {
-              background: rgba(156, 163, 175, 0.5);
-            }
-            .dark .modern-textarea-scroll::-webkit-scrollbar-thumb {
-              background: rgba(75, 85, 99, 0.3);
-            }
-            .dark .modern-textarea-scroll::-webkit-scrollbar-thumb:hover {
-              background: rgba(75, 85, 99, 0.5);
-            }
-            @media (max-width: 768px) {
-              .modern-textarea-scroll::-webkit-scrollbar {
-                width: 1px;
-              }
-              .modern-textarea-scroll::-webkit-scrollbar-thumb {
-                background: rgba(156, 163, 175, 0.2);
-              }
-              .dark .modern-textarea-scroll::-webkit-scrollbar-thumb {
-                background: rgba(75, 85, 99, 0.2);
-              }
-            }
-          `}</style>
-          <div className="w-full max-w-5xl h-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-2xl rounded-2xl overflow-hidden flex border border-white/20 dark:border-gray-700/50 min-w-0">
-            {/* Sidebar */}
-            <div
-              className={`w-full sm:w-80 border-r border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm flex-shrink-0 flex-col ${sidebarOpen ? "flex" : "hidden"} sm:flex transition-all duration-300 max-w-full`}
-            >
-              {/* Sidebar Header */}
-              <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    Messages
-                  </h2>
-                  <div className="flex items-center gap-2">
-                    
-                    <button
-                      onClick={() => setSidebarOpen(false)}
-                      className="sm:hidden p-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                    >
-                      <X className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Search */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
-                  <input
-                    type="text"
-                    placeholder="Search conversations..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-gray-700 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                  />
-                </div>
-              </div>
-
-              {/* User List */}
-              <div className="flex-1 overflow-y-auto custom-scrollbar">
-                {filteredUsers.map((user) => {
-                  const lastMessage = messages[user.id]?.[messages[user.id]?.length - 1]
-                  return (
-                    <div
-                      key={user.id}
-                      className={`flex items-center gap-4 px-6 py-4 cursor-pointer hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all duration-200 ${
-                        user.id === selectedUserId ? "bg-blue-50 dark:bg-blue-900/20 border-r-2 border-blue-500" : ""
-                      }`}
-                      onClick={() => {
-                        setSelectedUserId(user.id)
-                        setSidebarOpen(false)
-                      }}
-                    >
-                      <div className="relative">
-                        <div className="text-3xl">{user.avatar}</div>
-                        <div
-                          className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800 ${getStatusColor(user.status)}`}
-                        ></div>
-                      </div>
-                      <div className="flex-1 min-w-0 overflow-hidden">
-                        <div className="flex justify-between items-start">
-                          <h3 className="font-semibold text-gray-900 dark:text-white truncate pr-2">{user.name}</h3>
-                          <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
-                            {user.lastSeen}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-[200px] sm:max-w-none">
-                          {lastMessage
-                            ? (lastMessage.sender === "me" ? "You: " : "") + lastMessage.text
-                            : "No messages yet"}
-                        </p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Chat Window */}
-            <div className="flex-1 flex flex-col min-w-0">
-              {/* Chat Header */}
-              <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/30 dark:bg-gray-800/30 backdrop-blur-sm">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => setSidebarOpen(true)}
-                      className="sm:hidden p-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                    >
-                      <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                    </button>
-                    <div className="relative">
-                      <div className="text-3xl">{selectedUser?.avatar}</div>
-                      <div
-                        className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800 ${getStatusColor(selectedUser?.status)}`}
-                      ></div>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{selectedUser?.name}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">{selectedUser?.status}</p>
-                    </div>
-                  </div>
-                  <button className="p-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                    <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Messages Area */}
-              <div
-                ref={messagesContainerRef}
-                className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4 bg-gradient-to-b from-gray-50/50 to-white/50 dark:from-gray-800/50 dark:to-gray-900/50"
-              >
-                {currentMessages.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-center">
-                    <div className="text-6xl mb-4">{selectedUser?.avatar}</div>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                      Start a conversation with {selectedUser?.name}
-                    </h3>
-                    <p className="text-gray-500 dark:text-gray-400">Send a message to get the conversation started!</p>
-                  </div>
-                ) : (
-                  currentMessages.map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"}`}>
-                      <div
-                        className={`flex flex-col max-w-[280px] sm:max-w-xs lg:max-w-md ${msg.sender === "me" ? "items-end" : "items-start"}`}
-                      >
-                        <div
-                          className={`px-4 py-3 rounded-2xl shadow-sm word-wrap break-all overflow-wrap-anywhere ${
-                            msg.sender === "me"
-                              ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-md"
-                              : "bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-bl-md"
-                          }`}
-                          style={{ wordBreak: "break-word", overflowWrap: "anywhere", maxWidth: "100%" }}
-                        >
-                          <p
-                            className="text-sm leading-relaxed"
-                            style={{ wordBreak: "break-word", overflowWrap: "anywhere", whiteSpace: "pre-wrap" }}
-                          >
-                            {msg.text}
-                          </p>
-                        </div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 px-2">{msg.timestamp}</span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* Message Input */}
-              <div className="p-6 border-t border-gray-200/50 dark:border-gray-700/50 bg-white/30 dark:bg-gray-800/30 backdrop-blur-sm pb-safe">
-                <div className="flex gap-3 items-end">
-                  <div className="flex-1 relative">
-                    <textarea
-                      ref={inputRef}
-                      value={newMessage}
-                      onChange={handleTextareaChange}
-                      onKeyPress={handleKeyPress}
-                      placeholder="Type your message..."
-                      rows={1}
-                      className="w-full p-4 pr-12 bg-gray-100 dark:bg-gray-700 border-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-all text-sm leading-relaxed text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 overflow-y-auto modern-textarea-scroll"
-                      style={{
-                        minHeight: "52px",
-                        maxHeight: "120px",
-                        wordBreak: "break-word",
-                        overflowWrap: "anywhere",
-                        whiteSpace: "pre-wrap",
-                      }}
-                    />
-                  </div>
-                  <button
-                    onClick={handleSend}
-                    disabled={!newMessage.trim()}
-                    className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl flex-shrink-0 self-end"
-                    style={{ height: "52px", width: "52px" }}
-                  >
-                    <Send className="w-5 h-5" />
-                  </button>
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black opacity-40" onClick={handleClose} aria-hidden />
+        <div className="relative z-60 w-full max-w-2xl h-[80vh] bg-white rounded-2xl shadow-lg flex flex-col overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 bg-gray-900 text-white">
+            <div className="flex items-center gap-3">
+              <button className="md:hidden text-2xl" onClick={handleClose} aria-label="close">
+                <FaArrowLeft />
+              </button>
+              <img
+                src={`https://backend.finditbd.hurairaconsultancy.com/image/${peerInfo.avatar}` || "/default-avatar.png"}
+                alt={peerInfo.name}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+              <div className="flex flex-col">
+                <div className="text-lg font-semibold">{peerInfo.name}</div>
+                <div className="text-sm">
+                  {peerIsActive ? (
+                    <span className="text-green-400">Active</span>
+                  ) : (
+                    <span className="text-gray-400">Offline</span>
+                  )}
+                  {isTyping && <span className="ml-3 text-yellow-200">Typing...</span>}
                 </div>
               </div>
             </div>
+            <div className="text-sm text-gray-300">{/* additional actions */}</div>
+          </div>
+
+          {/* Messages */}
+          <div
+            ref={containerRef}
+            onScroll={handleScroll}
+            className="chat-body-tailwind flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50"
+          >
+            {hasMore && (
+              <div className="flex justify-center mb-2">
+                <button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="px-3 py-1 text-sm rounded-full border"
+                >
+                  {loadingMore ? "Loading..." : "Load more"}
+                </button>
+              </div>
+            )}
+
+            {messages.length === 0 && <div className="text-center text-gray-400 mt-8">No messages yet — say hi 👋</div>}
+
+            {messages.map((msg, i) => {
+              const senderId = msg.sender_id ?? msg.userId ?? msg.senderId;
+              const isMine = senderId?.toString() === currentUserId?.toString();
+              const created = msg.createdAt ?? msg.created_at ?? Date.now();
+              const messageId = msg._id || msg.id || `msg-${i}`;
+
+              return (
+                <div key={messageId} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+                  <div className={`max-w-[75%] px-4 py-2 rounded-2xl shadow ${isMine ? "bg-blue-600 text-white" : "bg-white text-gray-800"}`}>
+                    <div className="text-sm whitespace-pre-wrap">{msg.message}</div>
+                    <div className="flex items-center justify-between text-[10px] text-gray-300 mt-1">
+                      <span>{new Date(created).toLocaleTimeString()}</span>
+                      {isMine && (
+                        <span className="ml-2 text-[10px]">
+                          {msg.read ? "Read" : "Sent"}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="bg-gray-200 text-gray-600 p-2 rounded-xl w-max">Typing...</div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="p-4 bg-white shadow flex items-center gap-3">
+            <textarea
+              rows={1}
+              value={newMessage}
+              placeholder="Type a message..."
+              onChange={(e) => {
+                handleInputChange(e);
+              }}
+              onKeyDown={handleKeyDown}
+              className="flex-1 p-3 border rounded-xl focus:ring focus:ring-blue-300 outline-none resize-none max-h-32"
+            />
+            <button onClick={handleSendMessage} className="px-5 py-3 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700">
+              Send
+            </button>
           </div>
         </div>
       </div>
-    </div>
-  )
-}
 
-export default Messenger
+      <ToastContainer />
+    </>
+  );
+}

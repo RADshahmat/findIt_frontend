@@ -180,6 +180,7 @@ const FoundItemForm = ({
     })
 
     try {
+      console.log("Submitting found item report with data:")
       await onSubmit(data)
       setSubmitSuccess(true)
       resetForm()
