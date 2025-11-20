@@ -44,7 +44,7 @@ const UserSidebar = () => {
     if (path.includes("/user/my-reports")) return "my-reports"
     if (path.includes("/user/archived-listings")) return "archived-listings"
     if (path.includes("/user/messenger")) return "messenger"
-    if (path.includes("/user/saved-searches")) return "saved-searches"
+    if (path.includes("/user/myclaims")) return "my-claims"
     if (path.includes("/user/my-account")) return "my-account"
     if (path.includes("/user/notifications")) return "notifications"
     return "dashboard" // default
@@ -108,7 +108,7 @@ const UserSidebar = () => {
       "my-reports": "/user/my-reports",
       "archived-listings": "/user/archived-listings",
       messenger: "/user/messenger",
-      "saved-searches": "/user/saved-searches",
+      "my-claims": "/user/myclaims",
       "my-account": "/user/my-account",
       notifications: "/user/notifications",
     }
@@ -182,7 +182,7 @@ const UserSidebar = () => {
       },
 
       { id: "messenger", label: "Messenger", icon: MessageCircle, count: 2 },
-      { id: "saved-searches", label: "My Claims", icon: Search, count: 5 },
+      { id: "my-claims", label: "My Claims", icon: Search, count: 5 },
     ],
     account: [
       { id: "my-account", label: "My Account", icon: User },

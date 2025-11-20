@@ -8,7 +8,7 @@ import MyListings from "../components/userpanel/MyListings"
 import MyReports from "../components/userpanel/MyReports"
 import ArchivedListings from "../components/userpanel/ArchivedListings"
 import Messenger from "../components/userpanel/Messenger"
-import SavedSearches from "../components/userpanel/SavedSearches"
+import MyClaims from "../components/userpanel/MyClaims"
 import MyAccount from "../components/userpanel/MyAccount"
 import Notifications from "../components/userpanel/Notifications"
 import ReportLostItem from "../components/userpanel/ReportLostItem"
@@ -42,7 +42,7 @@ const UserPage = () => {
 
             {/* Communication routes */}
             
-            <Route path="/saved-searches" element={<SavedSearches />} />
+            <Route path="/myclaims" element={<MyClaims />} />
             <Route path="/messenger" element={<Messenger />} />
 
             {/* Account routes */}
