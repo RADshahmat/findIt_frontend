@@ -2,7 +2,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import MessengerModal from "../modals/chatModal";
 
 import {
   ArrowLeft,
@@ -222,7 +221,7 @@ const ClaimsScreen = () => {
                                 <Eye className="h-4 w-4" />
                                 View Verification Details
                               </button>
-
+{claim.matchedLostPostId !== "" && claim.matchedLostPostId !== null  &&(
                               <button
                                 onClick={() => setViewLostModal(claim.matchedLostPostId)}
                                 className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg text-sm border"
@@ -230,7 +229,7 @@ const ClaimsScreen = () => {
                                 <LinkIcon className="h-4 w-4" />
                                 View Matched Lost Post
                               </button>
-
+)}
                               {claim.status === "pending" && (
                                 <div className="flex gap-3 mt-3 justify-between">
 
@@ -311,8 +310,3 @@ const ClaimsScreen = () => {
 };
 
 export default ClaimsScreen;
-
-
-
-// export default VerifyModal if using separate file
-//export default VerifyModal;

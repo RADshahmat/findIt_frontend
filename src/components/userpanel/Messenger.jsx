@@ -3,14 +3,13 @@ import { FaArrowLeft } from "react-icons/fa";
 import io from "socket.io-client";
 import axiosInstance from "../../axios/axiosInstance";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
-
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 
 export default function ChatModal({ isOpen, onClose, postId, postOwnerId }) {
   const { user } = useSelector((state) => state.auth);
   const currentUserId = user?.user?.id ?? null;
-
   const socketRef = useRef(null);
   const [socket, setSocket] = useState(null);
 
@@ -387,15 +386,23 @@ export default function ChatModal({ isOpen, onClose, postId, postOwnerId }) {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black opacity-40" onClick={handleClose} aria-hidden />
-        <div className="relative z-60 w-full max-w-2xl h-[80vh] bg-white rounded-2xl shadow-lg flex flex-col overflow-hidden">
+         <AnimatePresence>
+              <motion.div
+          className="fixed inset-0 z-50 flex justify-center items-center bg-black/40 backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+      
+          <motion.div className="relative z-60 w-full max-w-2xl h-[80vh] bg-white dark:bg-gray-900 rounded-2xl shadow-lg flex flex-col overflow-hidden"
+              initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          >
           {/* Header */}
           <div className="flex items-center justify-between p-4 bg-gray-900 text-white">
             <div className="flex items-center gap-3">
-              <button className="md:hidden text-2xl" onClick={handleClose} aria-label="close">
-                <FaArrowLeft />
-              </button>
               <img
                 src={`https://backend.finditbd.hurairaconsultancy.com/image/${peerInfo.avatar}` || "/default-avatar.png"}
                 alt={peerInfo.name}
@@ -411,9 +418,14 @@ export default function ChatModal({ isOpen, onClose, postId, postOwnerId }) {
                   )}
                   {isTyping && <span className="ml-3 text-yellow-200">Typing...</span>}
                 </div>
-              </div>
+                </div>
             </div>
-            <div className="text-sm text-gray-300">{/* additional actions */}</div>
+            <button
+                onClick={handleClose}
+                className="p-2 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              </button>
           </div>
 
           {/* Messages */}
@@ -482,9 +494,9 @@ export default function ChatModal({ isOpen, onClose, postId, postOwnerId }) {
               Send
             </button>
           </div>
-        </div>
-      </div>
-
+        </motion.div>
+      </motion.div>
+</AnimatePresence>
       <ToastContainer />
     </>
   );

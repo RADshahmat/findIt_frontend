@@ -32,6 +32,7 @@ const FoundItemForm = ({
     additionalDetails: "",
     condition: "good",
     handoverPreference: "meetup",
+    postType: "public",
     status: "found",
     ...initialData,
   })
@@ -87,6 +88,7 @@ const FoundItemForm = ({
       additionalDetails: "",
       condition: "good",
       handoverPreference: "meetup",
+      postType: "public",
       status: "found",
     })
     setImages([])
@@ -149,9 +151,7 @@ const FoundItemForm = ({
     if (!formData.description.trim()) newErrors.description = "Description is required"
     if (!formData.location) newErrors.location = "Location is required"
     if (!formData.date) newErrors.date = "Date is required"
-    if (!formData.contactName.trim()) newErrors.contactName = "Contact name is required"
-    if (!formData.contactPhone.trim()) newErrors.contactPhone = "Phone number is required"
-    if (!formData.contactEmail.trim()) newErrors.contactEmail = "Email is required"
+  
 
     if (formData.contactEmail && !/\S+@\S+\.\S+/.test(formData.contactEmail)) {
       newErrors.contactEmail = "Please enter a valid email"
@@ -542,7 +542,56 @@ const FoundItemForm = ({
         </div>
       </motion.div>
 
-      {/* Contact Information */}
+      {/* Post Type */}
+<motion.div
+  variants={sectionVariants}
+  className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800"
+>
+  <h3 className="text-lg font-semibold mb-4 text-blue-800 dark:text-blue-200">Post Type</h3>
+
+  <div className="flex items-center gap-10">
+    {[
+      {
+        value: "public",
+        label: "Public Post",
+        note: "Everyone can see this post",
+      },
+      {
+        value: "private",
+        label: "Private Post",
+        note: "Only matched users can see this",
+      },
+    ].map((option) => (
+      <motion.label
+        key={option.value}
+        whileHover={{ scale: 1.03 }}
+        className="flex flex-col cursor-pointer select-none"
+      >
+        <div className="flex items-center">
+          <input
+            type="radio"
+            name="postType"
+            value={option.value}
+            checked={formData.postType === option.value}
+            onChange={handleInputChange}
+            className="mr-2 h-5 w-5 text-green-500 focus:ring-green-500"
+          />
+          <span className="text-gray-700 dark:text-gray-300 text-base font-medium">
+            {option.label}
+          </span>
+        </div>
+        {/* Note below */}
+        <span className="ml-7 text-sm text-gray-500 dark:text-gray-400">
+        ( {option.note} )
+        </span>
+      </motion.label>
+    ))}
+  </div>
+</motion.div>
+
+
+      {/* Contact Information 
+
       <motion.div variants={sectionVariants} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
         <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Contact Information</h3>
 
@@ -617,7 +666,7 @@ const FoundItemForm = ({
           </div>
         </div>
       </motion.div>
-
+*/}
       {/* Additional Details */}
       <motion.div variants={sectionVariants} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
         <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Additional Details</h3>

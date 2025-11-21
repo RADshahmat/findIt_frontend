@@ -1,12 +1,20 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { motion } from "framer-motion"
-import { Upload, X, Scissors, MapPin, DollarSign, ChevronDown, AlertTriangle } from "lucide-react"
-import { useDispatch, useSelector } from "react-redux"
-import { fetchCatagories } from "../../features/catagory/catagory"
-import SubjectSelectionModal from "./subjectSelectionModal"
-import districtsData from "../../assets/bd-districts.json"
+import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import {
+  Upload,
+  X,
+  Scissors,
+  MapPin,
+  DollarSign,
+  ChevronDown,
+  AlertTriangle,
+} from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchCatagories } from "../../features/catagory/catagory";
+import SubjectSelectionModal from "./subjectSelectionModal";
+import districtsData from "../../assets/bd-districts.json";
 
 const LostItemForm = ({
   initialData,
@@ -15,8 +23,8 @@ const LostItemForm = ({
   submitButtonClass = "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white",
   isLoading = false,
 }) => {
-  const dispatch = useDispatch()
-  const { catagory, status } = useSelector((state) => state.catagory)
+  const dispatch = useDispatch();
+  const { catagory, status } = useSelector((state) => state.catagory);
   const [formData, setFormData] = useState({
     reportType: "lost",
     title: "",
@@ -28,6 +36,7 @@ const LostItemForm = ({
     date: "",
     time: "",
     reward: "",
+    postType: "public",
     contactName: "",
     contactPhone: "",
     contactEmail: "",
@@ -35,48 +44,51 @@ const LostItemForm = ({
     urgency: "medium",
     status: "lost",
     ...initialData,
-  })
+  });
   const [images, setImages] = useState(
     initialData?.images?.map((img, index) => ({
       id: index,
       preview: img,
       url: img,
-    })) || [],
-  )
-  const [errors, setErrors] = useState({})
-  const [locationQuery, setLocationQuery] = useState(initialData?.location || "")
-  const [showDropdown, setShowDropdown] = useState(false)
-  const [submitSuccess, setSubmitSuccess] = useState(false)
-  const dropdownRef = useRef()
+    })) || []
+  );
+  const [errors, setErrors] = useState({});
+  const [locationQuery, setLocationQuery] = useState(
+    initialData?.location || ""
+  );
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const dropdownRef = useRef();
 
-  const [isModalOpen, setModalOpen] = useState(false)
-  const [segments, setSegments] = useState([])
-  const [imagePreview, setImagePreview] = useState(null)
-  const [currentSegmentingImageId, setCurrentSegmentingImageId] = useState(null)
-  const [isSegmenting, setIsSegmenting] = useState(false)
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [segments, setSegments] = useState([]);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [currentSegmentingImageId, setCurrentSegmentingImageId] =
+    useState(null);
+  const [isSegmenting, setIsSegmenting] = useState(false);
   const [currImgId, setCurrImgId] = useState(null);
 
-  const locations = districtsData.districts.map((d) => d.name)
+  const locations = districtsData.districts.map((d) => d.name);
 
   useEffect(() => {
     if (status === "idle") {
-      dispatch(fetchCatagories())
+      dispatch(fetchCatagories());
     }
-  }, [status, dispatch])
+  }, [status, dispatch]);
 
   useEffect(() => {
     if (initialData) {
-      setFormData((prev) => ({ ...prev, ...initialData }))
-      setLocationQuery(initialData.location || "")
+      setFormData((prev) => ({ ...prev, ...initialData }));
+      setLocationQuery(initialData.location || "");
       setImages(
         initialData.images?.map((img, index) => ({
           id: index,
           preview: img,
           url: img,
-        })) || [],
-      )
+        })) || []
+      );
     }
-  }, [initialData])
+  }, [initialData]);
 
   const resetForm = () => {
     setFormData({
@@ -90,46 +102,47 @@ const LostItemForm = ({
       date: "",
       time: "",
       reward: "",
+      postType: "public",
       contactName: "",
       contactPhone: "",
       contactEmail: "",
       additionalDetails: "",
       urgency: "medium",
       status: "lost",
-    })
-    setImages([])
-    setLocationQuery("")
-    setErrors({})
-  }
+    });
+    setImages([]);
+    setLocationQuery("");
+    setErrors({});
+  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
       ...(name === "category" && { subcategory: "" }),
-    }))
+    }));
 
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }))
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
-  }
+  };
 
   const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files)
+    const files = Array.from(e.target.files);
 
     if (images.length + files.length > 5) {
-      alert("Maximum 5 images allowed")
-      return
+      alert("Maximum 5 images allowed");
+      return;
     }
 
     files.forEach((file) => {
       if (file.size > 5 * 1024 * 1024) {
-        alert(`${file.name} is too large. Maximum size is 5MB.`)
-        return
+        alert(`${file.name} is too large. Maximum size is 5MB.`);
+        return;
       }
 
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = (e) => {
         setImages((prev) => [
           ...prev,
@@ -139,149 +152,153 @@ const LostItemForm = ({
             preview: e.target.result,
             name: file.name,
           },
-        ])
-      }
-      reader.readAsDataURL(file)
-    })
-  }
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
 
   const removeImage = (id) => {
-    setImages((prev) => prev.filter((img) => img.id !== id))
-  }
+    setImages((prev) => prev.filter((img) => img.id !== id));
+  };
 
   const callSegmentService = async (file) => {
-    const fd = new FormData()
-    fd.append("image", file)
+    const fd = new FormData();
+    fd.append("image", file);
 
     const res = await fetch("http://localhost:8000/segment", {
       method: "POST",
       body: fd,
-    })
-    const data = await res.json();   // ✅ parse JSON
-    setCurrImgId(data.image_id)
+    });
+    const data = await res.json(); // ✅ parse JSON
+    setCurrImgId(data.image_id);
     //console.log("SEGMENTS:", data);
-    if (!res.ok) throw new Error("Segmentation failed")
-    return data
-  }
+    if (!res.ok) throw new Error("Segmentation failed");
+    return data;
+  };
 
   const handleExtractSubject = async (imageId) => {
-    const imageData = images.find((img) => img.id === imageId)
-    if (!imageData) return
+    const imageData = images.find((img) => img.id === imageId);
+    if (!imageData) return;
 
-    setIsSegmenting(true)
-    setCurrentSegmentingImageId(imageId)
+    setIsSegmenting(true);
+    setCurrentSegmentingImageId(imageId);
     //console.log(imageData,imageId,"this is image data")
     try {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = async (ev) => {
-        setImagePreview(ev.target.result)
+        setImagePreview(ev.target.result);
 
-        const segData = await callSegmentService(imageData.file)
-        setSegments(segData.segments || [])
+        const segData = await callSegmentService(imageData.file);
+        setSegments(segData.segments || []);
         // setCurrentSegmentingImageId(segData.segments.image_id)
-        setModalOpen(true)
-      }
-      reader.readAsDataURL(imageData.file)
+        setModalOpen(true);
+      };
+      reader.readAsDataURL(imageData.file);
     } catch (err) {
-      console.error(err)
-      alert("Segmentation service error: " + err.message)
+      console.error(err);
+      alert("Segmentation service error: " + err.message);
     } finally {
-      setIsSegmenting(false)
+      setIsSegmenting(false);
     }
-  }
+  };
 
   const handleSelectSegment = async (segment) => {
-    setModalOpen(false)
+    setModalOpen(false);
     //console.log(currentSegmentingImageId.currImgId,"lets see")
     try {
-      const imageIndex = images.findIndex(img => img.id === currentSegmentingImageId);
+      const imageIndex = images.findIndex(
+        (img) => img.id === currentSegmentingImageId
+      );
       //console.log(imageIndex,"kaj kor")
       const res = await fetch("http://localhost:8000/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           mask_id: segment.id,
-          image_id: currImgId
+          image_id: currImgId,
         }),
       });
 
-
-      const data = await res.json()
+      const data = await res.json();
       //console.log(data,"extract data")
       // Replace the original image with extracted subject
       setImages((prev) =>
         prev.map((img) =>
           img.id === currentSegmentingImageId
             ? {
-              ...img,
-              preview: `data:image/png;base64,${data.cropped_image}`,
-              extracted: true,
-              maskId: segment.id,
-            }
-            : img,
-        ),
-      )
+                ...img,
+                preview: `data:image/png;base64,${data.cropped_image}`,
+                extracted: true,
+                maskId: segment.id,
+              }
+            : img
+        )
+      );
 
-      setCurrentSegmentingImageId(null)
+      setCurrentSegmentingImageId(null);
     } catch (err) {
-      console.error(err)
-      alert("Extraction failed: " + err.message)
+      console.error(err);
+      alert("Extraction failed: " + err.message);
     }
-  }
+  };
   //console.log(isModalOpen)
   const validateForm = () => {
-    const newErrors = {}
+    const newErrors = {};
 
-    if (!formData.title.trim()) newErrors.title = "Item title is required"
-    if (!formData.category) newErrors.category = "Category is required"
-    if (!formData.description.trim()) newErrors.description = "Description is required"
-    if (!formData.location) newErrors.location = "Location is required"
-    if (!formData.date) newErrors.date = "Date is required"
-    if (!formData.contactName.trim()) newErrors.contactName = "Contact name is required"
-    if (!formData.contactPhone.trim()) newErrors.contactPhone = "Phone number is required"
-    if (!formData.contactEmail.trim()) newErrors.contactEmail = "Email is required"
+    if (!formData.title.trim()) newErrors.title = "Item title is required";
+    if (!formData.category) newErrors.category = "Category is required";
+    if (!formData.description.trim())
+      newErrors.description = "Description is required";
+    if (!formData.location) newErrors.location = "Location is required";
+    if (!formData.date) newErrors.date = "Date is required";
 
     if (formData.contactEmail && !/\S+@\S+\.\S+/.test(formData.contactEmail)) {
-      newErrors.contactEmail = "Please enter a valid email"
+      newErrors.contactEmail = "Please enter a valid email";
     }
 
-    if (formData.contactPhone && !/^\+?[\d\s-()]{10,}$/.test(formData.contactPhone)) {
-      newErrors.contactPhone = "Please enter a valid phone number"
+    if (
+      formData.contactPhone &&
+      !/^\+?[\d\s-()]{10,}$/.test(formData.contactPhone)
+    ) {
+      newErrors.contactPhone = "Please enter a valid phone number";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!validateForm()) return
+    e.preventDefault();
+    if (!validateForm()) return;
 
-    const data = new FormData()
+    const data = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
-      data.append(key, value)
-    })
+      data.append(key, value);
+    });
     images.forEach((img) => {
       if (img.file) {
-        data.append("post_images", img.file)
+        data.append("post_images", img.file);
       }
-    })
+    });
 
     try {
-      await onSubmit(data)
-      setSubmitSuccess(true)
-      resetForm()
+      await onSubmit(data);
+      setSubmitSuccess(true);
+      resetForm();
 
       // Hide success message after 3 seconds
       setTimeout(() => {
-        setSubmitSuccess(false)
-      }, 3000)
+        setSubmitSuccess(false);
+      }, 3000);
     } catch (error) {
-      console.error("Error submitting form:", error)
+      console.error("Error submitting form:", error);
     }
-  }
+  };
 
-  const filteredLocations = locations.filter((loc) => loc.toLowerCase().includes(locationQuery.toLowerCase()))
+  const filteredLocations = locations.filter((loc) =>
+    loc.toLowerCase().includes(locationQuery.toLowerCase())
+  );
 
   const formVariants = {
     hidden: { opacity: 0 },
@@ -291,7 +308,7 @@ const LostItemForm = ({
         staggerChildren: 0.1,
       },
     },
-  }
+  };
 
   const sectionVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -304,7 +321,7 @@ const LostItemForm = ({
         damping: 30,
       },
     },
-  }
+  };
   console.log(images, "these are images");
   return (
     <motion.form
@@ -326,15 +343,20 @@ const LostItemForm = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Item Title *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Item Title *
+            </label>
             <input
               type="text"
               name="title"
               value={formData.title}
               onChange={handleInputChange}
               placeholder="e.g., iPhone 15 Pro Max"
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${errors.title ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-                }`}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
+                errors.title
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-gray-600"
+              }`}
             />
             {errors.title && (
               <motion.p
@@ -348,13 +370,18 @@ const LostItemForm = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Category *
+            </label>
             <select
               name="category"
               value={formData.category}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${errors.category ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-                }`}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
+                errors.category
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-gray-600"
+              }`}
             >
               <option value="">Select Category</option>
               {catagory.map((category) => (
@@ -380,7 +407,9 @@ const LostItemForm = ({
               animate={{ opacity: 1, height: "auto" }}
               transition={{ duration: 0.3 }}
             >
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Subcategory</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Subcategory
+              </label>
               <select
                 name="subcategory"
                 value={formData.subcategory}
@@ -400,7 +429,9 @@ const LostItemForm = ({
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Urgency Level</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Urgency Level
+            </label>
             <select
               name="urgency"
               value={formData.urgency}
@@ -416,15 +447,20 @@ const LostItemForm = ({
         </div>
 
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description *</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Description *
+          </label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleInputChange}
             rows={4}
             placeholder="Provide detailed description including color, size, brand, distinctive features, etc."
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${errors.description ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-              }`}
+            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
+              errors.description
+                ? "border-red-500"
+                : "border-gray-300 dark:border-gray-600"
+            }`}
           />
           {errors.description && (
             <motion.p
@@ -439,7 +475,10 @@ const LostItemForm = ({
       </motion.div>
 
       {/* Location & Time */}
-      <motion.div variants={sectionVariants} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+      <motion.div
+        variants={sectionVariants}
+        className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4"
+      >
         <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white flex items-center">
           <MapPin className="h-5 w-5 mr-2 text-red-500" />
           Where & When Lost
@@ -447,7 +486,9 @@ const LostItemForm = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div ref={dropdownRef} className="relative">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">City/Area *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              City/Area *
+            </label>
             <div className="relative">
               <input
                 type="text"
@@ -456,8 +497,11 @@ const LostItemForm = ({
                 onChange={(e) => setLocationQuery(e.target.value)}
                 onClick={() => setShowDropdown(true)}
                 onFocus={() => setShowDropdown(true)}
-                className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${errors.location ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-                  }`}
+                className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
+                  errors.location
+                    ? "border-red-500"
+                    : "border-gray-300 dark:border-gray-600"
+                }`}
               />
               <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer" />
             </div>
@@ -473,10 +517,10 @@ const LostItemForm = ({
                     key={index}
                     whileHover={{ backgroundColor: "rgba(239, 68, 68, 0.1)" }}
                     onClick={() => {
-                      setFormData((prev) => ({ ...prev, location: loc }))
-                      setLocationQuery(loc)
-                      setShowDropdown(false)
-                      setErrors((prev) => ({ ...prev, location: "" }))
+                      setFormData((prev) => ({ ...prev, location: loc }));
+                      setLocationQuery(loc);
+                      setShowDropdown(false);
+                      setErrors((prev) => ({ ...prev, location: "" }));
                     }}
                     className="px-4 py-2 cursor-pointer text-gray-900 dark:text-white"
                   >
@@ -497,7 +541,9 @@ const LostItemForm = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Specific Location</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Specific Location
+            </label>
             <input
               type="text"
               name="specificLocation"
@@ -509,15 +555,20 @@ const LostItemForm = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date Lost *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Date Lost *
+            </label>
             <input
               type="date"
               name="date"
               value={formData.date}
               onChange={handleInputChange}
               max={new Date().toISOString().split("T")[0]}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${errors.date ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-                }`}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
+                errors.date
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-gray-600"
+              }`}
             />
             {errors.date && (
               <motion.p
@@ -531,7 +582,9 @@ const LostItemForm = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Approximate Time</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Approximate Time
+            </label>
             <input
               type="time"
               name="time"
@@ -544,8 +597,13 @@ const LostItemForm = ({
       </motion.div>
 
       {/* Images with Extract Functionality */}
-      <motion.div variants={sectionVariants} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-        <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Images (Optional)</h3>
+      <motion.div
+        variants={sectionVariants}
+        className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4"
+      >
+        <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+          Images (Optional)
+        </h3>
 
         <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
           <input
@@ -558,8 +616,12 @@ const LostItemForm = ({
           />
           <label htmlFor="image-upload" className="cursor-pointer">
             <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400 mb-2">Click to upload images</p>
-            <p className="text-sm text-gray-500 dark:text-gray-500">Maximum 5 images, 5MB each</p>
+            <p className="text-gray-600 dark:text-gray-400 mb-2">
+              Click to upload images
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-500">
+              Maximum 5 images, 5MB each
+            </p>
           </label>
         </div>
 
@@ -597,11 +659,15 @@ const LostItemForm = ({
                   whileTap={{ scale: 0.95 }}
                   type="button"
                   onClick={() => handleExtractSubject(image.id)}
-                  disabled={isSegmenting && currentSegmentingImageId === image.id}
+                  disabled={
+                    isSegmenting && currentSegmentingImageId === image.id
+                  }
                   className="absolute bottom-1 left-1 right-1 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white px-2 py-1 rounded text-xs font-medium flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <Scissors className="h-3 w-3" />
-                  {isSegmenting && currentSegmentingImageId === image.id ? "Extracting..." : "Extract"}
+                  {isSegmenting && currentSegmentingImageId === image.id
+                    ? "Extracting..."
+                    : "Extract"}
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
@@ -633,7 +699,9 @@ const LostItemForm = ({
           Reward (Optional)
         </h3>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reward Amount (৳)</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Reward Amount (৳)
+          </label>
           <input
             type="number"
             name="reward"
@@ -646,7 +714,56 @@ const LostItemForm = ({
         </div>
       </motion.div>
 
-      {/* Contact Information */}
+      {/* Post Type */}
+      <motion.div
+        variants={sectionVariants}
+        className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800"
+      >
+        <h3 className="text-lg font-semibold mb-4 text-blue-800 dark:text-blue-200">
+          Post Type
+        </h3>
+
+        <div className="flex items-center gap-10">
+          {[
+            {
+              value: "public",
+              label: "Public Post",
+              note: "Everyone can see this post",
+            },
+            {
+              value: "private",
+              label: "Private Post",
+              note: "Only matched users can see this",
+            },
+          ].map((option) => (
+            <motion.label
+              key={option.value}
+              whileHover={{ scale: 1.03 }}
+              className="flex flex-col cursor-pointer select-none"
+            >
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  name="postType"
+                  value={option.value}
+                  checked={formData.postType === option.value}
+                  onChange={handleInputChange}
+                  className="mr-2 h-5 w-5 text-green-500 focus:ring-green-500"
+                />
+                <span className="text-gray-700 dark:text-gray-300 text-base font-medium">
+                  {option.label}
+                </span>
+              </div>
+              {/* Note below */}
+              <span className="ml-7 text-sm text-gray-500 dark:text-gray-400">
+                ( {option.note} )
+              </span>
+            </motion.label>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Contact Information 
       <motion.div variants={sectionVariants} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
         <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Contact Information</h3>
 
@@ -718,10 +835,16 @@ const LostItemForm = ({
           </div>
         </div>
       </motion.div>
+      */}
 
       {/* Additional Details */}
-      <motion.div variants={sectionVariants} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-        <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Additional Details</h3>
+      <motion.div
+        variants={sectionVariants}
+        className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4"
+      >
+        <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+          Additional Details
+        </h3>
         <textarea
           name="additionalDetails"
           value={formData.additionalDetails}
@@ -773,7 +896,7 @@ const LostItemForm = ({
         />
       )}
     </motion.form>
-  )
-}
+  );
+};
 
-export default LostItemForm
+export default LostItemForm;

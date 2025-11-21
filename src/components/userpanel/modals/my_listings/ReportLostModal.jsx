@@ -1,21 +1,28 @@
-
-import { useState, useEffect, useRef } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { motion } from "framer-motion"
-import { X, AlertTriangle, MapPin, ChevronDown } from "lucide-react"
-import { createPost } from "../../../../features/posts/post"
-import districtsData from "../../../../assets/bd-districts.json"
+import { useState, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { motion } from "framer-motion";
+import {
+  X,
+  AlertTriangle,
+  MapPin,
+  ChevronDown,
+  DollarSign,
+} from "lucide-react";
+import { createMyListingLostPost } from "../../../../features/posts/post";
+import { fetchMyListings } from "../../../../features/mylistings/myListingsSlice";
+import districtsData from "../../../../assets/bd-districts.json";
 
 const ReportLostModal = ({ onClose, onSubmit, item }) => {
-  const dispatch = useDispatch()
-  const { loading } = useSelector((state) => state.post)
-  const dropdownRef = useRef()
+  const dispatch = useDispatch();
+  const { loading } = useSelector((state) => state.post);
+  const dropdownRef = useRef();
 
   const [formData, setFormData] = useState({
     title: "",
     category: "",
     subcategory: "",
     description: "",
+    images: [],
     location: "",
     specificLocation: "",
     date: "",
@@ -23,17 +30,21 @@ const ReportLostModal = ({ onClose, onSubmit, item }) => {
     contactName: "",
     contactPhone: "",
     contactEmail: "",
+    reward: "",
     additionalDetails: "",
     urgency: "medium",
     status: "lost",
+    postType: "public",
     reportType: "lost",
-  })
+  });
 
-  const [locationQuery, setLocationQuery] = useState("")
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false)
+  const [locationQuery, setLocationQuery] = useState("");
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
 
-  const locations = districtsData.districts.map((d) => d.name)
-  const filteredLocations = locations.filter((loc) => loc.toLowerCase().includes(locationQuery.toLowerCase()))
+  const locations = districtsData.districts.map((d) => d.name);
+  const filteredLocations = locations.filter((loc) =>
+    loc.toLowerCase().includes(locationQuery.toLowerCase())
+  );
 
   useEffect(() => {
     if (item) {
@@ -43,34 +54,52 @@ const ReportLostModal = ({ onClose, onSubmit, item }) => {
         category: item.category,
         subcategory: item.subcategory,
         description: item.description,
-      }))
+        images: item.images,
+      }));
     }
-  }, [item])
+  }, [item]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowLocationDropdown(false)
+        setShowLocationDropdown(false);
       }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    const data = new FormData()
+    e.preventDefault();
+
+    const data = new FormData();
+
+    // Append normal fields
     Object.entries(formData).forEach(([key, value]) => {
-      data.append(key, value)
-    })
-    dispatch(createPost(data))
-    onSubmit()
-  }
+      if (key === "images") return; // skip images
+      data.append(key, value);
+    });
+
+    // Append images **individually**
+    if (Array.isArray(formData.images)) {
+      formData.images.forEach((img) => data.append("images", img));
+    }
+
+    dispatch(createMyListingLostPost({ id: item._id, formData: data }))
+      .unwrap()
+      .then(() => {
+        dispatch(fetchMyListings());
+        onSubmit();
+      })
+      .catch((err) => {
+        console.error("Error:", err);
+      });
+  };
 
   const modalVariants = {
     hidden: { opacity: 0, scale: 0.8, y: 50 },
@@ -91,13 +120,13 @@ const ReportLostModal = ({ onClose, onSubmit, item }) => {
       y: 50,
       transition: { duration: 0.2 },
     },
-  }
+  };
 
   const backdropVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
     exit: { opacity: 0 },
-  }
+  };
 
   return (
     <motion.div
@@ -149,10 +178,14 @@ const ReportLostModal = ({ onClose, onSubmit, item }) => {
               transition={{ delay: 0.2 }}
               className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200"
             >
-              <h3 className="font-bold text-lg mb-4 text-gray-800">Item Information</h3>
+              <h3 className="font-bold text-lg mb-4 text-gray-800">
+                Item Information
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Item Name</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Item Name
+                  </label>
                   <input
                     type="text"
                     value={formData.title}
@@ -161,10 +194,12 @@ const ReportLostModal = ({ onClose, onSubmit, item }) => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Category
+                  </label>
                   <input
                     type="text"
-                    value={`${formData.category} - ${formData.subcategory}`}
+                    value={`${item.categoryName} - ${item.subcategoryName}`}
                     readOnly
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white shadow-sm"
                   />
@@ -181,11 +216,15 @@ const ReportLostModal = ({ onClose, onSubmit, item }) => {
             >
               <div className="flex items-center mb-4">
                 <MapPin className="h-5 w-5 text-blue-600 mr-2" />
-                <h3 className="font-bold text-lg text-gray-800">Where & When Lost</h3>
+                <h3 className="font-bold text-lg text-gray-800">
+                  Where & When Lost
+                </h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div ref={dropdownRef} className="relative">
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">City/Area *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    City/Area *
+                  </label>
                   <div className="relative">
                     <input
                       type="text"
@@ -198,7 +237,9 @@ const ReportLostModal = ({ onClose, onSubmit, item }) => {
                     />
                     <ChevronDown
                       className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
-                      onClick={() => setShowLocationDropdown(!showLocationDropdown)}
+                      onClick={() =>
+                        setShowLocationDropdown(!showLocationDropdown)
+                      }
                     />
                   </div>
 
@@ -213,9 +254,9 @@ const ReportLostModal = ({ onClose, onSubmit, item }) => {
                           key={index}
                           whileHover={{ backgroundColor: "#fef2f2" }}
                           onClick={() => {
-                            setFormData((prev) => ({ ...prev, location: loc }))
-                            setLocationQuery(loc)
-                            setShowLocationDropdown(false)
+                            setFormData((prev) => ({ ...prev, location: loc }));
+                            setLocationQuery(loc);
+                            setShowLocationDropdown(false);
                           }}
                           className="px-4 py-3 cursor-pointer hover:bg-red-50 transition-colors"
                         >
@@ -227,7 +268,9 @@ const ReportLostModal = ({ onClose, onSubmit, item }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">Specific Location</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    Specific Location
+                  </label>
                   <input
                     type="text"
                     name="specificLocation"
@@ -239,7 +282,9 @@ const ReportLostModal = ({ onClose, onSubmit, item }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">Date Lost *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    Date Lost *
+                  </label>
                   <input
                     type="date"
                     name="date"
@@ -252,7 +297,9 @@ const ReportLostModal = ({ onClose, onSubmit, item }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">Approximate Time</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    Approximate Time
+                  </label>
                   <input
                     type="time"
                     name="time"
@@ -271,52 +318,103 @@ const ReportLostModal = ({ onClose, onSubmit, item }) => {
               transition={{ delay: 0.4 }}
               className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200"
             >
-              <h3 className="font-bold text-lg mb-4 text-gray-800">Contact Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">Your Name *</label>
-                  <input
-                    type="text"
-                    name="contactName"
-                    value={formData.contactName}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white"
-                    placeholder="Enter your full name"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">Phone Number *</label>
-                  <input
-                    type="tel"
-                    name="contactPhone"
-                    value={formData.contactPhone}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white"
-                    placeholder="+880 1234 567890"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">Email Address *</label>
-                  <input
-                    type="email"
-                    name="contactEmail"
-                    value={formData.contactEmail}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white"
-                    placeholder="your.email@example.com"
-                  />
-                </div>
+              <div className="flex gap-3 items-center">
+                <label className="block text-sm font-bold text-gray-700">
+                  Urgency Level
+                </label>
+                <select
+                  name="urgency"
+                  value={formData.urgency}
+                  onChange={handleInputChange}
+                  className=" px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
+                >
+                  <option value="low">Low - Can wait</option>
+                  <option value="medium">Medium - Important</option>
+                  <option value="high">High - Very urgent</option>
+                  <option value="critical">Critical - Emergency</option>
+                </select>
               </div>
             </motion.div>
+            {/* Reward */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-green-50  rounded-lg p-4 border border-green-200"
+            >
+              <h3 className="text-lg font-semibold mb-4 text-green-800  flex items-center">
+                <DollarSign className="h-5 w-5 mr-2" />
+                Reward (Optional)
+              </h3>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Reward Amount (৳)
+                </label>
+                <input
+                  type="number"
+                  name="reward"
+                  value={formData.reward}
+                  onChange={handleInputChange}
+                  placeholder="e.g., 5000"
+                  min="0"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white  text-gray-900"
+                />
+              </div>
+            </motion.div>
+            {/* Post Type */}
+            <motion.div className="bg-blue-50 rounded-lg p-4 border border-blue-200 ">
+              <h3 className="text-lg font-semibold mb-4 text-blue-800 ">
+                Post Type
+              </h3>
 
+              <div className="flex items-center gap-10">
+                {[
+                  {
+                    value: "public",
+                    label: "Public Post",
+                    note: "Everyone can see this post",
+                  },
+                  {
+                    value: "private",
+                    label: "Private Post",
+                    note: "Only matched users can see this",
+                  },
+                ].map((option) => (
+                  <motion.label
+                    key={option.value}
+                    whileHover={{ scale: 1.03 }}
+                    className="flex flex-col cursor-pointer select-none"
+                  >
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        name="postType"
+                        value={option.value}
+                        checked={formData.postType === option.value}
+                        onChange={handleInputChange}
+                        className="mr-2 h-5 w-5 text-green-500 focus:ring-green-500"
+                      />
+                      <span className="text-gray-700  text-base font-medium">
+                        {option.label}
+                      </span>
+                    </div>
+                    {/* Note below */}
+                    <span className="ml-7 text-sm text-gray-500">
+                      ( {option.note} )
+                    </span>
+                  </motion.label>
+                ))}
+              </div>
+            </motion.div>
             {/* Additional Details */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">Additional Details</label>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Additional Details
+              </label>
               <textarea
                 name="additionalDetails"
                 value={formData.additionalDetails}
@@ -353,7 +451,11 @@ const ReportLostModal = ({ onClose, onSubmit, item }) => {
                 {loading ? (
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "linear",
+                    }}
                     className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
                   />
                 ) : (
@@ -366,7 +468,7 @@ const ReportLostModal = ({ onClose, onSubmit, item }) => {
         </div>
       </motion.div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default ReportLostModal
+export default ReportLostModal;
