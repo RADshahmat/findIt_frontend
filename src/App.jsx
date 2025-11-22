@@ -10,11 +10,14 @@ import ScrollRestoration from "./helpers/scrolltotop";
 import UserPage from "./pages/userAreaPage";
 import LoginPage from "./pages/LoginPage";
 import ProtectedRoute from "./helpers/ProtectedRoute";
+import DonorInfo from "./pages/donorinfo";
 import Messenger from "./components/userpanel/Messenger";
 import { requestWebNotificationPermission } from "./helpers/firebaseNotification";
 import axiosInstance from "./axios/axiosInstance";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PaymentResponse from "./pages/donationInfo";
+import SupportChat from "./pages/supportChat";
 
 function App() {
   const dispatch = useDispatch();
@@ -51,9 +54,12 @@ function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/user/*" element={<ProtectedRoute><UserPage /></ProtectedRoute>} />
+            <Route path="/donate" element={<DonorInfo />} />
+            <Route path="/payment_response" element={<PaymentResponse />} />
             
           </Routes>
         </BrowserRouter>
+        <SupportChat />
       </div>
     </ThemeProvider>
   );

@@ -12,6 +12,7 @@ import FAQ from "../components/homepage/FAQ"
 import CTA from "../components/homepage/CTA"
 import Footer from "../components/Footer"
 import SearchBar from "../components/homepage/SearchBar"
+import SupportChat from "./supportChat"
 
 function HomePage() {
   //const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -73,6 +74,7 @@ function HomePage() {
       <TestimonialsComponent />
       <FAQ />
       <CTA />
+ 
       <Footer />
     </div>
   )
