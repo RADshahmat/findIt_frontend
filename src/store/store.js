@@ -12,6 +12,7 @@ import verificationReducer from "../features/verification/verificationSlice";
 import claimReducer from '../features/claim/claimSlice';
 import matchedLostPostReducer from '../features/posts/getsinglepostSlice';
 import myListingsReducer from '../features/mylistings/myListingsSlice.js';
+import postActivenessFlagReducer from '../features/posts/postActivenessFlagSlice.js';
 
 export const store = configureStore({
   reducer: {
@@ -28,5 +29,6 @@ export const store = configureStore({
     claims: claimReducer,
     singlepost: matchedLostPostReducer,
     myListings: myListingsReducer,
+    postActivenessFlag: postActivenessFlagReducer,
   },
 });

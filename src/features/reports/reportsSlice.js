@@ -1,65 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import axiosInstance from "../../axios/axiosInstance"
 
-// Demo data
-export const demoReports = [
-  {
-    id: "6866850a17f1183a2ea9f7a2",
-    title: "Person",
-    description: "Lost person in Patuakhali area. Please help us find them.",
-    category: "People",
-    subcategory: "Man",
-    location: "Patuakhali",
-    date: "2025-07-03T00:00:00.000Z",
-    status: "lost",
-    image: "http://93.127.166.229:5000/image/1obRQVFL-j3iXZKeAfOrGU_6WW9rdcJ5F",
-    postedBy: "Rad",
-    views: 0,
-    reward: 9999993,
-    contactName: "Rad Ahmed",
-    contactPhone: "+880 1234 567890",
-    contactEmail: "rad@example.com",
-    urgency: "critical",
-    createdAt: "2025-07-03T00:00:00.000Z",
-  },
-  {
-    id: "6866850a17f1183a2ea9f7a3",
-    title: "iPhone 13 Pro",
-    description: "Found iPhone 13 Pro near Dhaka University campus. Screen is cracked but phone is working.",
-    category: "Electronics",
-    subcategory: "Phone",
-    location: "Dhaka University",
-    date: "2025-07-02T00:00:00.000Z",
-    status: "found",
-    image: "/placeholder.svg?height=128&width=192",
-    postedBy: "Sarah",
-    views: 15,
-    contactName: "Sarah Khan",
-    contactPhone: "+880 1987 654321",
-    contactEmail: "sarah@example.com",
-    condition: "fair",
-    createdAt: "2025-07-02T00:00:00.000Z",
-  },
-  {
-    id: "6866850a17f1183a2ea9f7a4",
-    title: "Black Wallet",
-    description: "Lost my black leather wallet containing important documents and cards.",
-    category: "Accessories",
-    subcategory: "Wallet",
-    location: "Gulshan 2",
-    date: "2025-07-01T00:00:00.000Z",
-    status: "lost",
-    image: "/placeholder.svg?height=128&width=192",
-    postedBy: "John",
-    views: 8,
-    reward: 5000,
-    contactName: "John Doe",
-    contactPhone: "+880 1555 123456",
-    contactEmail: "john@example.com",
-    urgency: "high",
-    createdAt: "2025-07-01T00:00:00.000Z",
-  },
-]
 
 
 export const fetchUserReports = createAsyncThunk("reports/fetchUserReports", async (_, { rejectWithValue }) => {
@@ -73,16 +14,20 @@ export const fetchUserReports = createAsyncThunk("reports/fetchUserReports", asy
   }
 }
 );
-// Async thunks
-export const fetchUserReports1 = createAsyncThunk("reports/fetchUserReports", async (_, { rejectWithValue }) => {
-  try {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    return demoReports
-  } catch (error) {
-    return rejectWithValue(error.message)
+
+export const fetchArchivedReports = createAsyncThunk(
+  "reports/fetchArchivedReports",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get("/own_archived_posts");
+      console.log("archived Post get successfully:", res.data);
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
-})
+);
+
 
 export const createReport = createAsyncThunk("reports/createReport", async (reportData, { rejectWithValue }) => {
   try {
@@ -132,6 +77,7 @@ const reportsSlice = createSlice({
   name: "reports",
   initialState: {
     userReports: [],
+    archivedReports: [],
     loading: false,
     error: null,
     searchTerm: "",
@@ -167,6 +113,10 @@ const reportsSlice = createSlice({
         state.loading = false
         state.error = action.payload
       })
+      // Fetch archived reports
+      .addCase(fetchArchivedReports.pending, (state) => { state.loading = true; state.error = null })
+      .addCase(fetchArchivedReports.fulfilled, (state, action) => { state.loading = false; state.archivedReports = action.payload })
+      .addCase(fetchArchivedReports.rejected, (state, action) => { state.loading = false; state.error = action.payload })
       // Create report
       .addCase(createReport.pending, (state) => {
         state.loading = true

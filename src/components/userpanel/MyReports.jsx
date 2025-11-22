@@ -22,12 +22,12 @@ import {
 import {
   fetchUserReports,
   deleteReport,
-  demoReports,
+ 
 } from "../../features/reports/reportsSlice";
+import { postActivenessFlag } from "../../features/posts/postActivenessFlagSlice";
 import EditReportModal from "./modals/my_reports/EditReportModal";
 import DeleteConfirmModal from "./modals/my_reports/DeleteConfirmModal";
-import MatchedItemsScreen from "./screens/MatchedItemsScreen";
-import ClaimsScreen from "./screens/ClaimsScreen";
+
 
 const MyReports = () => {
   const dispatch = useDispatch();
@@ -35,7 +35,7 @@ const MyReports = () => {
 
   const { userReports = userReports, loading } = useSelector(
     (state) =>
-      state.reports || { userReports: demoReports, loading: false, error: null }
+      state.reports || {  loading: false, error: null }
   );
 
   const [selectedReport, setSelectedReport] = useState(null);
@@ -61,8 +61,13 @@ const MyReports = () => {
 
   const confirmDelete = async () => {
     if (selectedReport) {
-      dispatch(deleteReport(selectedReport.id));
-      //dispatch(fetchUserReports()) // Refresh reports after deletion
+      dispatch(deleteReport(selectedReport.id))  .unwrap()
+            .then(() => {
+              dispatch(fetchUserReports());
+            })
+            .catch((err) => {
+              console.error("Error:", err);
+            });;
       setShowDeleteModal(false);
       setSelectedReport(null);
     }
@@ -76,17 +81,20 @@ const MyReports = () => {
     navigate(`/user/my-reports/claimscreen/${report.id}`);
   };
 
-  const handleFoundThis = (report) => {
-    // Handle marking item as found
-    console.log("Marking as found:", report.id);
-    // You can dispatch an action to update the report status
-  };
+ 
 
-  const handleReturnedThis = (report) => {
-    // Handle marking item as returned
-    console.log("Marking as returned:", report.id);
-    // You can dispatch an action to update the report status
-  };
+    const setpostActivenessFlag = (report) => {
+      dispatch(
+        postActivenessFlag({ postId: report.id }))
+        .unwrap()
+        .then(() => {
+          dispatch(fetchUserReports());
+        })
+        .catch((err) => {
+          console.error("Error:", err);
+        });
+      console.log("postId", report.id);
+    };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -427,7 +435,7 @@ const MyReports = () => {
                             onClick={() => handleClaims(report)}
                             className="w-full flex items-center justify-center px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
                           >
-                            <MessageSquare className="h-4 w-4 mr-2" />4 Claims
+                            <MessageSquare className="h-4 w-4 mr-2" />{report.claimCount} Claims
                           </motion.button>
                         )}
 
@@ -437,7 +445,7 @@ const MyReports = () => {
                             variants={buttonVariants}
                             whileHover="hover"
                             whileTap="tap"
-                            onClick={() => handleFoundThis(report)}
+                            onClick={() => setpostActivenessFlag(report)}
                             className="w-full flex items-center justify-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg text-sm font-medium hover:from-green-600 hover:to-emerald-600 transition-all shadow-md"
                           >
                             <CheckCircle className="h-4 w-4 mr-2" />I Found This
@@ -448,7 +456,7 @@ const MyReports = () => {
                             variants={buttonVariants}
                             whileHover="hover"
                             whileTap="tap"
-                            onClick={() => handleReturnedThis(report)}
+                            onClick={() => setpostActivenessFlag(report)}
                             className="w-full flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-indigo-600 transition-all shadow-md"
                           >
                             <RotateCcw className="h-4 w-4 mr-2" />I Returned
@@ -607,7 +615,7 @@ const MyReports = () => {
                                 variants={buttonVariants}
                                 whileHover="hover"
                                 whileTap="tap"
-                                onClick={() => handleFoundThis(report)}
+                                onClick={() => setpostActivenessFlag(report)}
                                 className="w-full flex justify-center items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg text-sm font-medium hover:from-green-600 hover:to-emerald-600 transition-all shadow-md"
                               >
                                 <CheckCircle className="h-4 w-4 mr-2" />I Found
@@ -619,7 +627,7 @@ const MyReports = () => {
                                 variants={buttonVariants}
                                 whileHover="hover"
                                 whileTap="tap"
-                                onClick={() => handleReturnedThis(report)}
+                                onClick={() => setpostActivenessFlag(report)}
                                 className="w-full flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-indigo-600 transition-all shadow-md"
                               >
                                 <RotateCcw className="h-4 w-4 mr-2" />I Returned
