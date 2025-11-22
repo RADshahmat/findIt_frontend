@@ -71,6 +71,7 @@ const Navbar = () => {
               { href: "#how-it-works", label: "How It Works" },
               { href: "#testimonials", label: "Success Stories" },
               { href: "#faq", label: "FAQ" },
+              { href: "/donate", label: "Donate" },
             ].map((item, index) => (
               <motion.a
                 key={item.href}
