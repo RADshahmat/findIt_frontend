@@ -6,6 +6,7 @@ export const fetchCatagories = createAsyncThunk(
   'catagory/fetchCatagories',
   async () => {
     const response = await axiosInstance.get('/category');
+    //console.log(response,"category data")
     return response.data;
   }
 );

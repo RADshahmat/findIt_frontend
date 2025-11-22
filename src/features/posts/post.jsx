@@ -23,6 +23,33 @@ export const createPost = createAsyncThunk(
     }
 );
 
+export const createMyListingLostPost = createAsyncThunk(
+    "post/createMyListingLostPost",
+    async ({ id, formData }, thunkAPI) => {
+        try {
+            //console.log("Creating MyListing Lost Post:", id);
+//console.log("Form Data: ",formData);
+            const res = await axiosInstance.post(
+                `createmylistinglostpost/${id}`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    transformRequest: (data) => data, // ✅ prevents Axios from changing FormData
+                }
+            );
+
+            return res.data;
+        } catch (err) {
+            return thunkAPI.rejectWithValue(
+                err.response?.data || "Failed to post mylisting lost"
+            );
+        }
+    }
+);
+
+
 const initialState = {
     loading: false,
     success: false,
@@ -56,8 +83,22 @@ const postSlice = createSlice({
             .addCase(createPost.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || "Something went wrong";
-            });
-    },
+            })
+        
+     .addCase(createMyListingLostPost.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+    })
+    .addCase(createMyListingLostPost.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.postData = action.payload;
+    })
+    .addCase(createMyListingLostPost.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Something went wrong";
+    });},
 });
 
 export const { resetPostState } = postSlice.actions;

@@ -10,7 +10,7 @@ const EditItemModal = ({ onClose, onSubmit, categories, item }) => {
     subcategory: "",
     description: "",
   })
-
+  console.log(item, "item in edit modal");
   useEffect(() => {
     if (item) {
       setFormData({
@@ -135,7 +135,7 @@ const EditItemModal = ({ onClose, onSubmit, categories, item }) => {
                 >
                   <option value="">Select Category</option>
                   {categories.map((category) => (
-                    <option key={category.id} value={category.lable}>
+                    <option key={category.id} value={category.id}>
                       {category.lable}
                     </option>
                   ))}
@@ -157,9 +157,9 @@ const EditItemModal = ({ onClose, onSubmit, categories, item }) => {
                   >
                     <option value="">Select Subcategory</option>
                     {categories
-                      .find((c) => c.lable === formData.category)
+                      .find((c) => c.id === formData.category)
                       ?.subcategories?.map((sub) => (
-                        <option key={sub.id} value={sub.name}>
+                        <option key={sub.id} value={sub.id}>
                           {sub.name}
                         </option>
                       ))}

@@ -181,7 +181,6 @@ const UserSidebar = () => {
         count: 8,
       },
 
-      { id: "messenger", label: "Messenger", icon: MessageCircle, count: 2 },
       { id: "my-claims", label: "My Claims", icon: Search, count: 5 },
     ],
     account: [
