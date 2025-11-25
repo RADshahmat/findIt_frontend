@@ -4,13 +4,13 @@ import { toast } from "react-toastify";
 
 export const submitReportToAdmin = createAsyncThunk(
   "report/submitReportToAdmin",
-  async ({ reportText, reportImages, listingId }, { rejectWithValue }) => {
+  async ({ reportText, reportImages, listingId, post_user_id }, { rejectWithValue }) => {
     try {
       const formData = new FormData();
 
       formData.append("report_body", reportText);
       formData.append("post_id", listingId);
-
+      formData.append("post_user_id", post_user_id);
       // append images[]
       reportImages.forEach((img) => {
         formData.append("report_images", img);
@@ -19,11 +19,8 @@ export const submitReportToAdmin = createAsyncThunk(
       const res = await axiosInstance.post("/admin/report", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
-      toast.success("Report submitted successfully!");
       return res.data;
     } catch (error) {
-      toast.error("Failed to submit report");
       return rejectWithValue(error.message);
     }
   }
