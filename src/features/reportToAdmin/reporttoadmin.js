@@ -4,13 +4,13 @@ import { toast } from "react-toastify";
 
 export const submitReportToAdmin = createAsyncThunk(
   "report/submitReportToAdmin",
-  async ({ reportText, reportImages, listingId }, { rejectWithValue }) => {
+  async ({ reportText, reportImages, listingId, post_user_id }, { rejectWithValue }) => {
     try {
       const formData = new FormData();
 
       formData.append("description", reportText);
       formData.append("listingId", listingId);
-
+      formData.append("post_user_id", post_user_id);
       // append images[]
       reportImages.forEach((img) => {
         formData.append("images[]", img);

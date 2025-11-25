@@ -362,6 +362,7 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
                       reportText,
                       reportImages,
                       listingId: listing.id,
+                      post_user_id: listing.postedById,
                     }),
                   )
                   setShowReportModal(false)
