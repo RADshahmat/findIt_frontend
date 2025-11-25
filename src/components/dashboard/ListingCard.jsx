@@ -274,7 +274,7 @@ const [reportImages, setReportImages] = useState([]); // multiple images
         </button>
 
         <button
-          onClick={() => dispatch(submitReportToAdmin({ reportText, reportImages, listingId: listing._id }))}
+          onClick={() => dispatch(submitReportToAdmin({ reportText, reportImages, listingId: listing.id }))}
           className="px-4 py-1.5 bg-red-600 text-white rounded-md text-sm"
         >
           Submit
