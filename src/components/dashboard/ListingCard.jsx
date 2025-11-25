@@ -1,8 +1,20 @@
-import { MapPin, Calendar, Eye, Heart, Share2 } from "lucide-react"
+import { MapPin, Calendar, Eye, Heart, EllipsisVertical  } from "lucide-react"
 import { useState } from "react"
+import { useDispatch } from "react-redux"
+import { submitReportToAdmin } from "../../features/reportToAdmin/reporttoadmin.js"
+
 
 const ListingCard = ({ listing, viewMode = "grid" }) => {
+const dispatch = useDispatch();
+  const [showMenu, setShowMenu] = useState(false);
+const [showReportModal, setShowReportModal] = useState(false);
+const [reportText, setReportText] = useState("");
+const [reportImages, setReportImages] = useState([]); // multiple images
+
+
   const [imageLoaded, setImageLoaded] = useState(false);
+
+
   const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", {
@@ -121,14 +133,36 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
             {listing.status.toUpperCase()}
           </span>
         </div>
-        <div className="absolute top-3 right-3 flex space-x-1">
-          <button className="p-1.5 bg-white/80 hover:bg-white rounded-full transition-colors">
-            <Heart className="h-3 w-3 text-gray-600" />
-          </button>
-          <button className="p-1.5 bg-white/80 hover:bg-white rounded-full transition-colors">
-            <Share2 className="h-3 w-3 text-gray-600" />
-          </button>
-        </div>
+<div className="absolute top-3 right-3 flex space-x-1">
+  <button className="p-1.5 bg-white/80 hover:bg-white rounded-full transition-colors">
+    <Heart className="h-3 w-3 text-gray-600" />
+  </button>
+
+  {/* 3 dots menu */}
+  <div className="relative">
+    <button
+      onClick={() => setShowMenu(!showMenu)}
+      className="p-1.5 bg-white/80 hover:bg-white rounded-full transition-colors"
+    >
+      <EllipsisVertical className="h-3 w-3 text-gray-600" />
+    </button>
+
+    {showMenu && (
+      <div className="absolute right-0 mt-1 w-32 bg-white shadow-md rounded-md py-1 z-50">
+        <button
+          onClick={() => {
+            setShowMenu(false);
+            setShowReportModal(true);
+          }}
+          className="px-3 py-2 text-sm hover:bg-gray-100 w-full text-left"
+        >
+          Report
+        </button>
+      </div>
+    )}
+  </div>
+</div>
+
         {listing.reward && (
           <div className="absolute bottom-3 left-3">
             <span className="px-2 py-1 bg-yellow-400 text-yellow-900 rounded-full text-xs font-medium">
@@ -171,6 +205,85 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
           </button>
         </div>
       </div>
+
+{showReportModal && (
+  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="bg-white w-full max-w-md rounded-xl shadow-2xl p-6 animate-fadeIn">
+
+      <h2 className="text-xl font-semibold mb-4 text-gray-700">Report to Admin</h2>
+
+      {/* Text Input */}
+      <textarea
+        className="w-full border border-gray-300 rounded-lg p-3 mb-4 focus:ring-2 focus:ring-red-400"
+        rows="4"
+        placeholder="Describe the issue..."
+        value={reportText}
+        onChange={(e) => setReportText(e.target.value)}
+      />
+
+      {/* Image Upload */}
+      <div className="mb-3">
+        <label className="block text-sm font-medium mb-1 text-gray-600">
+          Upload Images (optional)
+        </label>
+
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(e) => {
+            const files = Array.from(e.target.files);
+            setReportImages((prev) => [...prev, ...files]);
+          }}
+          className="block w-full text-sm"
+        />
+      </div>
+
+      {/* Preview Section */}
+      {reportImages.length > 0 && (
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          {reportImages.map((img, idx) => (
+            <div key={idx} className="relative group">
+              <img
+                src={URL.createObjectURL(img)}
+                alt="preview"
+                className="h-20 w-full object-cover rounded-md border"
+              />
+
+              {/* Remove Icon */}
+              <button
+                onClick={() =>
+                  setReportImages(reportImages.filter((_, i) => i !== idx))
+                }
+                className="absolute top-1 right-1 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow group-hover:block text-red-600 font-bold"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Buttons */}
+      <div className="flex justify-end space-x-2">
+        <button
+          onClick={() => setShowReportModal(false)}
+          className="px-3 py-1.5 bg-gray-200 rounded-md text-sm"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={() => dispatch(submitReportToAdmin({ reportText, reportImages, listingId: listing._id }))}
+          className="px-4 py-1.5 bg-red-600 text-white rounded-md text-sm"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   )
 }

@@ -13,12 +13,15 @@ import claimReducer from '../features/claim/claimSlice';
 import matchedLostPostReducer from '../features/posts/getsinglepostSlice';
 import myListingsReducer from '../features/mylistings/myListingsSlice.js';
 import postActivenessFlagReducer from '../features/posts/postActivenessFlagSlice.js';
+import peopleReducer from '../features/posts/fetchPeoplePosts.jsx';
+import reporttoadminReducer from '../features/reportToAdmin/reporttoadmin.js';
 
 export const store = configureStore({
   reducer: {
     catagory: catagoryReducer,
     auth: authReducer,
     post: postReducer,
+    people: peopleReducer,
     location: locationReducer,
     fetchPost: fetchPostReducer,
     fetchPostHome: fetchPostHomeReducer,
@@ -30,5 +33,6 @@ export const store = configureStore({
     singlepost: matchedLostPostReducer,
     myListings: myListingsReducer,
     postActivenessFlag: postActivenessFlagReducer,
+    reporttoadmin: reporttoadminReducer,
   },
 });

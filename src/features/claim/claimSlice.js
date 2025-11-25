@@ -75,6 +75,24 @@ export const rejectClaimThunk = createAsyncThunk(
   }
 );
 
+// AUTO-CREATE CLAIM For People Category
+export const autoCreateClaim = createAsyncThunk(
+  "claims/autoCreateClaim",
+  async ({ postId, lost_post_id }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/claims/auto-create", {
+        postId,
+        lost_post_id,
+      });
+
+      return res.data;  // claim created
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to create auto-claim");
+    }
+  }
+);
+
+
 const claimsSlice = createSlice({
   name: "claims",
   initialState: {
@@ -148,7 +166,29 @@ const claimsSlice = createSlice({
       .addCase(deleteClaim.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+    // AUTO CREATE CLAIM
+// ------------------------
+.addCase(autoCreateClaim.pending, (state) => {
+    state.loading = true;
+    state.error = null;
+})
+.addCase(autoCreateClaim.fulfilled, (state, action) => {
+    state.loading = false;
+    state.success = true;
+    
+    // Push new claim into claim list if needed
+    if (state.claims) {
+        state.claims.push(action.payload.newClaim);
+    }
+
+    // OR: if backend returns directly a claim object, adjust accordingly:
+    // state.claims.push(action.payload);
+})
+.addCase(autoCreateClaim.rejected, (state, action) => {
+    state.loading = false;
+    state.error = action.payload;
+})
 
   },
 });

@@ -16,6 +16,7 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { fetchMatchess } from "../../../features/matching/matching";
 import VerifyOwnershipModal from "../modals/VerifyOwnershipModal";
+import { autoCreateClaim } from "../../../features/claim/claimSlice";
 import Chat from "../Messenger";
 
 // 🔹 Main Screen Component
@@ -198,35 +199,76 @@ const MatchedItemsScreen = () => {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-3">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      setChatPostId(item._id);
-                      setChatPostOwnerId(item.postedBy);
-                      setIsChatOpen(true);
-                    }}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-200 text-sm font-medium"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    <span>Contact</span>
-                  </motion.button>
 
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      setSelectedMatch(item);
-                      setVerifyModalOpen(true);
-                    }}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 text-sm font-medium"
-                  >
-                    <CheckCircle className="h-4 w-4" />
-                    <span>Verify </span>
-                  </motion.button>
-                </div>
+{/* Action Buttons */}
+<div className="flex gap-3">
+
+  {/* People category buttons */}
+  {item.categoryName === "People" && (
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={() => {
+        if (item.myClaimStatus === "approved") {
+          // Open chat directly
+          setChatPostId(item._id);
+          setChatPostOwnerId(item.postedBy);
+          setIsChatOpen(true);
+        } else {
+          // Auto-create claim + then open chat
+          dispatch(autoCreateClaim({ postId: item._id, lost_post_id: reportId }))
+            .unwrap()
+            .then(() => {
+              setChatPostId(item._id);
+              setChatPostOwnerId(item.postedBy);
+              setIsChatOpen(false);
+            })
+            .catch((e) => console.log("Auto claim failed:", e));
+        }
+      }}
+      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-200 text-sm font-medium"
+    >
+      <MessageCircle className="h-4 w-4" />
+      <span>{item.myClaimStatus === "approved" ? "Contact" : "Request Contact"}</span>
+    </motion.button>
+  )}
+
+  {/* Other categories */}
+  {item.categoryName !== "People" && (
+    <>
+      {item.myClaimStatus === "approved" ? (
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => {
+            setChatPostId(item._id);
+            setChatPostOwnerId(item.postedBy);
+            setIsChatOpen(true);
+          }}
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-200 text-sm font-medium"
+        >
+          <MessageCircle className="h-4 w-4" />
+          <span>Contact</span>
+        </motion.button>
+      ) : (
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => {
+            setSelectedMatch(item);
+            setVerifyModalOpen(true);
+          }}
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 text-sm font-medium"
+        >
+          <CheckCircle className="h-4 w-4" />
+          <span>Verify</span>
+        </motion.button>
+      )}
+    </>
+  )}
+</div>
+
+
 
 
               </div>

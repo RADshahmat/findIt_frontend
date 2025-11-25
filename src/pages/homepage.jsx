@@ -11,6 +11,7 @@ import TestimonialsComponent from "../components/homepage/Testimonials"
 import FAQ from "../components/homepage/FAQ"
 import CTA from "../components/homepage/CTA"
 import Footer from "../components/Footer"
+import PeopleSection from "../components/homepage/PeopleSection"
 import SearchBar from "../components/homepage/SearchBar"
 import SupportChat from "./supportChat"
 
@@ -65,7 +66,7 @@ function HomePage() {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <Navbar />
       <Hero onSearch={handleSearch} />
-
+      <PeopleSection />
       <CityRegionSelector />
       <CategoryGrid />
       <FeaturesComponent />
@@ -74,7 +75,6 @@ function HomePage() {
       <TestimonialsComponent />
       <FAQ />
       <CTA />
- 
       <Footer />
     </div>
   )

@@ -93,46 +93,80 @@ const Hero = ({ onSearch }) => {
                   <div className="h-1 w-20 bg-cyan-500 rounded-full"></div>
                 </div>
 
-                {/* Item Cards */}
-                <div className="space-y-4">
-                  {postData1?.map((item, index) => (
-                    <div
-                      key={index}
-                      className="bg-slate-50 rounded-lg p-4 border border-slate-100 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="flex items-center">
-                            <span
-                              className={`text-xs font-medium px-2 py-1 rounded-full ${
-                                item.status === "lost"
-                                  ? "bg-orange-100 text-orange-700"
-                                  : "bg-green-100 text-green-700"
-                              }`}
-                            >
-                              {item.status === "lost" ? "LOST" : "FOUND"}
-                            </span>
-                            <span className="ml-2 font-medium text-slate-800">
-                              {item.title}
-                            </span>
-                          </div>
-                          <div className="mt-2 flex items-center text-sm text-slate-500">
-                            <MapPin className="h-3 w-3 mr-1" />
-                            {item.location}
-                          </div>
-                          <div className="mt-1 text-xs text-slate-400">
-                            {item.date}
-                          </div>
-                        </div>
-                        {item.reward && (
-                          <div className="bg-cyan-50 text-cyan-700 text-xs font-medium px-2 py-1 rounded">
-                            Reward: {item.reward}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+<div className="space-y-4">
+  {postData1?.map((item, index) => {
+    
+    // Format date & time → "Nov 24, 2025 4:12 PM"
+    const formattedDate = item.date
+      ? new Date(item.date).toLocaleString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "numeric",
+          hour12: true,
+        })
+      : "N/A";
+
+    return (
+      <div
+        key={index}
+        className="bg-slate-50 rounded-lg p-1 border border-slate-100 hover:shadow-md transition-shadow"
+      >
+        <div className="flex gap-4 items-center">
+          
+          {/* IMAGE WITH BADGE */}
+          <div className="relative w-24 h-24 flex-shrink-0">
+            <img
+              src={item.image}
+              alt={item.title}
+              className="w-full h-full object-cover rounded-md"
+            />
+
+            {/* STATUS BADGE ON IMAGE */}
+            <span
+              className={`absolute top-1 left-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                item.status === "lost"
+                  ? "bg-orange-600 text-white"
+                  : "bg-green-600 text-white"
+              }`}
+            >
+              {item.status === "lost" ? "LOST" : "FOUND"}
+            </span>
+          </div>
+
+          {/* RIGHT SIDE TEXT */}
+          <div className="flex-1">
+            <div className="flex justify-between items-start">
+              <div>
+                <span className="font-medium text-slate-800">
+                  {item.title}
+                </span>
+
+                <div className="mt-2 flex items-center text-sm text-slate-500">
+                  <MapPin className="h-3 w-3 mr-1" />
+                  {item.location}
                 </div>
+
+                <div className="mt-1 text-xs text-slate-400">
+                  {formattedDate}
+                </div>
+              </div>
+
+              {item.reward && (
+                <div className="bg-cyan-50 text-cyan-700 text-xs font-medium px-2 py-1 rounded">
+                  Reward: {item.reward}
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    );
+  })}
+</div>
+
 
                 <div className="mt-4 text-center">
                   <Link
