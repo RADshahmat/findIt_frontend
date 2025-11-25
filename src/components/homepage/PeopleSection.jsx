@@ -204,6 +204,7 @@ function PeopleSection() {
 
                           {/* CTA Button */}
                           <motion.button
+                            onClick={handleViewAll}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             className="w-full px-3 py-1.5 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-md font-semibold transition-all shadow-sm hover:shadow-md text-xs mt-auto"

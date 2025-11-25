@@ -117,6 +117,7 @@ const ClaimsScreen = () => {
         <div className="space-y-4">
           {claimList.map((claim) => {
             const isOpen = expanded === claim._id;
+            console.log("Rendering claim:", claim._id);
             return (
               <div key={claim._id} className="bg-white/90 dark:bg-slate-800/80 rounded-2xl shadow-md border border-white/10 overflow-hidden">
                 {/* header */}

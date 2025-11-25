@@ -1,7 +1,7 @@
 // features/claims/claimsSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../axios/axiosInstance";
-import { toast } from "react-toastify";
+
 
 export const fetchMyClaims = createAsyncThunk(
   "claims/fetchMyClaims",
@@ -51,10 +51,10 @@ export const approveClaimThunk = createAsyncThunk(
   async (claimId, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.patch(`/claims/approve/${claimId}`);
-      toast.success("Claim approved successfully!");
+     // toast.success("Claim approved successfully!");
       return res.data; // updated claim returned from backend
     } catch (err) {
-      toast.error("Failed to approve claim");
+     // toast.error("Failed to approve claim");
       return rejectWithValue(err.response?.data || err.message);
     }
   }
@@ -66,10 +66,10 @@ export const rejectClaimThunk = createAsyncThunk(
   async (claimId, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.patch(`/claims/reject/${claimId}`);
-      toast.success("Claim rejected successfully!");
+     // toast.success("Claim rejected successfully!");
       return res.data;
     } catch (err) {
-      toast.error("Failed to reject claim");
+      //toast.error("Failed to reject claim");
       return rejectWithValue(err.response?.data || err.message);
     }
   }
