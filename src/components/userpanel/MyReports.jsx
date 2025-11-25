@@ -18,6 +18,7 @@ import {
   MessageSquare,
   CheckCircle,
   RotateCcw,
+  Heart,
 } from "lucide-react";
 import {
   fetchUserReports,
@@ -27,7 +28,7 @@ import {
 import { postActivenessFlag } from "../../features/posts/postActivenessFlagSlice";
 import EditReportModal from "./modals/my_reports/EditReportModal";
 import DeleteConfirmModal from "./modals/my_reports/DeleteConfirmModal";
-
+import DonationRequestModal from "./modals/my_reports/DonationRequestModal";
 
 const MyReports = () => {
   const dispatch = useDispatch();
@@ -44,6 +45,7 @@ const MyReports = () => {
   const [filterType, setFilterType] = useState("all"); // all, lost, found
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest"); // newest, oldest, title
+const [showDonationModal, setShowDonationModal] = useState(false);
 
   useEffect(() => {
     dispatch(fetchUserReports());
@@ -608,6 +610,21 @@ const MyReports = () => {
                                 <MessageSquare className="h-4 w-4 mr-2" /> {report.claimCount} Claims
                               </motion.button>
                             )}
+{report.category === "People" && report.status === "found" && (
+  <motion.button
+    variants={buttonVariants}
+    whileHover="hover"
+    whileTap="tap"
+    onClick={() => {
+      setSelectedReport(report);
+      setShowDonationModal(true);
+    }}
+    className="w-full flex justify-center items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg text-sm font-medium hover:from-rose-600 hover:to-pink-600 transition-all shadow-md"
+  >
+    <Heart className="h-4 w-4 mr-2" />
+    Request Donation
+  </motion.button>
+)}
 
                             {/* Resolution button */}
                             {report.status === "lost" && (
@@ -691,6 +708,17 @@ const MyReports = () => {
             onConfirm={confirmDelete}
           />
         )}
+
+        {showDonationModal && (
+  <DonationRequestModal
+    report={selectedReport}
+    onClose={() => {
+      setShowDonationModal(false);
+      setSelectedReport(null);
+    }}
+  />
+)}
+
       </AnimatePresence>
     </div>
   );

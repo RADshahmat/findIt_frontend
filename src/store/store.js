@@ -15,6 +15,7 @@ import myListingsReducer from '../features/mylistings/myListingsSlice.js';
 import postActivenessFlagReducer from '../features/posts/postActivenessFlagSlice.js';
 import peopleReducer from '../features/posts/fetchPeoplePosts.jsx';
 import reporttoadminReducer from '../features/reportToAdmin/reporttoadmin.js';
+import donationsReducer from '../features/reportToAdmin/donationSlice.js';
 
 export const store = configureStore({
   reducer: {
@@ -34,5 +35,6 @@ export const store = configureStore({
     myListings: myListingsReducer,
     postActivenessFlag: postActivenessFlagReducer,
     reporttoadmin: reporttoadminReducer,
+    donations: donationsReducer,
   },
 });

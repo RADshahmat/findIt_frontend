@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import React,{useEffect} from "react"
 import { useSelector,useDispatch } from "react-redux"
 import { fetchPost1 } from "../../features/posts/fetchPostHome";
-import SearchBar from "./SearchBar"
 
-const Hero = ({ onSearch }) => {
+
+const Hero = () => {
   const { postData1 } = useSelector((state) => state.fetchPostHome);
   const dispatch = useDispatch();
   useEffect(() => {
@@ -55,18 +55,7 @@ const Hero = ({ onSearch }) => {
               </Link>
             </div>
 
-            <SearchBar onSearch={onSearch} className="lg:flex" />
 
-            <div className="flex items-center mt-8 text-slate-500 text-sm">
-              <div className="flex items-center mr-6">
-                <Clock className="h-4 w-4 mr-1 text-cyan-500" />
-                <span>Quick matching</span>
-              </div>
-              <div className="flex items-center">
-                <MapPin className="h-4 w-4 mr-1 text-cyan-500" />
-                <span>Location-based search</span>
-              </div>
-            </div>
           </div>
 
           {/* Right Column - Image/Illustration */}
