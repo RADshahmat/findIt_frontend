@@ -108,42 +108,42 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
                 </div>
               </div>
 
-          <div className="relative menu-area">
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setShowContactDropdown(!showContactDropdown)
-              }}
-              className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white text-sm font-medium rounded-lg transition-all"
-            >
-              Contact
-            </button>
+              <div className="relative menu-area">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowContactDropdown(!showContactDropdown)
+                  }}
+                  className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white text-sm font-medium rounded-lg transition-all"
+                >
+                  Contact
+                </button>
 
-            {showContactDropdown && (
-              <div className="absolute bottom-10 right-10 mt-2 w-48 bg-amber-100 border border-gray-200 rounded-lg shadow-lg z-100">
-                <a
-                  href={`mailto:${listing.postedByEmail}`}
-                  className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors border-b border-gray-200"
-                >
-                  <Mail className="h-4 w-4 text-cyan-500" />
-                  <div className="text-left">
-                    <p className="text-xs text-gray-600">Email</p>
-                    <p className="text-sm text-gray-900 font-medium">{listing.postedByEmail}</p>
+                {showContactDropdown && (
+                  <div className="absolute bottom-10 right-10 mt-2 w-50 bg-amber-100 border border-gray-200 rounded-lg shadow-lg z-100">
+                    <a
+                      href={`mailto:${listing.postedByEmail}`}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors border-b border-gray-200"
+                    >
+                      <Mail className="h-4 w-4 text-cyan-500" />
+                      <div className="text-left">
+                        <p className="text-xs text-gray-600">Email</p>
+                        <p className="text-sm text-gray-900 font-medium">{listing.postedByEmail}</p>
+                      </div>
+                    </a>
+                    <a
+                      href={`tel:${listing.postedByPhone}`}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors"
+                    >
+                      <Phone className="h-4 w-4 text-teal-500" />
+                      <div className="text-left">
+                        <p className="text-xs text-gray-600">Phone</p>
+                        <p className="text-sm text-gray-900 font-medium">{listing.postedByPhone}</p>
+                      </div>
+                    </a>
                   </div>
-                </a>
-                <a
-                  href={`tel:${listing.postedByPhone}`}
-                  className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors"
-                >
-                  <Phone className="h-4 w-4 text-teal-500" />
-                  <div className="text-left">
-                    <p className="text-xs text-gray-600">Phone</p>
-                    <p className="text-sm text-gray-900 font-medium">{listing.postedByPhone}</p>
-                  </div>
-                </a>
+                )}
               </div>
-            )}
-          </div>
             </div>
           </div>
         </div>
@@ -195,7 +195,7 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
             </button>
 
             {showMenu && (
-              <div className="absolute right-0 mt-1 w-32 bg-white shadow-md rounded-md py-1 z-50">
+              <div className="absolute right-0 mt-1 w-32 bg-blue-200 shadow-md rounded-md py-1 z-50">
                 <button
                   onClick={() => {
                     setShowMenu(false)
@@ -259,7 +259,7 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
             </button>
 
             {showContactDropdown && (
-              <div className="absolute bottom-10 right-10 mt-2 w-48 bg-amber-100 border border-gray-200 rounded-lg shadow-lg z-100">
+              <div className="absolute bottom-10 right-10 mt-2 w-50 bg-amber-100 border border-gray-200 rounded-lg shadow-lg z-100">
                 <a
                   href={`mailto:${listing.postedByEmail}`}
                   className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors border-b border-gray-200"
@@ -288,7 +288,10 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
 
       {showReportModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white w-full max-w-md rounded-xl shadow-2xl p-6 animate-fadeIn">
+          <div
+            className="bg-white w-full max-w-md rounded-xl shadow-2xl p-6 animate-fadeIn"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h2 className="text-xl font-semibold mb-4 text-gray-700">Report to Admin</h2>
 
             {/* Text Input */}
@@ -341,12 +344,19 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
 
             {/* Buttons */}
             <div className="flex justify-end space-x-2">
-              <button onClick={() => setShowReportModal(false)} className="px-3 py-1.5 bg-gray-200 rounded-md text-sm">
+              <button
+                onClick={() => {
+                  setShowReportModal(false)
+                  setReportText("")
+                  setReportImages([])
+                }}
+                className="px-3 py-1.5 bg-gray-200 rounded-md text-sm hover:bg-gray-300 transition-colors"
+              >
                 Cancel
               </button>
 
               <button
-                onClick={() =>
+                onClick={() => {
                   dispatch(
                     submitReportToAdmin({
                       reportText,
@@ -354,8 +364,11 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
                       listingId: listing.id,
                     }),
                   )
-                }
-                className="px-4 py-1.5 bg-red-600 text-white rounded-md text-sm"
+                  setShowReportModal(false)
+                  setReportText("")
+                  setReportImages([])
+                }}
+                className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm transition-colors"
               >
                 Submit
               </button>
@@ -366,8 +379,12 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
 
       {showFullModal && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
-          onClick={() => setShowFullModal(false)}
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[100]"
+          onClick={() => {
+            setShowFullModal(false)
+            setShowContactDropdown(false)
+            setShowMenu(false)
+          }}
         >
           <div
             className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-8 animate-fadeIn overflow-y-auto max-h-[90vh]"
