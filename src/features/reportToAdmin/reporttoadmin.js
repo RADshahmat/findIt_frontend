@@ -8,22 +8,19 @@ export const submitReportToAdmin = createAsyncThunk(
     try {
       const formData = new FormData();
 
-      formData.append("description", reportText);
-      formData.append("listingId", listingId);
+      formData.append("report_body", reportText);
+      formData.append("post_id", listingId);
       formData.append("post_user_id", post_user_id);
       // append images[]
       reportImages.forEach((img) => {
-        formData.append("images[]", img);
+        formData.append("report_images", img);
       });
 
       const res = await axiosInstance.post("/admin/report", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
-      toast.success("Report submitted successfully!");
       return res.data;
     } catch (error) {
-      toast.error("Failed to submit report");
       return rejectWithValue(error.message);
     }
   }
