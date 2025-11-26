@@ -6,7 +6,7 @@ export const submitDonationRequest = createAsyncThunk(
   "donations/submitDonationRequest",
   async (formData, { rejectWithValue }) => {
     try {
-      const { data } = await axiosInstance.post("/donation/request", formData, {
+      const { data } = await axiosInstance.post("/admin/donation/request", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
      // toast.success("Donation request submitted!");
