@@ -42,7 +42,7 @@ function SupportChat({ apiUrl, sessionToken }) {
       console.error("Error fetching unread count", error);
     }
   };
-//sending message
+  //sending message
   const handleSendMessage = async (text) => {
     try {
       const messagePayload = { message: text, sender: "user" };
@@ -57,7 +57,7 @@ function SupportChat({ apiUrl, sessionToken }) {
   const markMessagesAsRead = async () => {
     try {
       await axiosInstance.put(`/support_chat/mark-read`);
-      setUnreadCount(0); 
+      setUnreadCount(0);
     } catch (error) {
       console.error("Error marking messages as read", error);
     }
@@ -73,13 +73,13 @@ function SupportChat({ apiUrl, sessionToken }) {
         markMessagesAsRead();
       }
     };
-  
-    fetchUnreadCountAndMessages(); 
+
+    fetchUnreadCountAndMessages();
     const interval = setInterval(fetchUnreadCountAndMessages, 25000);
-  
+
     return () => clearInterval(interval);
   }, [unreadCount]);
-  
+
   return (
     <div>
       {/* Support Button */}
@@ -123,10 +123,10 @@ function SupportChat({ apiUrl, sessionToken }) {
           </span>
         )}
       </div>
-        
+
       {/* Chat Window */}
       {isChatOpen && (
-          <div
+        <div
           ref={chatRef}
           style={{
             position: "fixed",
@@ -164,12 +164,28 @@ function SupportChat({ apiUrl, sessionToken }) {
                   <Message
                     key={index}
                     model={{
-                      message: msg.message,
-                      sentTime: msg.created_at,
-                      sender: msg.sender,
                       direction: msg.sender !== "admin" ? "outgoing" : "incoming",
+                      sender: msg.sender,
                     }}
-                  />
+                  >
+                    <Message.CustomContent>
+                      {typeof msg.message === "string" &&
+                        (msg.message.includes("https://") || msg.message.includes("http://")) ? (
+                        <img
+                          src={msg.message}
+                          alt="message content"
+                          style={{
+                            maxWidth: "200px",
+                            borderRadius: "8px",
+                            margin: "5px 0",
+                          }}
+                        />
+                      ) : (
+                        <p style={{ margin: 0 }}>{msg.message}</p>
+                      )}
+                    </Message.CustomContent>
+                  </Message>
+
                 ))}
               </MessageList>
               <MessageInput

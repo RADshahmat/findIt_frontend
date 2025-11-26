@@ -1,9 +1,10 @@
 "use client"
 
 import { MapPin, Calendar, Eye, Heart, EllipsisVertical, Phone, Mail } from "lucide-react"
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import { useDispatch } from "react-redux"
 import { submitReportToAdmin } from "../../features/reportToAdmin/reporttoadmin.js"
+import { processImageForVerification } from "../../helpers/imageConv.js"
 
 const ListingCard = ({ listing, viewMode = "grid" }) => {
   const dispatch = useDispatch()
@@ -14,6 +15,8 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
   const [showFullModal, setShowFullModal] = useState(false)
   const [showContactDropdown, setShowContactDropdown] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
+  const [processedImages, setProcessedImages] = useState([]);
+
 
   const formatDate = (dateString) => {
     const date = new Date(dateString)
@@ -24,6 +27,31 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
     })
   }
 
+useEffect(() => {
+  async function convertImages() {
+    if (listing.category.toLowerCase() === "people") {
+      setProcessedImages(listing.images || [listing.image]);
+      return;
+    }
+
+    const imgs = listing.images?.length ? listing.images : [listing.image];
+    const converted = [];
+   // console.log("Original Images:", imgs);
+    for (let img of imgs) {
+      const blob = await fetch(img).then(res => res.blob());
+     // console.log("Original Blob:", blob);
+      const processedBlob = await processImageForVerification(blob);
+      console.log("Processed Blob:", processedBlob);
+      converted.push(URL.createObjectURL(processedBlob));
+    }
+    console.log("Converted Images:", converted);
+    setProcessedImages(converted);
+  }
+
+  convertImages();
+}, [listing]);
+
+console.log("Processed Images:", processedImages);
   const getStatusColor = (status) => {
     switch (status) {
       case "lost":
@@ -54,7 +82,8 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
             <div className="relative w-48 h-32 flex-shrink-0">
               {!imageLoaded && <div className="w-full h-full bg-gray-200 animate-pulse rounded-sm"></div>}
               <img
-                src={listing.image == "" ? "/noimg.svg?height=128&width=192" : listing.image}
+                src={listing.image == "" ? "/noimg.svg?height=128&width=192" : processedImages[0]
+}
                 alt={listing.title}
                 onLoad={() => setImageLoaded(true)}
                 className={`w-full h-full object-cover transition-opacity duration-300 ${
@@ -166,7 +195,8 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
         <div className="relative overflow-hidden ">
           {!imageLoaded && <div className="w-full h-48 bg-gray-200 animate-pulse"></div>}
           <img
-            src={listing.image == "" ? "/noimg.svg?height=128&width=192" : listing.image}
+            src={listing.image == "" ? "/noimg.svg?height=128&width=192" : (processedImages[0])
+}
             alt={listing.title}
             onLoad={() => setImageLoaded(true)}
             className={`w-full h-48 object-cover group-hover:scale-105 transform transition-all duration-500 ease-in-out ${
@@ -419,7 +449,7 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
                 {(Array.isArray(listing.images) ? listing.images : [listing.image]).map((img, idx) => (
                   <img
                     key={idx}
-                    src={img || "/noimg.svg?height=200&width=200"}
+                    src={processedImages[idx] || "/noimg.svg?height=200&width=200"}
                     alt="preview"
                     className="h-48 w-48 object-cover rounded-lg border-2 border-gray-200 flex-shrink-0 hover:border-cyan-500 transition-colors"
                   />

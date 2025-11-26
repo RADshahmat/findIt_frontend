@@ -18,6 +18,7 @@ import { fetchMatchess } from "../../../features/matching/matching";
 import VerifyOwnershipModal from "../modals/VerifyOwnershipModal";
 import { autoCreateClaim } from "../../../features/claim/claimSlice";
 import Chat from "../Messenger";
+import {processImageForVerification} from "../../../helpers/imageConv";
 
 // 🔹 Main Screen Component
 const MatchedItemsScreen = () => {
@@ -35,6 +36,36 @@ const MatchedItemsScreen = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatPostId, setChatPostId] = useState(null);
   const [chatPostOwnerId, setChatPostOwnerId] = useState(null);
+  const [processedImages, setProcessedImages] = useState({});
+
+  useEffect(() => {
+  const loadProcessed = async () => {
+    const results = {};
+
+    if (matches.length === 0) return;
+
+    for (const item of matches) {
+      if (item.categoryName === "People") {
+        // For people, maybe use a placeholder or profile image processing
+        results[item._id] = item.image?.[0]
+          ? `https://backend.finditbd.hurairaconsultancy.com/image/${item.image[0]}`
+          : "/noimg.svg?height=128&width=192";
+      } else {
+        // For other categories, do actual image processing
+        const url = `https://backend.finditbd.hurairaconsultancy.com/image/${item.image[0]}`;
+        const blob = await fetch(url).then(res => res.blob());
+        const processed = await processImageForVerification(blob);
+        results[item._id] = URL.createObjectURL(processed);
+      }
+    }
+
+    setProcessedImages(results);
+  };
+
+  loadProcessed();
+}, [matches]);
+
+
 
 
   useEffect(() => {
@@ -63,7 +94,7 @@ const MatchedItemsScreen = () => {
         return "bg-gray-500/10 text-gray-600 border-gray-500/20 dark:bg-gray-500/20 dark:text-gray-400";
     }
   };
-
+  console.log("Matches:", matches);
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -121,7 +152,7 @@ const MatchedItemsScreen = () => {
                 <motion.img
                   whileHover={{ scale: 1.1 }}
                   transition={{ duration: 0.3 }}
-                  src={`https://backend.finditbd.hurairaconsultancy.com/image/${item.image[0]}`}
+                  src={processedImages[item._id] || "/noimg.svg?height=128&width=192"}
                   alt={item.title}
                   className="w-full h-full object-cover"
                 />
@@ -200,73 +231,73 @@ const MatchedItemsScreen = () => {
                 </div>
 
 
-{/* Action Buttons */}
-<div className="flex gap-3">
+                {/* Action Buttons */}
+                <div className="flex gap-3">
 
-  {/* People category buttons */}
-  {item.categoryName === "People" && (
-    <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      onClick={() => {
-        if (item.myClaimStatus === "approved") {
-          // Open chat directly
-          setChatPostId(item._id);
-          setChatPostOwnerId(item.postedBy);
-          setIsChatOpen(true);
-        } else {
-          // Auto-create claim + then open chat
-          dispatch(autoCreateClaim({ postId: item._id, lost_post_id: reportId }))
-            .unwrap()
-            .then(() => {
-              setChatPostId(item._id);
-              setChatPostOwnerId(item.postedBy);
-              setIsChatOpen(false);
-            })
-            .catch((e) => console.log("Auto claim failed:", e));
-        }
-      }}
-      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-200 text-sm font-medium"
-    >
-      <MessageCircle className="h-4 w-4" />
-      <span>{item.myClaimStatus === "approved" ? "Contact" : "Request Contact"}</span>
-    </motion.button>
-  )}
+                  {/* People category buttons */}
+                  {item.categoryName === "People" && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        if (item.myClaimStatus === "approved") {
+                          // Open chat directly
+                          setChatPostId(item._id);
+                          setChatPostOwnerId(item.postedBy);
+                          setIsChatOpen(true);
+                        } else {
+                          // Auto-create claim + then open chat
+                          dispatch(autoCreateClaim({ postId: item._id, lost_post_id: reportId }))
+                            .unwrap()
+                            .then(() => {
+                              setChatPostId(item._id);
+                              setChatPostOwnerId(item.postedBy);
+                              setIsChatOpen(false);
+                            })
+                            .catch((e) => console.log("Auto claim failed:", e));
+                        }
+                      }}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-200 text-sm font-medium"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      <span>{item.myClaimStatus === "approved" ? "Contact" : "Request Contact"}</span>
+                    </motion.button>
+                  )}
 
-  {/* Other categories */}
-  {item.categoryName !== "People" && (
-    <>
-      {item.myClaimStatus === "approved" ? (
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            setChatPostId(item._id);
-            setChatPostOwnerId(item.postedBy);
-            setIsChatOpen(true);
-          }}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-200 text-sm font-medium"
-        >
-          <MessageCircle className="h-4 w-4" />
-          <span>Contact</span>
-        </motion.button>
-      ) : (
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            setSelectedMatch(item);
-            setVerifyModalOpen(true);
-          }}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 text-sm font-medium"
-        >
-          <CheckCircle className="h-4 w-4" />
-          <span>Verify</span>
-        </motion.button>
-      )}
-    </>
-  )}
-</div>
+                  {/* Other categories */}
+                  {item.categoryName !== "People" && (
+                    <>
+                      {item.myClaimStatus === "approved" ? (
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => {
+                            setChatPostId(item._id);
+                            setChatPostOwnerId(item.postedBy);
+                            setIsChatOpen(true);
+                          }}
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-200 text-sm font-medium"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          <span>Contact</span>
+                        </motion.button>
+                      ) : (
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => {
+                            setSelectedMatch(item);
+                            setVerifyModalOpen(true);
+                          }}
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 text-sm font-medium"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                          <span>Verify</span>
+                        </motion.button>
+                      )}
+                    </>
+                  )}
+                </div>
 
 
 

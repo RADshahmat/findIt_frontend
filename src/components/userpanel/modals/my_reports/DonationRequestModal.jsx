@@ -37,7 +37,7 @@ export default function DonationRequestModal({ report, onClose }) {
 
   const handleSubmit = () => {
     const formData = new FormData();
-    formData.append("reportId", report._id);
+    formData.append("postId", report.id);
     formData.append("reason", reason);
 
     images.forEach((img) => formData.append("images", img.file));
@@ -45,7 +45,7 @@ export default function DonationRequestModal({ report, onClose }) {
     dispatch(submitDonationRequest(formData));
     onClose();
   };
-
+console.log(report,"report in donation modal");
   return (
     <motion.div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"

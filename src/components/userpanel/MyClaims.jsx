@@ -12,7 +12,7 @@ import {
   Filter,
   Search,
 } from "lucide-react";
-import {fetchMyClaims,deleteClaim} from "../../features/claim/claimSlice";
+import { fetchMyClaims, deleteClaim } from "../../features/claim/claimSlice";
 import EditReportModal from "./modals/my_reports/EditReportModal";
 import DeleteConfirmModal from "./modals/my_reports/DeleteConfirmModal";
 import Chat from "./Messenger";
@@ -21,7 +21,7 @@ import Chat from "./Messenger";
 const MyClaims = () => {
   const dispatch = useDispatch();
 
-const { myClaims, loading } = useSelector((state) => state.claims);
+  const { myClaims, loading } = useSelector((state) => state.claims);
 
   const [selectedReport, setSelectedReport] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -40,18 +40,18 @@ const { myClaims, loading } = useSelector((state) => state.claims);
     setShowDeleteModal(true);
   };
 
-
+console.log("myClaims data:", myClaims);
 
   const confirmDelete = async () => {
     if (selectedReport) {
       console.log("Deleting claim with ID:", selectedReport);
-      dispatch(deleteClaim(selectedReport))  .unwrap()
-            .then(() => {
-              dispatch(fetchMyClaims());
-            })
-            .catch((err) => {
-              console.error("Error:", err);
-            });;
+      dispatch(deleteClaim(selectedReport)).unwrap()
+        .then(() => {
+          dispatch(fetchMyClaims());
+        })
+        .catch((err) => {
+          console.error("Error:", err);
+        });;
       setShowDeleteModal(false);
       setSelectedReport(null);
     }
@@ -82,11 +82,11 @@ const { myClaims, loading } = useSelector((state) => state.claims);
   // Filter and sort reports
   const filteredReports = myClaims
     ?.filter((report) => {
-    
+
       const matchesSearch =
         report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         report.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      return  matchesSearch;
+      return matchesSearch;
     })
     ?.sort((a, b) => {
       switch (sortBy) {
@@ -105,19 +105,19 @@ const { myClaims, loading } = useSelector((state) => state.claims);
     });
 
   const getclaimStatusColor = (claimStatus) => {
-  switch (claimStatus) {
-    case "pending":
-      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-    case "approved":
-      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-    case "rejected":
-      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-    case "under_review":
-      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-    default:
-      return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
-  }
-};
+    switch (claimStatus) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+      case "approved":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      case "rejected":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+      case "under_review":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -215,7 +215,7 @@ const { myClaims, loading } = useSelector((state) => state.claims);
 
           {/* Filter Controls */}
           <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-4">
-            
+
 
             {/* Sort Dropdown */}
             <div className="flex items-center space-x-2">
@@ -247,7 +247,7 @@ const { myClaims, loading } = useSelector((state) => state.claims);
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
             No Reports Found
           </h3>
-        
+
         </motion.div>
       ) : (
         <motion.div
@@ -320,38 +320,38 @@ const { myClaims, loading } = useSelector((state) => state.claims);
                             </span>
                           </div>
                         )}
-                    <div className={`px-3 py-1 rounded-full text-xs font-medium text-center ${getclaimStatusColor(report.claimStatus)}`}>
-                      {report.claimStatus.replace("_", " ").toUpperCase()}
-                    </div>
+                        <div className={`px-3 py-1 rounded-full text-xs font-medium text-center ${getclaimStatusColor(report.claimStatus)}`}>
+                          {report.claimStatus.replace("_", " ").toUpperCase()}
+                        </div>
                       </div>
 
                       {/* Action Buttons */}
                       <div className="space-y-2">
                         {/* Edit/Delete buttons */}
                         <div className="flex space-x-2">
-              {report.claimStatus === "approved" && (
-                                <button
-                                      onClick={() => {
-                      setChatPostId(report.foundPostId);
-                      setChatPostOwnerId(report.postedById);
-                      setIsChatOpen(true);
-                    }}
-                                  className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm"
-                                >
-                                  <Mail className="h-4 w-4" />
-                                  Chat Now
-                                </button>
-                              )}
-         <motion.button
-  variants={buttonVariants}
-  whileHover="hover"
-  whileTap="tap"
-  onClick={() => handleDelete(report.id)}
-  className="flex-1 flex items-center justify-center px-4 py-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10 rounded-lg transition-colors border border-red-200 dark:border-red-800"
->
-  <Trash2 className="h-4 w-4 mr-2" />
-  Cancel Claim
-</motion.button>
+                          {report.claimStatus === "approved" && (
+                            <button
+                              onClick={() => {
+                                setChatPostId(report.foundPostId);
+                                setChatPostOwnerId(report.postedById);
+                                setIsChatOpen(true);
+                              }}
+                              className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm"
+                            >
+                              <Mail className="h-4 w-4" />
+                              Chat Now
+                            </button>
+                          )}
+                          <motion.button
+                            variants={buttonVariants}
+                            whileHover="hover"
+                            whileTap="tap"
+                            onClick={() => handleDelete(report.id)}
+                            className="flex-1 flex items-center justify-center px-4 py-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10 rounded-lg transition-colors border border-red-200 dark:border-red-800"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Cancel Claim
+                          </motion.button>
                         </div>
                       </div>
 
@@ -425,9 +425,9 @@ const { myClaims, loading } = useSelector((state) => state.claims);
                                 </span>
                               </div>
                             )}
-                    <div className={`flex px-3 py-1 text-center mx-auto rounded-full text-xs font-medium items-center  ${getclaimStatusColor(report.claimStatus)}`}>
-                      {report.claimStatus.replace("_", " ").toUpperCase()}
-                    </div>
+                            <div className={`flex px-3 py-1 text-center mx-auto rounded-full text-xs font-medium items-center  ${getclaimStatusColor(report.claimStatus)}`}>
+                              {report.claimStatus.replace("_", " ").toUpperCase()}
+                            </div>
                           </div>
 
                           <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
@@ -443,29 +443,29 @@ const { myClaims, loading } = useSelector((state) => state.claims);
 
                           {/* Right: Edit/Delete buttons */}
                           <div className="flex space-x-2 pt-1">
-                         {report.claimStatus === "approved" && (
-                                <button
-                                      onClick={() => {
-                      setChatPostId(report.foundPostId);
-                      setChatPostOwnerId(report.postedById);
-                      setIsChatOpen(true);
-                    }}
-                                  className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm"
-                                >
-                                  <Mail className="h-4 w-4" />
-                                  Chat Now
-                                </button>
-                              )}
-<motion.button
-  variants={buttonVariants}
-  whileHover="hover"
-  whileTap="tap"
-  onClick={() => handleDelete(report.id)}
-  className="flex-1 flex items-center justify-center px-4 py-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10 rounded-lg transition-colors border border-red-200 dark:border-red-800"
->
-  <Trash2 className="h-4 w-4 mr-2" />
-  Cancel Claim
-</motion.button>
+                            {report.claimStatus === "approved" && (
+                              <button
+                                onClick={() => {
+                                  setChatPostId(report.foundPostId);
+                                  setChatPostOwnerId(report.postedById);
+                                  setIsChatOpen(true);
+                                }}
+                                className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm"
+                              >
+                                <Mail className="h-4 w-4" />
+                                Chat Now
+                              </button>
+                            )}
+                            <motion.button
+                              variants={buttonVariants}
+                              whileHover="hover"
+                              whileTap="tap"
+                              onClick={() => handleDelete(report.id)}
+                              className="flex-1 flex items-center justify-center px-4 py-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10 rounded-lg transition-colors border border-red-200 dark:border-red-800"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Cancel Claim
+                            </motion.button>
                           </div>
                         </div>
                       </div>
@@ -500,16 +500,16 @@ const { myClaims, loading } = useSelector((state) => state.claims);
           />
         )}
 
-                {isChatOpen &&  (
-        
-                  <Chat
-                      isOpen={isChatOpen}
-          onClose={() => setIsChatOpen(false)}
-          postId={chatPostId}
-          postOwnerId={chatPostOwnerId}
-                  />
-        
-                )}
+        {isChatOpen && (
+
+          <Chat
+            isOpen={isChatOpen}
+            onClose={() => setIsChatOpen(false)}
+            postId={chatPostId}
+            postOwnerId={chatPostOwnerId}
+          />
+
+        )}
       </AnimatePresence>
     </div>
   );
