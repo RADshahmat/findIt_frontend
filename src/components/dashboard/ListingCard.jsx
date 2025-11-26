@@ -169,7 +169,7 @@ const ListingCard = ({ listing, viewMode = "grid" }) => {
             src={listing.image == "" ? "/noimg.svg?height=128&width=192" : listing.image}
             alt={listing.title}
             onLoad={() => setImageLoaded(true)}
-            className={`w-full h-48 object-cover group-hover:scale-105 transform transition-all duration-500 ease-in-out ${
+            className={`w-full h-48 object-contain group-hover:scale-105 transform transition-all duration-500 ease-in-out ${
               imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-95 absolute"
             }`}
           />

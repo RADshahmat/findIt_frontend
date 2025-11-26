@@ -167,25 +167,25 @@ const UserSidebar = () => {
       },
     ],
     listings: [
-      { id: "my-listings", label: "My Listings", icon: List, count: 12 },
+      { id: "my-listings", label: "My Listings", icon: List },
       {
         id: "my-reports",
         label: "My Reports",
         icon: ClipboardList,
-        count: 3,
+       
       },
       {
         id: "archived-listings",
         label: "Archived Listings",
         icon: Archive,
-        count: 8,
+      
       },
 
-      { id: "my-claims", label: "My Claims", icon: Search, count: 5 },
+      { id: "my-claims", label: "My Claims", icon: Search },
     ],
     account: [
       { id: "my-account", label: "My Account", icon: User },
-      { id: "notifications", label: "Notifications", icon: Bell, count: 7 },
+      { id: "notifications", label: "Notifications", icon: Bell},
       { id: "logout", label: "Log Out", icon: LogOut },
       {
         id: "close-account",
@@ -204,13 +204,13 @@ const UserSidebar = () => {
       id: "listings",
       label: "Listings",
       icon: List,
-      count: sidebarItems.listings.reduce((sum, item) => sum + (item.count || 0), 0),
+     // count: sidebarItems.listings.reduce((sum, item) => sum + (item.count || 0), 0),
     },
     {
       id: "account",
       label: "Account",
       icon: User,
-      count: sidebarItems.account.reduce((sum, item) => sum + (item.count || 0), 0),
+      //count: sidebarItems.account.reduce((sum, item) => sum + (item.count || 0), 0),
     },
   ]
 

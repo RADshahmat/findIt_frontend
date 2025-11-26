@@ -126,7 +126,7 @@ const VerifyOwnershipModal = ({ isOpen, onClose, postId , lost_post_id}) => {
                     <label className="block font-medium text-slate-700 dark:text-slate-300">{q}</label>
                     <input
                       type="text"
-                      required
+                  
                       value={answers[index] || ""}
                       onChange={(e) => handleChange(index, e.target.value)}
                       className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-green-500 outline-none text-slate-800 dark:text-slate-100 placeholder-slate-400"

@@ -144,7 +144,7 @@ function PeopleSection() {
                               "/missing-person.jpg"
                             }
                             alt={item.title}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                           />
                           {/* Status Badge */}
                           <div className="absolute top-2 left-2">
